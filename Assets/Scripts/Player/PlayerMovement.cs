@@ -17,8 +17,9 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;           // ¿Está el jugador en el suelo o techo?
     private float gravityScale;        // Escala de gravedad inicial
     private bool isGravityNormal = true; // Estado de la gravedad (normal o invertida)
-    private float groundContactTime;   // Tiempo en que tocó el suelo por última vez
-    private float gravityChangeDelay = 0.25f; // Retraso de 0.25 segundos tras tocar el suelo
+    private float lastGravityChange;   // Tiempo del último cambio de gravedad
+    private float gravityChangeDelay = 0.25f; // Cooldown de 0.25 segundos
+    private bool hasTouchedGround = false; // ¿Ha tocado el suelo al menos una vez?
     private bool isRed = false;        // ¿Está el jugador en modo rojo (dispara)?
     private float facingDirection = 1f; // 1 = derecha, -1 = izquierda
     private bool isSelectingMode = false; // ¿Está en modo selección (E presionada)?
@@ -29,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         gravityScale = rb.gravityScale; // Guardar la gravedad inicial
-        groundContactTime = -gravityChangeDelay; // Permitir el primer cambio si está en el suelo
+        lastGravityChange = -gravityChangeDelay; // Permitir el primer cambio inmediato
 
         // Asegurarse de que el panel esté oculto al inicio
         if (habSelector != null) habSelector.SetActive(false);
@@ -58,14 +59,10 @@ public class PlayerMovement : MonoBehaviour
         Vector2 rayDirection = isGravityNormal ? Vector2.down : Vector2.up;
         isGrounded = Physics2D.Raycast(transform.position, rayDirection, 1f, groundLayer);
 
-        // Actualizar el tiempo de contacto con el suelo
-        if (isGrounded && groundContactTime < 0)
+        // Marcar que ha tocado el suelo al menos una vez
+        if (isGrounded)
         {
-            groundContactTime = Time.time;
-        }
-        else if (!isGrounded)
-        {
-            groundContactTime = -gravityChangeDelay;
+            hasTouchedGround = true;
         }
 
         // Salto (tecla Espacio)
@@ -75,12 +72,14 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
         }
 
-        // Cambiar gravedad y girar (tecla Q) - No permitido si es rojo
-        if (Input.GetKeyDown(KeyCode.Q) && isGrounded && Time.time >= groundContactTime + gravityChangeDelay && !isRed)
+        // Cambiar gravedad y girar (tecla Q) - No permitido si es rojo, permitido en el aire tras tocar suelo
+        if (Input.GetKeyDown(KeyCode.Q) && !isRed && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
         {
             rb.gravityScale = -rb.gravityScale;
             isGravityNormal = !isGravityNormal;
-            transform.Rotate(0f, 0f, 180f);
+            // Rotar 180° verticalmente (Z) y 180° horizontalmente (Y)
+            transform.Rotate(0f, 180f, 180f);
+            lastGravityChange = Time.time; // Actualizar el tiempo del último cambio
         }
 
         // Mostrar panel "Hab-Selector" al mantener E y manejar estados
@@ -114,7 +113,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Disparar proyectiles solo si está en modo rojo
-        if (isRed && Input.GetKeyDown(KeyCode.Q))
+        if (isRed && Input.GetKeyDown(KeyCode.Q)) // ¡Corregido! Volvemos a usar "F" para disparar
         {
             FireProjectile();
         }
