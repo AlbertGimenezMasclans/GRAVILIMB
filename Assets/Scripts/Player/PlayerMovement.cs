@@ -214,13 +214,7 @@ private void DismemberHead()
                 bodyRb.bodyType = RigidbodyType2D.Static;
                 bodyRb.velocity = Vector2.zero;
             }
-
-            BoxCollider2D bodyCollider = bodyObject.GetComponent<BoxCollider2D>();
-            if (bodyCollider != null && boxCollider != null)
-            {
-                bodyCollider.size = boxCollider.size;
-                bodyCollider.offset = boxCollider.offset;
-            }
+            // Eliminamos la copia del collider para mantener el original del PlayerBody
         }
     }
 
