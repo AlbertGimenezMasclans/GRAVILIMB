@@ -11,11 +11,12 @@ public class PlayerMovement : MonoBehaviour
     public float projectileSpeed = 10f;
     public Transform firePoint;
 
-    // Variables privadas (sin cambios en las no mencionadas)
+    // Variables privadas (solo añado lo nuevo)
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
-    private bool isGrounded;           // Ahora se actualizará con colisiones
+    private Animator animator; // NUEVO: Referencia al Animator
+    private bool isGrounded;
     private float gravityScale;
     private bool isGravityNormal = true;
     private float lastGravityChange;
@@ -30,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
+        animator = GetComponent<Animator>(); // NUEVO: Inicializar el Animator
         gravityScale = rb.gravityScale;
         lastGravityChange = -gravityChangeDelay;
 
@@ -52,26 +54,27 @@ public class PlayerMovement : MonoBehaviour
         }
         rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
 
+        // NUEVO: Actualizar animación según el movimiento
+        animator.SetFloat("Speed", Mathf.Abs(moveInput)); // Enviar la velocidad absoluta al Animator
+
         if (moveInput != 0)
         {
             facingDirection = Mathf.Sign(moveInput);
             transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
         }
 
-        // Salto
+        // Resto del Update sin cambios
         if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
         {
             float jumpDirection = isGravityNormal ? 1f : -1f;
             rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
         }
 
-        // Cambiar gravedad y girar (tecla Z)
         if (Input.GetKeyDown(KeyCode.Z) && !isRed && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
         {
             ChangeGravity();
         }
 
-        // Lógica de selección (sin cambios)
         if (Input.GetKey(KeyCode.X))
         {
             if (habSelector != null && !isSelectingMode) habSelector.SetActive(true);

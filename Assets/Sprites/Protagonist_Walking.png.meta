@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: eb3d0c6d2b1d8614ca738c726b9e0e83
+guid: c80cf690e3228e7458ffc8f517551460
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -97,12 +97,75 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Protagonist_Idle_0
+      name: Protagonist_Walking_0
+      rect:
+        serializedVersion: 2
+        x: 11
+        y: 73
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b8b2e1f9eff54f478329539a5a77e96
+      internalID: -1803269632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Protagonist_Walking_1
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 73
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ad540e4fd4e2514eb849e0e7691e94e
+      internalID: -1713320021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Protagonist_Walking_2
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 73
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c585a846dafd5d947a827479f66d07e4
+      internalID: 702267725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Protagonist_Walking_3
       rect:
         serializedVersion: 2
         x: 11
         y: 41
-        width: 7
+        width: 8
         height: 16
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -111,19 +174,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 498b080be5cb3c44185abfed8c5f444f
-      internalID: 904749119
+      spriteID: 7c3caa72d13c37441bae749a7e951fb6
+      internalID: -349154284
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Protagonist_Idle_1
+      name: Protagonist_Walking_4
       rect:
         serializedVersion: 2
         x: 43
         y: 41
-        width: 7
+        width: 8
         height: 16
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -132,19 +195,40 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8ec750b2cb2f91a45a4032601e995d59
-      internalID: 2145222956
+      spriteID: 0b74c0fd97a876449957cc7db75dca57
+      internalID: 658572423
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Protagonist_Idle_2
+      name: Protagonist_Walking_5
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 41
+        width: 8
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32c53c486da978e448eb86b2a3e72cd2
+      internalID: -777296321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Protagonist_Walking_6
       rect:
         serializedVersion: 2
         x: 11
         y: 9
-        width: 7
+        width: 8
         height: 16
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -153,19 +237,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1484dab86debaa342965657fca344f96
-      internalID: 765615045
+      spriteID: 812a4f15e5d3506498d7c71272d4ad92
+      internalID: -199725348
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Protagonist_Idle_3
+      name: Protagonist_Walking_7
       rect:
         serializedVersion: 2
         x: 43
         y: 9
-        width: 7
+        width: 8
         height: 16
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -174,8 +258,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d64a0d08d753d9643a5504b330c91dc0
-      internalID: -2001455080
+      spriteID: 134cdbc078c1edd449e742ad83bd464d
+      internalID: 740878422
       vertices: []
       indices: 
       edges: []
@@ -191,10 +275,14 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Protagonist_Idle_0: 904749119
-      Protagonist_Idle_1: 2145222956
-      Protagonist_Idle_2: 765615045
-      Protagonist_Idle_3: -2001455080
+      Protagonist_Walking_0: -1803269632
+      Protagonist_Walking_1: -1713320021
+      Protagonist_Walking_2: 702267725
+      Protagonist_Walking_3: -349154284
+      Protagonist_Walking_4: 658572423
+      Protagonist_Walking_5: -777296321
+      Protagonist_Walking_6: -199725348
+      Protagonist_Walking_7: 740878422
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
