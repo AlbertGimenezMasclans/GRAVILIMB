@@ -7,6 +7,7 @@ public class Dismember : MonoBehaviour
     public float hopInterval = 0.4f;         // Intervalo entre saltos (ajustable, como la rana)
     public float jumpForce = 5f;             // Fuerza del salto vertical independiente
     public LayerMask groundLayer;
+    public float bounceForce = 2f;           // Fuerza del rebote al chocar (ajustable)
 
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
@@ -65,6 +66,7 @@ public class Dismember : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        // Verificar si está tocando el suelo
         if (((1 << collision.gameObject.layer) & groundLayer) != 0)
         {
             Vector2 normal = collision.contacts[0].normal;
@@ -73,6 +75,14 @@ public class Dismember : MonoBehaviour
             {
                 isGrounded = true;
             }
+            else // Rebote si no es el suelo (como una pared)
+            {
+                ApplyBounce(collision);
+            }
+        }
+        else // Rebote con cualquier otro objeto que no sea el suelo
+        {
+            ApplyBounce(collision);
         }
     }
 
@@ -108,5 +118,18 @@ public class Dismember : MonoBehaviour
             transform.Rotate(0f, 0f, 180f);
         }
         transform.localScale = new Vector3(horizontalScale, Mathf.Abs(transform.localScale.y), transform.localScale.z);
+    }
+
+    private void ApplyBounce(Collision2D collision)
+    {
+        // Obtener la normal de la colisión
+        Vector2 normal = collision.contacts[0].normal;
+
+        // Calcular la dirección del rebote (opuesta al impacto con influencia de la normal)
+        Vector2 bounceDirection = -rb.velocity.normalized + normal;
+        bounceDirection = bounceDirection.normalized;
+
+        // Aplicar la fuerza de rebote
+        rb.velocity = bounceDirection * bounceForce;
     }
 }
