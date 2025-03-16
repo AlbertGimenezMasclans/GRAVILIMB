@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    private float lifetime = 2f; // Tiempo de vida en segundos
+    private float lifetime = 2.5f; // Tiempo de vida en segundos
     private float timer = 0f;
 
     void OnEnable()
