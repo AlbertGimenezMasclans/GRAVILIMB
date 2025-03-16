@@ -27,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
     private float lastGravityChange;
     private float gravityChangeDelay = 1f;
     private bool hasTouchedGround = false;
-    private bool isRed = false;
+    private bool isShoot = false;
     private float facingDirection = 1f;
     private bool isSelectingMode = false;
 
@@ -49,86 +49,98 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void Update()
+{
+    if (!isDismembered)
     {
-        if (!isDismembered)
+        // Movimiento horizontal (sin cambios)
+        float moveInput = 0f;
+        if (Input.GetKey(KeyCode.RightArrow))
         {
-            // Movimiento horizontal
-            float moveInput = 0f;
-            if (Input.GetKey(KeyCode.RightArrow))
-            {
-                moveInput = 1f;
-            }
-            else if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                moveInput = -1f;
-            }
-            rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+            moveInput = 1f;
+        }
+        else if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            moveInput = -1f;
+        }
+        rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
 
-            animator.SetFloat("Speed", Mathf.Abs(moveInput));
+        animator.SetFloat("Speed", Mathf.Abs(moveInput));
 
-            if (moveInput != 0)
+        if (moveInput != 0)
+        {
+            facingDirection = Mathf.Sign(moveInput);
+            transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+        {
+            float jumpDirection = isGravityNormal ? 1f : -1f;
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z) && !isShoot && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
+        {
+            ChangeGravity();
+        }
+
+        // Modo de selección
+        if (Input.GetKey(KeyCode.X))
+        {
+            if (habSelector != null && !isSelectingMode)
             {
-                facingDirection = Mathf.Sign(moveInput);
-                transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
+                habSelector.SetActive(true);
+                Debug.Log("Selector activado");
             }
+            Time.timeScale = 0.3f;
+            isSelectingMode = true;
 
-            if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+            if (Input.GetKeyDown(KeyCode.A))
             {
-                float jumpDirection = isGravityNormal ? 1f : -1f;
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Z) && !isRed && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
-            {
-                ChangeGravity();
-            }
-
-            if (Input.GetKey(KeyCode.X))
-            {
-                if (habSelector != null && !isSelectingMode) habSelector.SetActive(true);
-                Time.timeScale = 0.3f;
-                isSelectingMode = true;
-
-                if (Input.GetKeyDown(KeyCode.A))
-                {
-                    spriteRenderer.color = Color.white;
-                    isRed = false;
-                    if (habSelector != null) habSelector.SetActive(false);
-                }
-                else if (Input.GetKeyDown(KeyCode.D))
-                {
-                    spriteRenderer.color = Color.red;
-                    isRed = true;
-                    if (habSelector != null) habSelector.SetActive(false);
-                }
-                else if (Input.GetKeyDown(KeyCode.S))
-                {
-                    DismemberHead();
-                }
-            }
-            else
-            {
+                spriteRenderer.color = Color.white;
+                isShoot = false;
                 if (habSelector != null) habSelector.SetActive(false);
                 Time.timeScale = 1f;
                 isSelectingMode = false;
+                Debug.Log("Estado cambiado a blanco");
             }
-
-            if (isRed && Input.GetKeyDown(KeyCode.Z))
+            else if (Input.GetKeyDown(KeyCode.D))
             {
-                FireProjectile();
+                spriteRenderer.color = Color.red;
+                isShoot = true;
+                if (habSelector != null) habSelector.SetActive(false);
+                Time.timeScale = 1f;
+                isSelectingMode = false;
+                Debug.Log("Estado cambiado a rojo");
+            }
+            else if (Input.GetKeyDown(KeyCode.S))
+            {
+                Debug.Log("Intentando desmembrar");
+                DismemberHead();
             }
         }
         else
         {
-            rb.velocity = Vector2.zero;
+            if (habSelector != null) habSelector.SetActive(false);
+            Time.timeScale = 1f;
+            isSelectingMode = false;
+        }
 
-            // Volver al estado normal con Z
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                ReturnToNormal();
-            }
+        if (isShoot && Input.GetKeyDown(KeyCode.Z))
+        {
+            FireProjectile();
         }
     }
+    else
+    {
+        rb.velocity = Vector2.zero;
+
+        // Volver al estado normal con Z
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            ReturnToNormal();
+        }
+    }
+}
 
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -166,16 +178,24 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void FireProjectile()
+{
+    if (projectilePrefab != null && firePoint != null && ProjectilePool.Instance.CanShoot())
     {
-        if (projectilePrefab != null && firePoint != null)
+        // Obtener un proyectil del pool
+        GameObject projectile = ProjectilePool.Instance.GetProjectile();
+        if (projectile != null) // Verificar que se obtuvo un proyectil
         {
-            GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            projectile.transform.position = firePoint.position; // Posicionar en el punto de disparo
+            projectile.transform.rotation = Quaternion.identity; // Reiniciar rotación
+            projectile.SetActive(true); // Activar el proyectil
+
             Rigidbody2D projectileRb = projectile.GetComponent<Rigidbody2D>();
             projectileRb.gravityScale = 0f;
             Vector2 shootDirection = transform.right * facingDirection;
             projectileRb.velocity = shootDirection.normalized * projectileSpeed;
         }
     }
+}
 
     void OnDisable()
     {
@@ -183,40 +203,44 @@ public class PlayerMovement : MonoBehaviour
     }
 
 private void DismemberHead()
+{
+    if (headObject != null && bodyObject != null)
     {
-        if (headObject != null && bodyObject != null)
+        Debug.Log("Desmembramiento iniciado");
+        isDismembered = true;
+
+        // Hacer invisible al jugador y desactivar su colisión
+        spriteRenderer.enabled = false;
+        if (boxCollider != null) boxCollider.enabled = false;
+        rb.velocity = Vector2.zero;
+
+        if (habSelector != null) habSelector.SetActive(false);
+        Time.timeScale = 1f;
+        isSelectingMode = false;
+
+        bodyObject.SetActive(true);
+        headObject.SetActive(true);
+
+        bodyObject.transform.position = transform.position;
+        bodyObject.transform.rotation = transform.rotation;
+        bodyObject.transform.localScale = transform.localScale;
+
+        Vector3 headOffset = new Vector3(0f, boxCollider.size.y * 0.5f, 0f);
+        headObject.transform.position = transform.position + (isGravityNormal ? headOffset : -headOffset);
+        headObject.transform.localScale = transform.localScale;
+
+        Rigidbody2D bodyRb = bodyObject.GetComponent<Rigidbody2D>();
+        if (bodyRb != null)
         {
-            isDismembered = true;
-
-            // Hacer invisible al jugador y desactivar su colisión
-            spriteRenderer.enabled = false;
-            if (boxCollider != null) boxCollider.enabled = false;
-            rb.velocity = Vector2.zero;
-
-            if (habSelector != null) habSelector.SetActive(false);
-            Time.timeScale = 1f;
-            isSelectingMode = false;
-
-            bodyObject.SetActive(true);
-            headObject.SetActive(true);
-
-            bodyObject.transform.position = transform.position;
-            bodyObject.transform.rotation = transform.rotation;
-            bodyObject.transform.localScale = transform.localScale;
-
-            Vector3 headOffset = new Vector3(0f, boxCollider.size.y * 0.5f, 0f);
-            headObject.transform.position = transform.position + (isGravityNormal ? headOffset : -headOffset);
-            headObject.transform.localScale = transform.localScale;
-
-            Rigidbody2D bodyRb = bodyObject.GetComponent<Rigidbody2D>();
-            if (bodyRb != null)
-            {
-                bodyRb.bodyType = RigidbodyType2D.Static;
-                bodyRb.velocity = Vector2.zero;
-            }
-            // Eliminamos la copia del collider para mantener el original del PlayerBody
+            bodyRb.bodyType = RigidbodyType2D.Static;
+            bodyRb.velocity = Vector2.zero;
         }
     }
+    else
+    {
+        Debug.LogError("headObject o bodyObject no están asignados en el Inspector");
+    }
+}
 
     private void ReturnToNormal()
     {
@@ -236,8 +260,7 @@ private void DismemberHead()
             transform.position = bodyObject.transform.position;
 
             // Cambiar al estado de cambio de gravedad (blanco)
-            spriteRenderer.color = Color.white;
-            isRed = false;
+            isShoot = false;
 
             // Restaurar la escala y dirección
             transform.localScale = bodyObject.transform.localScale;
