@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     // Variables para el desmembramiento
     public GameObject headObject;    // Referencia al GameObject de la cabeza
     public GameObject bodyObject;    // Referencia al GameObject del cuerpo
-    private bool isDismembered = false;
+    public bool isDismembered = false;
 
     // Variables privadas existentes
     private Rigidbody2D rb;
@@ -52,7 +52,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isDismembered)
         {
-            // Movimiento horizontal
             float moveInput = 0f;
             if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
             else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
@@ -77,7 +76,6 @@ public class PlayerMovement : MonoBehaviour
                 ChangeGravity();
             }
 
-            // Modo de selección
             if (Input.GetKey(KeyCode.X))
             {
                 if (habSelector != null && !isSelectingMode)
@@ -103,7 +101,6 @@ public class PlayerMovement : MonoBehaviour
                     Time.timeScale = 1f;
                     isSelectingMode = false;
                 }
-                // Solo permitir desmembramiento si está en el suelo
                 if (Input.GetKeyDown(KeyCode.S) && isGrounded)
                 {
                     DismemberHead();
@@ -192,50 +189,50 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void DismemberHead()
-{
-    if (headObject != null && bodyObject != null)
     {
-        isDismembered = true;
-
-        spriteRenderer.enabled = false;
-        if (boxCollider != null) boxCollider.enabled = false;
-        rb.velocity = Vector2.zero;
-
-        if (habSelector != null) habSelector.SetActive(false);
-        Time.timeScale = 1f;
-        isSelectingMode = false;
-
-        bodyObject.SetActive(true);
-        headObject.SetActive(true);
-
-        bodyObject.transform.position = transform.position;
-        bodyObject.transform.rotation = transform.rotation;
-        bodyObject.transform.localScale = transform.localScale;
-
-        Vector3 headOffset = new Vector3(0f, boxCollider.size.y * 0.5f, 0f);
-        headObject.transform.position = transform.position + (isGravityNormal ? headOffset : -headOffset);
-        headObject.transform.localScale = transform.localScale;
-
-        Rigidbody2D bodyRb = bodyObject.GetComponent<Rigidbody2D>();
-        if (bodyRb != null)
+        if (headObject != null && bodyObject != null)
         {
-            bodyRb.bodyType = RigidbodyType2D.Static;
-            bodyRb.velocity = Vector2.zero;
+            isDismembered = true;
+
+            spriteRenderer.enabled = false;
+            if (boxCollider != null) boxCollider.enabled = false;
+            rb.velocity = Vector2.zero;
+
+            if (habSelector != null) habSelector.SetActive(false);
+            Time.timeScale = 1f;
+            isSelectingMode = false;
+
+            bodyObject.SetActive(true);
+            headObject.SetActive(true);
+
+            bodyObject.transform.position = transform.position;
+            bodyObject.transform.rotation = transform.rotation;
+            bodyObject.transform.localScale = transform.localScale;
+
+            Vector3 headOffset = new Vector3(0f, boxCollider.size.y * 0.5f, 0f);
+            headObject.transform.position = transform.position + (isGravityNormal ? headOffset : -headOffset);
+            headObject.transform.localScale = transform.localScale;
+
+            Rigidbody2D bodyRb = bodyObject.GetComponent<Rigidbody2D>();
+            if (bodyRb != null)
+            {
+                bodyRb.bodyType = RigidbodyType2D.Static;
+                bodyRb.velocity = Vector2.zero;
+            }
+
+            Rigidbody2D headRb = headObject.GetComponent<Rigidbody2D>();
+            if (headRb != null)
+            {
+                headRb.bodyType = RigidbodyType2D.Dynamic;
+                headRb.gravityScale = 1f; // Siempre gravedad normal (hacia abajo)
+                headRb.velocity = Vector2.zero;
+            }
         }
-
-        Rigidbody2D headRb = headObject.GetComponent<Rigidbody2D>();
-        if (headRb != null)
+        else
         {
-            headRb.bodyType = RigidbodyType2D.Dynamic;
-            headRb.gravityScale = 1f; // Siempre gravedad normal (hacia abajo)
-            headRb.velocity = Vector2.zero;
+            Debug.LogError("headObject o bodyObject no están asignados en el Inspector");
         }
     }
-    else
-    {
-        Debug.LogError("headObject o bodyObject no están asignados en el Inspector");
-    }
-}
 
     private void ReturnToNormal()
     {
@@ -255,6 +252,17 @@ public class PlayerMovement : MonoBehaviour
             isRed = false;
 
             transform.localScale = bodyObject.transform.localScale;
+
+            Time.timeScale = 1f;
+        }
+    }
+
+    // Método público para que "recompose" lo llame
+    public void RecomposePlayer()
+    {
+        if (isDismembered)
+        {
+            ReturnToNormal();
         }
     }
 }
