@@ -22,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
     private float lastGravityChange;
     private float gravityChangeDelay = 1f;
     private bool hasTouchedGround = false;
-    private bool isRed = false;
+    private bool isShoot = false;
     private float facingDirection = 1f;
     private bool isSelectingMode = false;
 
@@ -70,10 +70,17 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
         }
 
+<<<<<<< Updated upstream
         if (Input.GetKeyDown(KeyCode.Z) && !isRed && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
         {
             ChangeGravity();
         }
+=======
+            if (Input.GetKeyDown(KeyCode.Z) && !isShoot && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
+            {
+                ChangeGravity();
+            }
+>>>>>>> Stashed changes
 
         if (Input.GetKey(KeyCode.X))
         {
@@ -81,13 +88,37 @@ public class PlayerMovement : MonoBehaviour
             Time.timeScale = 0.3f;
             isSelectingMode = true;
 
+<<<<<<< Updated upstream
             if (Input.GetKeyDown(KeyCode.A))
+=======
+                if (Input.GetKeyDown(KeyCode.A))
+                {
+                    isShoot = false;
+                    if (habSelector != null) habSelector.SetActive(false);
+                }
+                else if (Input.GetKeyDown(KeyCode.D))
+                {
+                    isShoot = true;
+                    if (habSelector != null) habSelector.SetActive(false);
+                }
+                else if (Input.GetKeyDown(KeyCode.S))
+                {
+                    DismemberHead();
+                }
+            }
+            else
+>>>>>>> Stashed changes
             {
                 spriteRenderer.color = Color.white;
                 isRed = false;
                 if (habSelector != null) habSelector.SetActive(false);
             }
+<<<<<<< Updated upstream
             else if (Input.GetKeyDown(KeyCode.D))
+=======
+
+            if (isShoot && Input.GetKeyDown(KeyCode.Z))
+>>>>>>> Stashed changes
             {
                 spriteRenderer.color = Color.red;
                 isRed = true;
@@ -146,19 +177,91 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void FireProjectile()
+{
+    if (projectilePrefab != null && firePoint != null && ProjectilePool.Instance.CanShoot())
     {
-        if (projectilePrefab != null && firePoint != null)
+        // Obtener un proyectil del pool
+        GameObject projectile = ProjectilePool.Instance.GetProjectile();
+        if (projectile != null) // Verificar que se obtuvo un proyectil
         {
-            GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            projectile.transform.position = firePoint.position; // Posicionar en el punto de disparo
+            projectile.transform.rotation = Quaternion.identity; // Reiniciar rotación
+            projectile.SetActive(true); // Activar el proyectil
+
             Rigidbody2D projectileRb = projectile.GetComponent<Rigidbody2D>();
             projectileRb.gravityScale = 0f;
             Vector2 shootDirection = transform.right * facingDirection;
             projectileRb.velocity = shootDirection.normalized * projectileSpeed;
         }
     }
+}
 
     void OnDisable()
     {
         Time.timeScale = 1f;
     }
+<<<<<<< Updated upstream
+=======
+
+private void DismemberHead()
+    {
+        if (headObject != null && bodyObject != null)
+        {
+            isDismembered = true;
+
+            // Hacer invisible al jugador y desactivar su colisión
+            spriteRenderer.enabled = false;
+            if (boxCollider != null) boxCollider.enabled = false;
+            rb.velocity = Vector2.zero;
+
+            if (habSelector != null) habSelector.SetActive(false);
+            Time.timeScale = 1f;
+            isSelectingMode = false;
+
+            bodyObject.SetActive(true);
+            headObject.SetActive(true);
+
+            bodyObject.transform.position = transform.position;
+            bodyObject.transform.rotation = transform.rotation;
+            bodyObject.transform.localScale = transform.localScale;
+
+            Vector3 headOffset = new Vector3(0f, boxCollider.size.y * 0.5f, 0f);
+            headObject.transform.position = transform.position + (isGravityNormal ? headOffset : -headOffset);
+            headObject.transform.localScale = transform.localScale;
+
+            Rigidbody2D bodyRb = bodyObject.GetComponent<Rigidbody2D>();
+            if (bodyRb != null)
+            {
+                bodyRb.bodyType = RigidbodyType2D.Static;
+                bodyRb.velocity = Vector2.zero;
+            }
+            // Eliminamos la copia del collider para mantener el original del PlayerBody
+        }
+    }
+
+    private void ReturnToNormal()
+    {
+        if (headObject != null && bodyObject != null)
+        {
+            isDismembered = false;
+
+            // Hacer visible al jugador y reactivar su colisión
+            spriteRenderer.enabled = true;
+            if (boxCollider != null) boxCollider.enabled = true;
+
+            // Desactivar cabeza y cuerpo
+            headObject.SetActive(false);
+            bodyObject.SetActive(false);
+
+            // Mover al jugador a la posición del cuerpo
+            transform.position = bodyObject.transform.position;
+
+            // Cambiar al estado de cambio de gravedad (blanco)
+            isShoot = false;
+
+            // Restaurar la escala y dirección
+            transform.localScale = bodyObject.transform.localScale;
+        }
+    }
+>>>>>>> Stashed changes
 }
