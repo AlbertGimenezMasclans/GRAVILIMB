@@ -493,7 +493,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.972549}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.9607843}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1423,7 +1423,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[0]
-      value: Hola, soy R3p4rati0n. Aunque  ese es mi nombre en clave.
+      value: Hola, soy R3p4rati0n. Aunque ese es mi nombre en clave.
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[1]
@@ -2521,7 +2521,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: -1632318764, guid: 4bb3ff12f6c9ab5478c17668d3435be8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -2685,7 +2685,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: 862903397, guid: 4bb3ff12f6c9ab5478c17668d3435be8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

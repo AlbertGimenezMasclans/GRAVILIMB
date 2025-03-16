@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    // Variables públicas existentes
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
     public LayerMask groundLayer;
@@ -11,12 +10,10 @@ public class PlayerMovement : MonoBehaviour
     public float projectileSpeed = 10f;
     public Transform firePoint;
 
-    // Variables para el desmembramiento
-    public GameObject headObject;    // Referencia al GameObject de la cabeza
-    public GameObject bodyObject;    // Referencia al GameObject del cuerpo
+    public GameObject headObject;
+    public GameObject bodyObject;
     public bool isDismembered = false;
 
-    // Variables privadas existentes
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
@@ -30,6 +27,9 @@ public class PlayerMovement : MonoBehaviour
     private bool isRed = false;
     private float facingDirection = 1f;
     private bool isSelectingMode = false;
+
+    // Referencia al DialogueSystem activo
+    private DialogueSystem activeDialogueSystem;
 
     void Start()
     {
@@ -50,6 +50,12 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        // Bloquear acciones si hay un diálogo activo
+        if (activeDialogueSystem != null && activeDialogueSystem.IsDialogueActive)
+        {
+            return;
+        }
+
         if (!isDismembered)
         {
             float moveInput = 0f;
@@ -224,7 +230,7 @@ public class PlayerMovement : MonoBehaviour
             if (headRb != null)
             {
                 headRb.bodyType = RigidbodyType2D.Dynamic;
-                headRb.gravityScale = 1f; // Siempre gravedad normal (hacia abajo)
+                headRb.gravityScale = 1f;
                 headRb.velocity = Vector2.zero;
             }
         }
@@ -257,12 +263,17 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // Método público para que "recompose" lo llame
     public void RecomposePlayer()
     {
         if (isDismembered)
         {
             ReturnToNormal();
         }
+    }
+
+    // Método para que DialogueSystem actualice el estado del diálogo activo
+    public void SetDialogueActive(DialogueSystem dialogue)
+    {
+        activeDialogueSystem = dialogue;
     }
 }

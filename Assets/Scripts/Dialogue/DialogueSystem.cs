@@ -1,7 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI; // Necesario para el componente Image
+using UnityEngine.UI;
 
 public class DialogueSystem : MonoBehaviour
 {   
@@ -9,8 +9,8 @@ public class DialogueSystem : MonoBehaviour
     [SerializeField] private GameObject textBox;
     [SerializeField] private TMP_Text dialogueText;
     [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
-    [SerializeField] private GameObject textBoxPortrait; // Referencia a TextBox_Portrait
-    [SerializeField] private Sprite portraitSprite;     // Sprite para el retrato, asignable en el Inspector
+    [SerializeField] private GameObject textBoxPortrait;
+    [SerializeField] private Sprite portraitSprite;
 
     private float typingTime = 0.05f;
 
@@ -18,9 +18,14 @@ public class DialogueSystem : MonoBehaviour
     private bool didDialogueStart;
     private int lineIndex;
 
+    // Propiedad pública para el estado del diálogo
+    public bool IsDialogueActive => didDialogueStart;
+
+    // Referencia al PlayerMovement para notificarle
+    private PlayerMovement playerMovement;
+
     void Start()
     {
-        // Asegurarse de que el retrato esté desactivado al inicio si el textbox lo está
         if (textBoxPortrait != null && !textBox.activeSelf)
         {
             textBoxPortrait.SetActive(false);
@@ -55,19 +60,24 @@ public class DialogueSystem : MonoBehaviour
         lineIndex = 0;
         Time.timeScale = 0f;
 
-        // Configurar el retrato
         if (textBoxPortrait != null)
         {
             textBoxPortrait.SetActive(true);
             Image portraitImage = textBoxPortrait.GetComponent<Image>();
             if (portraitImage != null && portraitSprite != null)
             {
-                portraitImage.sprite = portraitSprite; // Asignar el sprite desde el Inspector
+                portraitImage.sprite = portraitSprite;
             }
             else if (portraitImage == null)
             {
                 Debug.LogError("TextBox_Portrait no tiene un componente Image.");
             }
+        }
+
+        // Notificar al PlayerMovement que el diálogo ha comenzado
+        if (playerMovement != null)
+        {
+            playerMovement.SetDialogueActive(this);
         }
 
         StartCoroutine(ShowLine());
@@ -87,9 +97,15 @@ public class DialogueSystem : MonoBehaviour
             dialogueMark.SetActive(true);
             if (textBoxPortrait != null)
             {
-                textBoxPortrait.SetActive(false); // Desactivar el retrato al finalizar
+                textBoxPortrait.SetActive(false);
             }
             Time.timeScale = 1f;
+
+            // Notificar al PlayerMovement que el diálogo ha terminado
+            if (playerMovement != null)
+            {
+                playerMovement.SetDialogueActive(null);
+            }
         }
     }
 
@@ -109,6 +125,12 @@ public class DialogueSystem : MonoBehaviour
         {
             isPlayerRange = true;
             dialogueMark.SetActive(true);
+            // Obtener la referencia al PlayerMovement cuando el jugador entra en rango
+            playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
+            if (playerMovement == null)
+            {
+                Debug.LogError("El jugador no tiene el componente PlayerMovement.");
+            }
         }
     }
 
@@ -118,6 +140,8 @@ public class DialogueSystem : MonoBehaviour
         {
             isPlayerRange = false;
             dialogueMark.SetActive(false);
+            // Limpiar la referencia cuando el jugador sale del rango
+            playerMovement = null;
         }
     }
 }
