@@ -12,6 +12,7 @@ public class DialogueSystem : MonoBehaviour
     [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
     [SerializeField] private GameObject textBoxPortrait;
     [SerializeField] private Sprite portraitSprite;
+    [SerializeField] private Image Input_TB; // Imagen en el Canvas
 
     [SerializeField] private bool useAlternativePosition = false;
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
@@ -27,6 +28,7 @@ public class DialogueSystem : MonoBehaviour
 
     void Start()
     {
+        // Validaciones iniciales
         if (textBox == null)
         {
             Debug.LogError("TextBox no está asignado en el Inspector.");
@@ -51,6 +53,16 @@ public class DialogueSystem : MonoBehaviour
         {
             textBoxPortrait.SetActive(false);
         }
+
+        // Configurar Input_TB (como imagen del Canvas)
+        if (Input_TB != null)
+        {
+            Input_TB.gameObject.SetActive(false); // Desactivado por defecto
+        }
+        else
+        {
+            Debug.LogError("Input_TB (Image) no está asignado en el Inspector.");
+        }
     }
 
     void Update()
@@ -69,6 +81,8 @@ public class DialogueSystem : MonoBehaviour
             {
                 StopAllCoroutines();
                 dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(dialogueLines[lineIndex]);
+                // Activar Input_TB cuando el texto se muestra completamente
+                if (Input_TB != null) Input_TB.gameObject.SetActive(true);
             }
         }
     }
@@ -101,15 +115,16 @@ public class DialogueSystem : MonoBehaviour
             {
                 portraitImage.sprite = portraitSprite;
             }
-            else if (portraitImage == null)
-            {
-                Debug.LogError("TextBox_Portrait no tiene un componente Image.");
-            }
         }
 
         if (playerMovement != null)
         {
             playerMovement.SetDialogueActive(this);
+        }
+
+        if (Input_TB != null)
+        {
+            Input_TB.gameObject.SetActive(false); // Desactivado al iniciar el diálogo
         }
 
         StartCoroutine(ShowLine());
@@ -120,6 +135,7 @@ public class DialogueSystem : MonoBehaviour
         lineIndex++;
         if (lineIndex < dialogueLines.Length)
         {
+            if (Input_TB != null) Input_TB.gameObject.SetActive(false); // Desactivar antes de mostrar la siguiente línea
             StartCoroutine(ShowLine());
         }
         else
@@ -134,19 +150,21 @@ public class DialogueSystem : MonoBehaviour
             {
                 playerMovement.SetDialogueActive(null);
             }
+
+            // Activar Input_TB al finalizar el diálogo
+            if (Input_TB != null)
+            {
+                Input_TB.gameObject.SetActive(true);
+            }
         }
     }
 
     private IEnumerator ShowLine()
     {
-        // Establecemos el texto completo desde el inicio
         dialogueText.text = dialogueLines[lineIndex];
-        dialogueText.maxVisibleCharacters = 0; // Ocultamos todo al principio
-
-        // Forzamos a TMP a calcular la disposición del texto
+        dialogueText.maxVisibleCharacters = 0;
         dialogueText.ForceMeshUpdate();
 
-        // Contamos solo los caracteres visibles (sin etiquetas)
         int totalVisibleChars = GetVisibleCharacterCount(dialogueLines[lineIndex]);
         int visibleCount = 0;
 
@@ -156,9 +174,11 @@ public class DialogueSystem : MonoBehaviour
             dialogueText.maxVisibleCharacters = visibleCount;
             yield return new WaitForSecondsRealtime(typingTime);
         }
+
+        // Activar Input_TB cuando el texto se ha mostrado completamente
+        if (Input_TB != null) Input_TB.gameObject.SetActive(true);
     }
 
-    // Calcula el número de caracteres visibles (excluyendo etiquetas)
     private int GetVisibleCharacterCount(string line)
     {
         int count = 0;
@@ -166,20 +186,10 @@ public class DialogueSystem : MonoBehaviour
 
         foreach (char c in line)
         {
-            if (c == '<')
-            {
-                inTag = true;
-            }
-            else if (c == '>')
-            {
-                inTag = false;
-            }
-            else if (!inTag)
-            {
-                count++;
-            }
+            if (c == '<') inTag = true;
+            else if (c == '>') inTag = false;
+            else if (!inTag) count++;
         }
-
         return count;
     }
 
@@ -190,10 +200,6 @@ public class DialogueSystem : MonoBehaviour
             isPlayerRange = true;
             if (dialogueMark != null) dialogueMark.SetActive(true);
             playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
-            if (playerMovement == null)
-            {
-                Debug.LogError("El jugador no tiene el componente PlayerMovement.");
-            }
         }
     }
 
