@@ -61,14 +61,14 @@ public class DialogueSystem : MonoBehaviour
             {
                 StartDialogue();
             }
-            else if (dialogueText.text == dialogueLines[lineIndex])
+            else if (dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(dialogueLines[lineIndex]))
             {
                 NextDialogueLine();
             }
             else
             {
                 StopAllCoroutines();
-                dialogueText.text = dialogueLines[lineIndex];
+                dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(dialogueLines[lineIndex]);
             }
         }
     }
@@ -139,103 +139,48 @@ public class DialogueSystem : MonoBehaviour
 
     private IEnumerator ShowLine()
     {
-        dialogueText.text = string.Empty;
-        string fullLine = dialogueLines[lineIndex];
+        // Establecemos el texto completo desde el inicio
+        dialogueText.text = dialogueLines[lineIndex];
+        dialogueText.maxVisibleCharacters = 0; // Ocultamos todo al principio
 
-        // Separamos el texto en partes (etiquetas y contenido visible)
-        List<string> parts = ParseLine(fullLine);
-        string visibleText = GetVisibleText(parts); // Solo el texto visible
-        string formattedText = string.Empty;
+        // Forzamos a TMP a calcular la disposición del texto
+        dialogueText.ForceMeshUpdate();
 
-        // Construimos el texto completo con etiquetas desde el inicio
-        foreach (string part in parts)
+        // Contamos solo los caracteres visibles (sin etiquetas)
+        int totalVisibleChars = GetVisibleCharacterCount(dialogueLines[lineIndex]);
+        int visibleCount = 0;
+
+        while (visibleCount < totalVisibleChars)
         {
-            formattedText += part;
-        }
-        dialogueText.text = formattedText; // Establecemos el texto con etiquetas
-
-        // Animamos solo el texto visible
-        int visibleIndex = 0;
-        string currentVisible = string.Empty;
-
-        while (visibleIndex < visibleText.Length)
-        {
-            currentVisible += visibleText[visibleIndex];
-            dialogueText.text = BuildTextWithVisible(parts, currentVisible);
-            visibleIndex++;
+            visibleCount++;
+            dialogueText.maxVisibleCharacters = visibleCount;
             yield return new WaitForSecondsRealtime(typingTime);
         }
     }
 
-    // Separa la línea en partes (etiquetas y texto visible)
-    private List<string> ParseLine(string line)
+    // Calcula el número de caracteres visibles (excluyendo etiquetas)
+    private int GetVisibleCharacterCount(string line)
     {
-        List<string> parts = new List<string>();
-        int i = 0;
+        int count = 0;
+        bool inTag = false;
 
-        while (i < line.Length)
+        foreach (char c in line)
         {
-            if (line[i] == '<')
+            if (c == '<')
             {
-                // Encontramos una etiqueta
-                int endTag = line.IndexOf('>', i);
-                if (endTag == -1) break; // Etiqueta incompleta, paramos
-                parts.Add(line.Substring(i, endTag - i + 1));
-                i = endTag + 1;
+                inTag = true;
             }
-            else
+            else if (c == '>')
             {
-                // Encontramos texto visible
-                int nextTag = line.IndexOf('<', i);
-                if (nextTag == -1) nextTag = line.Length;
-                parts.Add(line.Substring(i, nextTag - i));
-                i = nextTag;
+                inTag = false;
+            }
+            else if (!inTag)
+            {
+                count++;
             }
         }
 
-        return parts;
-    }
-
-    // Obtiene solo el texto visible (sin etiquetas)
-    private string GetVisibleText(List<string> parts)
-    {
-        string visibleText = string.Empty;
-        foreach (string part in parts)
-        {
-            if (!part.StartsWith("<"))
-            {
-                visibleText += part;
-            }
-        }
-        return visibleText;
-    }
-
-    // Construye el texto completo con solo una parte del texto visible mostrado
-    private string BuildTextWithVisible(List<string> parts, string currentVisible)
-    {
-        string result = string.Empty;
-        int visibleIndex = 0;
-
-        foreach (string part in parts)
-        {
-            if (part.StartsWith("<"))
-            {
-                result += part; // Añadimos la etiqueta tal cual
-            }
-            else
-            {
-                // Añadimos solo la porción visible que corresponde
-                int remainingVisible = currentVisible.Length - visibleIndex;
-                if (remainingVisible > 0)
-                {
-                    int charsToShow = Mathf.Min(remainingVisible, part.Length);
-                    result += part.Substring(0, charsToShow);
-                    visibleIndex += charsToShow;
-                }
-            }
-        }
-
-        return result;
+        return count;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
