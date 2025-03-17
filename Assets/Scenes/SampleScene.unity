@@ -1665,7 +1665,7 @@ PrefabInstance:
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprite
       value: 
-      objectReference: {fileID: -2064289986, guid: 949ab1f1d9174d14c9f55d158b866ca3, type: 3}
+      objectReference: {fileID: 1918823127, guid: 3c36350fcdb84fb49a90667f8c049eba, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: textBoxPortrait
       value: 
@@ -1676,7 +1676,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.size
-      value: 3
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.size
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[0]
@@ -1684,11 +1688,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[1]
-      value: Todos me llaman <color=yellow>Repi</color>, mucho gusto Protagonista.
+      value: Todos me llaman <color=yellow>Repi</color>, mucho gusto.
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[2]
-      value: Vas aprendiendo como van los <color=#96d5ec>controles</color>?
+      value: Vas aprendiendo como van los <color=#96d5ec>controles</color> ?
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueLines.Array.data[3]
+      value: Son simples de recordar, no te preocupes.
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueLines.Array.data[4]
+      value: Seguro que te acostumbras rapidamente!
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: alternativeTextBoxPosition.x
@@ -1698,6 +1710,26 @@ PrefabInstance:
       propertyPath: alternativeTextBoxPosition.y
       value: -600
       objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[0]
+      value: 
+      objectReference: {fileID: 1918823127, guid: 3c36350fcdb84fb49a90667f8c049eba, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[1]
+      value: 
+      objectReference: {fileID: 631653693, guid: 3c36350fcdb84fb49a90667f8c049eba, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[2]
+      value: 
+      objectReference: {fileID: 1097899062, guid: 3c36350fcdb84fb49a90667f8c049eba, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[3]
+      value: 
+      objectReference: {fileID: 1918823127, guid: 3c36350fcdb84fb49a90667f8c049eba, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[4]
+      value: 
+      objectReference: {fileID: 631653693, guid: 3c36350fcdb84fb49a90667f8c049eba, type: 3}
     - target: {fileID: 6906432589731621659, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_FlipX
       value: 1
@@ -3803,7 +3835,7 @@ PrefabInstance:
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprite
       value: 
-      objectReference: {fileID: 2096012614, guid: 4e63399c0866f3945b48eb1cfb4bfe19, type: 3}
+      objectReference: {fileID: 1110948326, guid: e669082add788c849b22e72acc48f0c8, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: textBoxPortrait
       value: 
@@ -3813,13 +3845,45 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueLines.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[0]
-      value: Bienvenido, <color=yellow>Protagonista</color>!
+      value: Bienvenido <color=yellow>Protagonista</color>!
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[1]
       value: Esta es la zona de prueba.
       objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueLines.Array.data[2]
+      value: Aqui puedes experimentar con tus <color=#7bf688>habilidades</color>.
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueLines.Array.data[3]
+      value: Mola eh?
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[0]
+      value: 
+      objectReference: {fileID: -479710967, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[1]
+      value: 
+      objectReference: {fileID: 1110948326, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[2]
+      value: 
+      objectReference: {fileID: 1110948326, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[3]
+      value: 
+      objectReference: {fileID: -479710967, guid: e669082add788c849b22e72acc48f0c8, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

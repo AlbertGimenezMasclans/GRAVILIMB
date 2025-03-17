@@ -11,13 +11,15 @@ public class DialogueSystem : MonoBehaviour
     [SerializeField] private TMP_Text dialogueText;
     [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
     [SerializeField] private GameObject textBoxPortrait;
-    [SerializeField] private Sprite portraitSprite;
+    [SerializeField] private Sprite[] portraitSprites; // Arreglo de Sprites, uno por línea de diálogo
     [SerializeField] private Image Input_TB; // Imagen en el Canvas
 
     [SerializeField] private bool useAlternativePosition = false;
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
 
     private float typingTime = 0.05f;
+    private float commaPauseTime = 0.25f; // Pausa después de una coma (ajustable)
+    private float periodPauseTime = 0.48f; // Pausa después de un punto (mayor que la coma, ajustable)
     private bool isPlayerRange;
     private bool didDialogueStart;
     private int lineIndex;
@@ -63,6 +65,12 @@ public class DialogueSystem : MonoBehaviour
         {
             Debug.LogError("Input_TB (Image) no está asignado en el Inspector.");
         }
+
+        // Validar que portraitSprites tenga el mismo tamaño que dialogueLines
+        if (portraitSprites != null && portraitSprites.Length != dialogueLines.Length)
+        {
+            Debug.LogWarning("El número de portraitSprites no coincide con el número de dialogueLines. Ajusta los tamaños en el Inspector.");
+        }
     }
 
     void Update()
@@ -107,15 +115,7 @@ public class DialogueSystem : MonoBehaviour
             textBoxRect.anchoredPosition = useAlternativePosition ? alternativeTextBoxPosition : originalTextBoxPosition;
         }
 
-        if (textBoxPortrait != null)
-        {
-            textBoxPortrait.SetActive(true);
-            Image portraitImage = textBoxPortrait.GetComponent<Image>();
-            if (portraitImage != null && portraitSprite != null)
-            {
-                portraitImage.sprite = portraitSprite;
-            }
-        }
+        UpdatePortrait(); // Actualizar el retrato para la primera línea
 
         if (playerMovement != null)
         {
@@ -136,6 +136,7 @@ public class DialogueSystem : MonoBehaviour
         if (lineIndex < dialogueLines.Length)
         {
             if (Input_TB != null) Input_TB.gameObject.SetActive(false); // Desactivar antes de mostrar la siguiente línea
+            UpdatePortrait(); // Actualizar el retrato para la siguiente línea
             StartCoroutine(ShowLine());
         }
         else
@@ -167,16 +168,55 @@ public class DialogueSystem : MonoBehaviour
 
         int totalVisibleChars = GetVisibleCharacterCount(dialogueLines[lineIndex]);
         int visibleCount = 0;
+        string currentLine = dialogueLines[lineIndex];
 
         while (visibleCount < totalVisibleChars)
         {
             visibleCount++;
             dialogueText.maxVisibleCharacters = visibleCount;
-            yield return new WaitForSecondsRealtime(typingTime);
+
+            // Obtener el carácter actual (teniendo en cuenta etiquetas)
+            char currentChar = GetCharAtVisibleIndex(currentLine, visibleCount - 1);
+
+            // Pausar si es una coma o un punto
+            if (currentChar == ',')
+            {
+                yield return new WaitForSecondsRealtime(commaPauseTime);
+            }
+            else if (currentChar == '.')
+            {
+                yield return new WaitForSecondsRealtime(periodPauseTime);
+            }
+            else
+            {
+                yield return new WaitForSecondsRealtime(typingTime);
+            }
         }
 
         // Activar Input_TB cuando el texto se ha mostrado completamente
         if (Input_TB != null) Input_TB.gameObject.SetActive(true);
+    }
+
+    private char GetCharAtVisibleIndex(string line, int visibleIndex)
+    {
+        int visibleCount = 0;
+        bool inTag = false;
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '<') inTag = true;
+            else if (c == '>') inTag = false;
+            else if (!inTag)
+            {
+                if (visibleCount == visibleIndex)
+                {
+                    return c;
+                }
+                visibleCount++;
+            }
+        }
+        return '\0'; // Carácter nulo si no se encuentra (no debería ocurrir)
     }
 
     private int GetVisibleCharacterCount(string line)
@@ -191,6 +231,23 @@ public class DialogueSystem : MonoBehaviour
             else if (!inTag) count++;
         }
         return count;
+    }
+
+    private void UpdatePortrait()
+    {
+        if (textBoxPortrait != null)
+        {
+            textBoxPortrait.SetActive(true);
+            Image portraitImage = textBoxPortrait.GetComponent<Image>();
+            if (portraitImage != null && portraitSprites != null && lineIndex < portraitSprites.Length)
+            {
+                portraitImage.sprite = portraitSprites[lineIndex]; // Asignar el Sprite correspondiente a la línea actual
+            }
+            else if (portraitImage != null)
+            {
+                portraitImage.sprite = null; // Si no hay Sprite disponible, dejarlo vacío
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
