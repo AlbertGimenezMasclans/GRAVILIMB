@@ -301,7 +301,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -530,7 +530,7 @@ GameObject:
   - component: {fileID: 401881228}
   - component: {fileID: 401881227}
   m_Layer: 6
-  m_Name: Floor (3)
+  m_Name: Plataform_3
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -660,7 +660,7 @@ GameObject:
   - component: {fileID: 419533058}
   - component: {fileID: 419533057}
   m_Layer: 6
-  m_Name: Floor (4)
+  m_Name: Plataform_4
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1068,13 +1068,13 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1259906637}
+  - {fileID: 1348434415}
   - {fileID: 1027969892}
   - {fileID: 401881226}
   - {fileID: 2138509324}
   - {fileID: 419533056}
   - {fileID: 484376093}
   - {fileID: 906373308}
-  - {fileID: 1348434415}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &791037824
@@ -1522,7 +1522,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
   m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_FlipX: 0
@@ -1713,7 +1713,7 @@ GameObject:
   - component: {fileID: 1027969894}
   - component: {fileID: 1027969893}
   m_Layer: 6
-  m_Name: Floor (1)
+  m_Name: Plataform
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2115,7 +2115,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &1197844568
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2944,7 +2944,7 @@ GameObject:
   - component: {fileID: 2138509326}
   - component: {fileID: 2138509325}
   m_Layer: 6
-  m_Name: Floor (2)
+  m_Name: Plataform_2
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3070,6 +3070,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 957161491}
     m_Modifications:
+    - target: {fileID: 308049801205453937, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2337772732244123404, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.0564818
