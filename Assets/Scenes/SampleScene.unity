@@ -1389,6 +1389,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2716238129885337175, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4203387803939019058, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.189
+      objectReference: {fileID: 0}
     - target: {fileID: 4554248628103416672, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_FlipY
       value: 1
@@ -1406,6 +1414,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 427908726}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueMark
+      value: 
+      objectReference: {fileID: 1055851671}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueText
       value: 
       objectReference: {fileID: 993444660}
@@ -1417,6 +1429,10 @@ PrefabInstance:
       propertyPath: textBoxPortrait
       value: 
       objectReference: {fileID: 881400028}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: useAlternativePosition
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.size
       value: 3
@@ -1433,6 +1449,22 @@ PrefabInstance:
       propertyPath: dialogueLines.Array.data[2]
       value: Vas aprendiendo como van los controles?
       objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: alternativeTextBoxPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: alternativeTextBoxPosition.y
+      value: -600
+      objectReference: {fileID: 0}
+    - target: {fileID: 6906432589731621659, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_FlipX
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6906432589731621659, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_FlipY
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7470985163125792116, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Color.b
       value: 0
@@ -1448,7 +1480,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2716238129885337175, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1055851674}
   m_SourcePrefab: {fileID: 100100000, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
 --- !u!1 &943586149
 GameObject:
@@ -1831,6 +1866,32 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1055851671 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2716238129885337175, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+  m_PrefabInstance: {fileID: 915128443}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1055851674
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055851671}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4d7479a653fa3f249b00cf8f47becfa0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1063493015
 GameObject:
   m_ObjectHideFlags: 0
@@ -2115,7 +2176,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1197844568
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3072,7 +3133,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 308049801205453937, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2337772732244123404, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3114,6 +3175,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2716238129885337175, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5521566355243332115, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Name
       value: NPC
@@ -3122,6 +3187,10 @@ PrefabInstance:
       propertyPath: textBox
       value: 
       objectReference: {fileID: 427908726}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueMark
+      value: 
+      objectReference: {fileID: 8360234824165512057}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueText
       value: 
@@ -3134,11 +3203,44 @@ PrefabInstance:
       propertyPath: textBoxPortrait
       value: 
       objectReference: {fileID: 881400028}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: useAlternativePosition
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2716238129885337175, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8360234824165512060}
   m_SourcePrefab: {fileID: 100100000, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+--- !u!1 &8360234824165512057 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2716238129885337175, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+  m_PrefabInstance: {fileID: 8360234824165512056}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &8360234824165512060
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8360234824165512057}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4d7479a653fa3f249b00cf8f47becfa0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

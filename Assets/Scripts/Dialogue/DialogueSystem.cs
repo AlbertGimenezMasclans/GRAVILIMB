@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class DialogueSystem : MonoBehaviour
-{   
+{
     [SerializeField] private GameObject dialogueMark;
     [SerializeField] private GameObject textBox;
     [SerializeField] private TMP_Text dialogueText;
@@ -12,20 +12,28 @@ public class DialogueSystem : MonoBehaviour
     [SerializeField] private GameObject textBoxPortrait;
     [SerializeField] private Sprite portraitSprite;
 
+    // Nuevas variables para el checkbox y las coordenadas alternativas
+    [SerializeField] private bool useAlternativePosition = false; // Checkbox en el Inspector
+    [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100); // Posición alternativa
+
     private float typingTime = 0.05f;
 
     private bool isPlayerRange;
     private bool didDialogueStart;
     private int lineIndex;
 
-    // Propiedad pública para el estado del diálogo
+    // Variable para almacenar la posición original del textBox
+    private Vector2 originalTextBoxPosition;
+
     public bool IsDialogueActive => didDialogueStart;
 
-    // Referencia al PlayerMovement para notificarle
     private PlayerMovement playerMovement;
 
     void Start()
     {
+        // Guardamos la posición original del textBox al iniciar
+        originalTextBoxPosition = textBox.GetComponent<RectTransform>().anchoredPosition;
+
         if (textBoxPortrait != null && !textBox.activeSelf)
         {
             textBoxPortrait.SetActive(false);
@@ -60,6 +68,17 @@ public class DialogueSystem : MonoBehaviour
         lineIndex = 0;
         Time.timeScale = 0f;
 
+        // Ajustar la posición del textBox según el checkbox
+        RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
+        if (useAlternativePosition)
+        {
+            textBoxRect.anchoredPosition = alternativeTextBoxPosition;
+        }
+        else
+        {
+            textBoxRect.anchoredPosition = originalTextBoxPosition; // Vuelve a la posición original si no usas la alternativa
+        }
+
         if (textBoxPortrait != null)
         {
             textBoxPortrait.SetActive(true);
@@ -74,7 +93,6 @@ public class DialogueSystem : MonoBehaviour
             }
         }
 
-        // Notificar al PlayerMovement que el diálogo ha comenzado
         if (playerMovement != null)
         {
             playerMovement.SetDialogueActive(this);
@@ -101,7 +119,6 @@ public class DialogueSystem : MonoBehaviour
             }
             Time.timeScale = 1f;
 
-            // Notificar al PlayerMovement que el diálogo ha terminado
             if (playerMovement != null)
             {
                 playerMovement.SetDialogueActive(null);
@@ -125,7 +142,6 @@ public class DialogueSystem : MonoBehaviour
         {
             isPlayerRange = true;
             dialogueMark.SetActive(true);
-            // Obtener la referencia al PlayerMovement cuando el jugador entra en rango
             playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
             if (playerMovement == null)
             {
@@ -140,7 +156,6 @@ public class DialogueSystem : MonoBehaviour
         {
             isPlayerRange = false;
             dialogueMark.SetActive(false);
-            // Limpiar la referencia cuando el jugador sale del rango
             playerMovement = null;
         }
     }
