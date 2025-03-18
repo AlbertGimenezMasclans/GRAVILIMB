@@ -61,7 +61,11 @@ public class PlayerMovement : MonoBehaviour
             else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
             rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
 
+            // Actualizar parámetros del Animator
             animator.SetFloat("Speed", Mathf.Abs(moveInput));
+            animator.SetBool("IsGrounded", isGrounded);
+            float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
+            animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
 
             if (moveInput != 0)
             {
@@ -166,6 +170,15 @@ public class PlayerMovement : MonoBehaviour
 
         lastGravityChange = Time.time;
         rb.velocity = new Vector2(rb.velocity.x, 0f);
+
+        // Si está en el suelo y quieto, forzar la animación de caída
+        if (isGrounded && Mathf.Abs(rb.velocity.x) < 0.1f)
+        {
+            isGrounded = false;
+            animator.SetBool("IsGrounded", false);
+            float adjustedVerticalSpeed = isGravityNormal ? -0.1f : 0.1f;
+            animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
+        }
     }
 
     void FireProjectile()
@@ -279,7 +292,6 @@ public class PlayerMovement : MonoBehaviour
         return isGrounded;
     }
 
-    // Getter para que DialogueSystem pueda acceder al estado de la gravedad
     public bool IsGravityNormal()
     {
         return isGravityNormal;
