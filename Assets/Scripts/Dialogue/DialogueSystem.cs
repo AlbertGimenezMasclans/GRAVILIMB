@@ -154,6 +154,9 @@ public class DialogueSystem : MonoBehaviour
         lineIndex = 0;
         Time.timeScale = 0f;
 
+        // Girar el NPC en dirección opuesta al jugador, considerando la gravedad
+        FacePlayer();
+
         // Configurar todos los animadores para usar UnscaledTime
         ConfigureAnimatorsForDialogue(true);
 
@@ -339,7 +342,6 @@ public class DialogueSystem : MonoBehaviour
     {
         if (isStarting)
         {
-            // Encontrar todos los animadores en la escena y almacenar sus modos originales
             sceneAnimators.Clear();
             originalUpdateModes.Clear();
             Animator[] animators = FindObjectsOfType<Animator>();
@@ -352,12 +354,48 @@ public class DialogueSystem : MonoBehaviour
         }
         else
         {
-            // Restaurar los modos originales de los animadores
             for (int i = 0; i < sceneAnimators.Count; i++)
             {
-                if (sceneAnimators[i] != null) // Verificar que el animator aún exista
+                if (sceneAnimators[i] != null)
                 {
                     sceneAnimators[i].updateMode = originalUpdateModes[i];
+                }
+            }
+        }
+    }
+
+    private void FacePlayer()
+    {
+        if (playerMovement != null)
+        {
+            // Obtener la dirección en la que mira el jugador (basada en su escala en X)
+            float playerFacingDirection = Mathf.Sign(playerMovement.transform.localScale.x);
+            bool isPlayerGravityNormal = playerMovement.IsGravityNormal(); // Obtener el estado de la gravedad del jugador
+            Vector3 currentScale = transform.localScale;
+
+            // Ajustar la dirección del NPC según la gravedad del jugador
+            if (isPlayerGravityNormal)
+            {
+                // Gravedad normal: jugador mirando derecha -> NPC izquierda, y viceversa
+                if (playerFacingDirection > 0) // Jugador mira a la derecha, NPC mira a la izquierda
+                {
+                    transform.localScale = new Vector3(Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
+                }
+                else if (playerFacingDirection < 0) // Jugador mira a la izquierda, NPC mira a la derecha
+                {
+                    transform.localScale = new Vector3(-Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
+                }
+            }
+            else
+            {
+                // Gravedad invertida: jugador mirando derecha -> NPC derecha, y viceversa
+                if (playerFacingDirection > 0) // Jugador mira a la derecha, NPC mira a la derecha
+                {
+                    transform.localScale = new Vector3(-Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
+                }
+                else if (playerFacingDirection < 0) // Jugador mira a la izquierda, NPC mira a la izquierda
+                {
+                    transform.localScale = new Vector3(Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
                 }
             }
         }

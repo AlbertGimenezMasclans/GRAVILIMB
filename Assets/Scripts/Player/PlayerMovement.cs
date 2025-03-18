@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
     private Animator animator;
-    public bool isGrounded; // Ahora explícitamente público
+    public bool isGrounded;
     private float gravityScale;
     private bool isGravityNormal = true;
     private float lastGravityChange;
@@ -274,9 +274,14 @@ public class PlayerMovement : MonoBehaviour
         activeDialogueSystem = dialogue;
     }
 
-    // Getter para isGrounded (opcional, pero más limpio)
     public bool IsGrounded()
     {
         return isGrounded;
+    }
+
+    // Getter para que DialogueSystem pueda acceder al estado de la gravedad
+    public bool IsGravityNormal()
+    {
+        return isGravityNormal;
     }
 }
