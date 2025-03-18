@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: e38dceb7e0cd01c4ba5b02e96f1c3b5a
+guid: 75f0df9d6e92da041a909c9c6b8f53e0
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -97,64 +97,169 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: NPC_Reparation_0
+      name: NPC_Reparation_Purple_0
       rect:
         serializedVersion: 2
-        x: 6
-        y: 55
+        x: 3
+        y: 35
         width: 15
         height: 27
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d6917e11020edd64cb6f6f4c783e034f
-      internalID: -1396669166
+      spriteID: 96975f48c5557d84b860016b03db66ce
+      internalID: -176005930
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NPC_Reparation_1
+      name: NPC_Reparation_Purple_1
       rect:
         serializedVersion: 2
-        x: 38
-        y: 55
+        x: 20
+        y: 35
         width: 15
         height: 27
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c26e3d3ca9c631c49ac64424992a3ce1
-      internalID: -1178959614
+      spriteID: a11bc9c8d1f04764ca9094eeb40320ad
+      internalID: -1627002456
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NPC_Reparation_2
+      name: NPC_Reparation_Purple_2
       rect:
         serializedVersion: 2
-        x: 6
-        y: 11
+        x: 37
+        y: 35
         width: 15
         height: 27
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e693c2b142facfb4d956feb87f017dd8
-      internalID: -1636001828
+      spriteID: 66997dd107f031f48844f6d966a12d39
+      internalID: 355481488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NPC_Reparation_Purple_3
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 35
+        width: 15
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 325a7963898e4294d9872b1340f30155
+      internalID: -1562336270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NPC_Reparation_Purple_4
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 35
+        width: 15
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 087a8d1e669ca0e43a4d7a8840a0e32c
+      internalID: -1240447443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NPC_Reparation_Purple_5
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 6
+        width: 15
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fb3b39e0b848f5c49812dbd41c357f6b
+      internalID: -514715940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NPC_Reparation_Purple_6
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 6
+        width: 15
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f7b6c0f22099284a97bf9e2bf5a1049
+      internalID: 628606795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NPC_Reparation_Purple_7
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 6
+        width: 15
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04300c93defd8064e942c3f74c7488ec
+      internalID: -1951615569
       vertices: []
       indices: 
       edges: []
@@ -170,9 +275,14 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      NPC_Reparation_0: -1396669166
-      NPC_Reparation_1: -1178959614
-      NPC_Reparation_2: -1636001828
+      NPC_Reparation_Purple_0: -176005930
+      NPC_Reparation_Purple_1: -1627002456
+      NPC_Reparation_Purple_2: 355481488
+      NPC_Reparation_Purple_3: -1562336270
+      NPC_Reparation_Purple_4: -1240447443
+      NPC_Reparation_Purple_5: -514715940
+      NPC_Reparation_Purple_6: 628606795
+      NPC_Reparation_Purple_7: -1951615569
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
