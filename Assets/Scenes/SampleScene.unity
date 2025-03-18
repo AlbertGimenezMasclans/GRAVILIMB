@@ -1671,6 +1671,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 881400028}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueEndSound
+      value: 
+      objectReference: {fileID: 8300000, guid: bffd131efcaf01c46be4c84afb7da63a, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueAdvanceSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 9eab6aafffe280240ac5a85d84d42889, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: useAlternativePosition
       value: 1
       objectReference: {fileID: 0}
@@ -3840,6 +3848,14 @@ PrefabInstance:
       propertyPath: textBoxPortrait
       value: 
       objectReference: {fileID: 881400028}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueEndSound
+      value: 
+      objectReference: {fileID: 8300000, guid: bffd131efcaf01c46be4c84afb7da63a, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueAdvanceSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 9eab6aafffe280240ac5a85d84d42889, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: useAlternativePosition
       value: 0

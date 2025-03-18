@@ -11,26 +11,47 @@ public class DialogueSystem : MonoBehaviour
     [SerializeField] private TMP_Text dialogueText;
     [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
     [SerializeField] private GameObject textBoxPortrait;
-    [SerializeField] private Sprite[] portraitSprites; // Arreglo de Sprites, uno por línea de diálogo
-    [SerializeField] private Image Input_TB; // Imagen en el Canvas
-
+    [SerializeField] private Sprite[] portraitSprites;
+    [SerializeField] private Image Input_TB;
     [SerializeField] private bool useAlternativePosition = false;
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
-
+    
     private float typingTime = 0.05f;
-    private float commaPauseTime = 0.25f; // Pausa después de una coma (ajustable)
-    private float periodPauseTime = 0.48f; // Pausa después de un punto (mayor que la coma, ajustable)
+    private float commaPauseTime = 0.25f;
+    private float periodPauseTime = 0.48f;
     private bool isPlayerRange;
     private bool didDialogueStart;
     private int lineIndex;
     private Vector2 originalTextBoxPosition;
+    private AudioSource audioSource;
+    private AudioClip dialogueAdvanceSound;
+    private AudioClip dialogueEndSound;
 
     public bool IsDialogueActive => didDialogueStart;
     private PlayerMovement playerMovement;
 
     void Start()
     {
-        // Validaciones iniciales
+        audioSource = gameObject.GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // Cargar los sonidos desde Resources/SFX (dentro de Assets/Resources)
+        dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
+        dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
+
+        // Validar que los sonidos se hayan cargado
+        if (dialogueAdvanceSound == null)
+        {
+            Debug.LogError("No se pudo cargar Dialogue1 desde Resources/SFX. Asegúrate de que esté en Assets/Resources/SFX");
+        }
+        if (dialogueEndSound == null)
+        {
+            Debug.LogError("No se pudo cargar Dialogue3 desde Resources/SFX. Asegúrate de que esté en Assets/Resources/SFX");
+        }
+
         if (textBox == null)
         {
             Debug.LogError("TextBox no está asignado en el Inspector.");
@@ -56,20 +77,18 @@ public class DialogueSystem : MonoBehaviour
             textBoxPortrait.SetActive(false);
         }
 
-        // Configurar Input_TB (como imagen del Canvas)
         if (Input_TB != null)
         {
-            Input_TB.gameObject.SetActive(false); // Desactivado por defecto
+            Input_TB.gameObject.SetActive(false);
         }
         else
         {
             Debug.LogError("Input_TB (Image) no está asignado en el Inspector.");
         }
 
-        // Validar que portraitSprites tenga el mismo tamaño que dialogueLines
         if (portraitSprites != null && portraitSprites.Length != dialogueLines.Length)
         {
-            Debug.LogWarning("El número de portraitSprites no coincide con el número de dialogueLines. Ajusta los tamaños en el Inspector.");
+            Debug.LogWarning("El número de portraitSprites no coincide con el número de dialogueLines.");
         }
     }
 
@@ -89,7 +108,6 @@ public class DialogueSystem : MonoBehaviour
             {
                 StopAllCoroutines();
                 dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(dialogueLines[lineIndex]);
-                // Activar Input_TB cuando el texto se muestra completamente
                 if (Input_TB != null) Input_TB.gameObject.SetActive(true);
             }
         }
@@ -115,7 +133,7 @@ public class DialogueSystem : MonoBehaviour
             textBoxRect.anchoredPosition = useAlternativePosition ? alternativeTextBoxPosition : originalTextBoxPosition;
         }
 
-        UpdatePortrait(); // Actualizar el retrato para la primera línea
+        UpdatePortrait();
 
         if (playerMovement != null)
         {
@@ -124,7 +142,7 @@ public class DialogueSystem : MonoBehaviour
 
         if (Input_TB != null)
         {
-            Input_TB.gameObject.SetActive(false); // Desactivado al iniciar el diálogo
+            Input_TB.gameObject.SetActive(false);
         }
 
         StartCoroutine(ShowLine());
@@ -135,12 +153,14 @@ public class DialogueSystem : MonoBehaviour
         lineIndex++;
         if (lineIndex < dialogueLines.Length)
         {
-            if (Input_TB != null) Input_TB.gameObject.SetActive(false); // Desactivar antes de mostrar la siguiente línea
-            UpdatePortrait(); // Actualizar el retrato para la siguiente línea
+            PlayDialogueSound(dialogueAdvanceSound);
+            if (Input_TB != null) Input_TB.gameObject.SetActive(false);
+            UpdatePortrait();
             StartCoroutine(ShowLine());
         }
         else
         {
+            PlayDialogueSound(dialogueEndSound);
             didDialogueStart = false;
             textBox.SetActive(false);
             if (dialogueMark != null) dialogueMark.SetActive(true);
@@ -152,7 +172,6 @@ public class DialogueSystem : MonoBehaviour
                 playerMovement.SetDialogueActive(null);
             }
 
-            // Activar Input_TB al finalizar el diálogo
             if (Input_TB != null)
             {
                 Input_TB.gameObject.SetActive(true);
@@ -175,10 +194,8 @@ public class DialogueSystem : MonoBehaviour
             visibleCount++;
             dialogueText.maxVisibleCharacters = visibleCount;
 
-            // Obtener el carácter actual (teniendo en cuenta etiquetas)
             char currentChar = GetCharAtVisibleIndex(currentLine, visibleCount - 1);
 
-            // Pausar si es una coma o un punto
             if (currentChar == ',')
             {
                 yield return new WaitForSecondsRealtime(commaPauseTime);
@@ -193,7 +210,6 @@ public class DialogueSystem : MonoBehaviour
             }
         }
 
-        // Activar Input_TB cuando el texto se ha mostrado completamente
         if (Input_TB != null) Input_TB.gameObject.SetActive(true);
     }
 
@@ -216,7 +232,7 @@ public class DialogueSystem : MonoBehaviour
                 visibleCount++;
             }
         }
-        return '\0'; // Carácter nulo si no se encuentra (no debería ocurrir)
+        return '\0';
     }
 
     private int GetVisibleCharacterCount(string line)
@@ -241,12 +257,20 @@ public class DialogueSystem : MonoBehaviour
             Image portraitImage = textBoxPortrait.GetComponent<Image>();
             if (portraitImage != null && portraitSprites != null && lineIndex < portraitSprites.Length)
             {
-                portraitImage.sprite = portraitSprites[lineIndex]; // Asignar el Sprite correspondiente a la línea actual
+                portraitImage.sprite = portraitSprites[lineIndex];
             }
             else if (portraitImage != null)
             {
-                portraitImage.sprite = null; // Si no hay Sprite disponible, dejarlo vacío
+                portraitImage.sprite = null;
             }
+        }
+    }
+
+    private void PlayDialogueSound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
         }
     }
 
