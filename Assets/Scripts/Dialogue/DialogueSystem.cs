@@ -250,6 +250,14 @@ public class DialogueSystem : MonoBehaviour
             {
                 yield return new WaitForSecondsRealtime(periodPauseTime);
             }
+            else if (currentChar == '?')
+            {
+                yield return new WaitForSecondsRealtime(periodPauseTime);
+            }
+            else if (currentChar == '!')
+            {
+                yield return new WaitForSecondsRealtime(periodPauseTime);
+            }
             else
             {
                 yield return new WaitForSecondsRealtime(typingTime);
