@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 344713a6a76cf7a49a9859de75100525
+guid: 4513971e732642344bba7f7575334e94
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -110,11 +110,11 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: NPC_Ball-ER (1)_0
+      name: NPC_Ball-ER (3) 1_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 18
+        x: 3
+        y: 17
         width: 11
         height: 12
       alignment: 0
@@ -124,18 +124,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 27702817d17785b458ff08d04ffd6734
-      internalID: 1235599586
+      spriteID: fbf7f4ed058c9e04e915faa987ad998d
+      internalID: -93722179
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NPC_Ball-ER (1)_1
+      name: NPC_Ball-ER (3) 1_1
       rect:
         serializedVersion: 2
-        x: 18
-        y: 18
+        x: 3
+        y: 1
         width: 11
         height: 12
       alignment: 0
@@ -145,18 +145,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c88a6a0cdcf4c1146b0fe6c1a415314c
-      internalID: -814400923
+      spriteID: 55ed285f68bc4da41953169fdfac40cf
+      internalID: 1781728463
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NPC_Ball-ER (1)_2
+      name: NPC_Ball-ER (3) 1_2
       rect:
         serializedVersion: 2
-        x: 34
-        y: 18
+        x: 19
+        y: 1
         width: 11
         height: 12
       alignment: 0
@@ -166,18 +166,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c8fe3cb7fb6ff38409e81a309762a7c9
-      internalID: -1401548654
+      spriteID: e09a1aee6e886b143a2eabca938f4387
+      internalID: -2031771218
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: NPC_Ball-ER (1)_3
+      name: NPC_Ball-ER (3) 1_3
       rect:
         serializedVersion: 2
-        x: 2
-        y: 2
+        x: 35
+        y: 1
         width: 11
         height: 12
       alignment: 0
@@ -187,8 +187,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5d247ec7779b9e34ba20f5054c28b0fc
-      internalID: 1821960901
+      spriteID: cdab0e6341549464c88e8175ea329385
+      internalID: 1111726570
       vertices: []
       indices: 
       edges: []
@@ -204,10 +204,10 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      NPC_Ball-ER (1)_0: 1235599586
-      NPC_Ball-ER (1)_1: -814400923
-      NPC_Ball-ER (1)_2: -1401548654
-      NPC_Ball-ER (1)_3: 1821960901
+      NPC_Ball-ER (3) 1_0: -93722179
+      NPC_Ball-ER (3) 1_1: 1781728463
+      NPC_Ball-ER (3) 1_2: -2031771218
+      NPC_Ball-ER (3) 1_3: 1111726570
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

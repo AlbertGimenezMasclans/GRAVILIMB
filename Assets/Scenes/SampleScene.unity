@@ -887,8 +887,8 @@ Transform:
   m_GameObject: {fileID: 419533055}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.85, y: 0.68, z: -0.052131016}
-  m_LocalScale: {x: 1.4902388, y: 0.2875, z: 1}
+  m_LocalPosition: {x: 7.39, y: 0.68, z: -0.052131016}
+  m_LocalScale: {x: 3.4631753, y: 0.2875, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 530916000}
@@ -2155,9 +2155,25 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4554248628103416672, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_FlipX
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4554248628103416672, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_Size.x
+      value: 0.11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4554248628103416672, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_Size.y
+      value: 0.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 4554248628103416672, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 1235599586, guid: 344713a6a76cf7a49a9859de75100525, type: 3}
+      objectReference: {fileID: 109435290, guid: beadd9c223d88c64e9cfcc9f1c24586a, type: 3}
+    - target: {fileID: 4554248628103416672, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5521566355243332115, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Name
       value: NPC 3
@@ -2181,7 +2197,7 @@ PrefabInstance:
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: typingSound
       value: 
-      objectReference: {fileID: 8300000, guid: 130654a53c1dda34796fc2eeb085e2a4, type: 3}
+      objectReference: {fileID: 8300000, guid: 6986e48d8f1309241880ff6d5a9d400d, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueMark
       value: 
@@ -2212,27 +2228,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.size
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.size
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[0]
-      value: AAA
+      value: Que... Que miras?
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[1]
-      value: Esta es la zona de prueba.
+      value: Si, ya se que no tengo brazos ni piernas.
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[2]
-      value: Aqui puedes experimentar con tus <color=#7bf688>habilidades</color>.
+      value: Pero que con eso?
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[3]
-      value: Mola eh?
+      value: <color=#c500ff>Rarito</color>...
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.data[0]
@@ -2241,54 +2257,25 @@ PrefabInstance:
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.data[1]
       value: 
-      objectReference: {fileID: 1110948326, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+      objectReference: {fileID: 1669876143, guid: ec6b98934dafdb94181d73fcd4f573d6, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.data[2]
       value: 
-      objectReference: {fileID: 1110948326, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+      objectReference: {fileID: -1013279470, guid: ec6b98934dafdb94181d73fcd4f573d6, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.data[3]
       value: 
-      objectReference: {fileID: -479710967, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+      objectReference: {fileID: 1669876143, guid: ec6b98934dafdb94181d73fcd4f573d6, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5521566355243332115, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 995089933}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
 --- !u!4 &995089931 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2337772732244123404, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
   m_PrefabInstance: {fileID: 995089930}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &995089932 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5521566355243332115, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
-  m_PrefabInstance: {fileID: 995089930}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &995089933
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 995089932}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 7e798d209450566449d9f1398daed961, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1027969891
 GameObject:
   m_ObjectHideFlags: 0
@@ -3124,7 +3111,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.7735849, g: 0.25907797, b: 0.25907797, a: 1}
   m_FlipX: 0
