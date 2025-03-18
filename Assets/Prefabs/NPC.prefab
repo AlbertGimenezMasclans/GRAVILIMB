@@ -105,9 +105,13 @@ MonoBehaviour:
   - Bienvenido, Protagonista!
   - Esta es la zona de prueba.
   textBoxPortrait: {fileID: 0}
-  portraitSprite: {fileID: 0}
+  portraitSprites: []
+  Input_TB: {fileID: 0}
   useAlternativePosition: 0
   alternativeTextBoxPosition: {x: 100, y: 100}
+  typingSound: {fileID: 0}
+  idleSprite: {fileID: 0}
+  blinkSprite: {fileID: 0}
 --- !u!61 &459166877580452727
 BoxCollider2D:
   m_ObjectHideFlags: 0
