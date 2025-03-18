@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
     private Animator animator;
-    private bool isGrounded;
+    public bool isGrounded; // Ahora explícitamente público
     private float gravityScale;
     private bool isGravityNormal = true;
     private float lastGravityChange;
@@ -28,7 +28,6 @@ public class PlayerMovement : MonoBehaviour
     private float facingDirection = 1f;
     private bool isSelectingMode = false;
 
-    // Referencia al DialogueSystem activo
     private DialogueSystem activeDialogueSystem;
 
     void Start()
@@ -50,7 +49,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Bloquear acciones si hay un diálogo activo
         if (activeDialogueSystem != null && activeDialogueSystem.IsDialogueActive)
         {
             return;
@@ -271,9 +269,14 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // Método para que DialogueSystem actualice el estado del diálogo activo
     public void SetDialogueActive(DialogueSystem dialogue)
     {
         activeDialogueSystem = dialogue;
+    }
+
+    // Getter para isGrounded (opcional, pero más limpio)
+    public bool IsGrounded()
+    {
+        return isGrounded;
     }
 }

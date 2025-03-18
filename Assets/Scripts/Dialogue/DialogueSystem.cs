@@ -30,6 +30,8 @@ public class DialogueSystem : MonoBehaviour
     private AudioClip dialogueAdvanceSound;
     private AudioClip dialogueEndSound;
     private Image portraitImage; // Referencia al componente Image del portrait
+    private List<Animator> sceneAnimators; // Lista para almacenar todos los animadores de la escena
+    private List<AnimatorUpdateMode> originalUpdateModes; // Lista para guardar los modos originales
 
     public bool IsDialogueActive => didDialogueStart;
     private PlayerMovement playerMovement;
@@ -108,25 +110,32 @@ public class DialogueSystem : MonoBehaviour
         {
             StartCoroutine(BlinkRoutine());
         }
+
+        // Inicializar las listas para animadores
+        sceneAnimators = new List<Animator>();
+        originalUpdateModes = new List<AnimatorUpdateMode>();
     }
 
     void Update()
     {
         if (isPlayerRange && Input.GetKeyDown(KeyCode.C))
         {
-            if (!didDialogueStart)
+            if (playerMovement != null && playerMovement.IsGrounded())
             {
-                StartDialogue();
-            }
-            else if (dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(dialogueLines[lineIndex]))
-            {
-                NextDialogueLine();
-            }
-            else
-            {
-                StopAllCoroutines();
-                dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(dialogueLines[lineIndex]);
-                if (Input_TB != null) Input_TB.gameObject.SetActive(true);
+                if (!didDialogueStart)
+                {
+                    StartDialogue();
+                }
+                else if (dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(dialogueLines[lineIndex]))
+                {
+                    NextDialogueLine();
+                }
+                else
+                {
+                    StopAllCoroutines();
+                    dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(dialogueLines[lineIndex]);
+                    if (Input_TB != null) Input_TB.gameObject.SetActive(true);
+                }
             }
         }
     }
@@ -144,6 +153,9 @@ public class DialogueSystem : MonoBehaviour
         if (dialogueMark != null) dialogueMark.SetActive(false);
         lineIndex = 0;
         Time.timeScale = 0f;
+
+        // Configurar todos los animadores para usar UnscaledTime
+        ConfigureAnimatorsForDialogue(true);
 
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
         if (textBoxRect != null)
@@ -184,6 +196,9 @@ public class DialogueSystem : MonoBehaviour
             if (dialogueMark != null) dialogueMark.SetActive(true);
             if (textBoxPortrait != null) textBoxPortrait.SetActive(false);
             Time.timeScale = 1f;
+
+            // Restaurar los modos originales de los animadores
+            ConfigureAnimatorsForDialogue(false);
 
             if (playerMovement != null)
             {
@@ -305,20 +320,44 @@ public class DialogueSystem : MonoBehaviour
     {
         while (true)
         {
-            // Esperar un tiempo aleatorio entre 5 y 10 segundos
             float waitTime = Random.Range(2f, 5f);
             yield return new WaitForSecondsRealtime(waitTime);
 
-            // Verificar si el sprite actual es el idleSprite
             if (portraitImage != null && portraitImage.sprite == idleSprite)
             {
-                // Cambiar al sprite de parpadeo
                 portraitImage.sprite = blinkSprite;
-                yield return new WaitForSecondsRealtime(0.26f); // Duración del parpadeo: 1 segundo
-                // Volver al sprite original solo si sigue siendo el momento adecuado
+                yield return new WaitForSecondsRealtime(0.26f);
                 if (didDialogueStart && lineIndex < portraitSprites.Length && portraitSprites[lineIndex] == idleSprite)
                 {
                     portraitImage.sprite = idleSprite;
+                }
+            }
+        }
+    }
+
+    private void ConfigureAnimatorsForDialogue(bool isStarting)
+    {
+        if (isStarting)
+        {
+            // Encontrar todos los animadores en la escena y almacenar sus modos originales
+            sceneAnimators.Clear();
+            originalUpdateModes.Clear();
+            Animator[] animators = FindObjectsOfType<Animator>();
+            foreach (Animator animator in animators)
+            {
+                sceneAnimators.Add(animator);
+                originalUpdateModes.Add(animator.updateMode);
+                animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+            }
+        }
+        else
+        {
+            // Restaurar los modos originales de los animadores
+            for (int i = 0; i < sceneAnimators.Count; i++)
+            {
+                if (sceneAnimators[i] != null) // Verificar que el animator aún exista
+                {
+                    sceneAnimators[i].updateMode = originalUpdateModes[i];
                 }
             }
         }
