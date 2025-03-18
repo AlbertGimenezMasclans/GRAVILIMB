@@ -15,6 +15,9 @@ public class DialogueSystem : MonoBehaviour
     [SerializeField] private Image Input_TB;
     [SerializeField] private bool useAlternativePosition = false;
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
+    [SerializeField] private AudioClip typingSound; // Sonido para cada dos caracteres, asignado desde Inspector
+    [SerializeField] private Sprite idleSprite;     // Sprite específico que activará el parpadeo
+    [SerializeField] private Sprite blinkSprite;   // Sprite de parpadeo
     
     private float typingTime = 0.05f;
     private float commaPauseTime = 0.25f;
@@ -26,6 +29,7 @@ public class DialogueSystem : MonoBehaviour
     private AudioSource audioSource;
     private AudioClip dialogueAdvanceSound;
     private AudioClip dialogueEndSound;
+    private Image portraitImage; // Referencia al componente Image del portrait
 
     public bool IsDialogueActive => didDialogueStart;
     private PlayerMovement playerMovement;
@@ -45,11 +49,15 @@ public class DialogueSystem : MonoBehaviour
         // Validar que los sonidos se hayan cargado
         if (dialogueAdvanceSound == null)
         {
-            Debug.LogError("No se pudo cargar Dialogue1 desde Resources/SFX. Asegúrate de que esté en Assets/Resources/SFX");
+            Debug.LogError("No se pudo cargar DialogueNEXT desde Resources/SFX. Asegúrate de que esté en Assets/Resources/SFX");
         }
         if (dialogueEndSound == null)
         {
-            Debug.LogError("No se pudo cargar Dialogue3 desde Resources/SFX. Asegúrate de que esté en Assets/Resources/SFX");
+            Debug.LogError("No se pudo cargar DialogueEND desde Resources/SFX. Asegúrate de que esté en Assets/Resources/SFX");
+        }
+        if (typingSound == null)
+        {
+            Debug.LogWarning("TypingSound no está asignado en el Inspector.");
         }
 
         if (textBox == null)
@@ -72,9 +80,13 @@ public class DialogueSystem : MonoBehaviour
             return;
         }
 
-        if (textBoxPortrait != null && !textBox.activeSelf)
+        if (textBoxPortrait != null)
         {
-            textBoxPortrait.SetActive(false);
+            portraitImage = textBoxPortrait.GetComponent<Image>();
+            if (!textBox.activeSelf)
+            {
+                textBoxPortrait.SetActive(false);
+            }
         }
 
         if (Input_TB != null)
@@ -89,6 +101,12 @@ public class DialogueSystem : MonoBehaviour
         if (portraitSprites != null && portraitSprites.Length != dialogueLines.Length)
         {
             Debug.LogWarning("El número de portraitSprites no coincide con el número de dialogueLines.");
+        }
+
+        // Iniciar la corrutina de parpadeo si hay un idleSprite y blinkSprite asignados
+        if (idleSprite != null && blinkSprite != null && portraitImage != null)
+        {
+            StartCoroutine(BlinkRoutine());
         }
     }
 
@@ -188,6 +206,7 @@ public class DialogueSystem : MonoBehaviour
         int totalVisibleChars = GetVisibleCharacterCount(dialogueLines[lineIndex]);
         int visibleCount = 0;
         string currentLine = dialogueLines[lineIndex];
+        int nonSpaceCharCount = 0;
 
         while (visibleCount < totalVisibleChars)
         {
@@ -195,6 +214,15 @@ public class DialogueSystem : MonoBehaviour
             dialogueText.maxVisibleCharacters = visibleCount;
 
             char currentChar = GetCharAtVisibleIndex(currentLine, visibleCount - 1);
+
+            if (currentChar != ' ')
+            {
+                nonSpaceCharCount++;
+                if (nonSpaceCharCount % 2 == 0)
+                {
+                    PlayDialogueSound(typingSound);
+                }
+            }
 
             if (currentChar == ',')
             {
@@ -254,7 +282,6 @@ public class DialogueSystem : MonoBehaviour
         if (textBoxPortrait != null)
         {
             textBoxPortrait.SetActive(true);
-            Image portraitImage = textBoxPortrait.GetComponent<Image>();
             if (portraitImage != null && portraitSprites != null && lineIndex < portraitSprites.Length)
             {
                 portraitImage.sprite = portraitSprites[lineIndex];
@@ -271,6 +298,29 @@ public class DialogueSystem : MonoBehaviour
         if (audioSource != null && clip != null)
         {
             audioSource.PlayOneShot(clip);
+        }
+    }
+
+    private IEnumerator BlinkRoutine()
+    {
+        while (true)
+        {
+            // Esperar un tiempo aleatorio entre 5 y 10 segundos
+            float waitTime = Random.Range(2f, 5f);
+            yield return new WaitForSecondsRealtime(waitTime);
+
+            // Verificar si el sprite actual es el idleSprite
+            if (portraitImage != null && portraitImage.sprite == idleSprite)
+            {
+                // Cambiar al sprite de parpadeo
+                portraitImage.sprite = blinkSprite;
+                yield return new WaitForSecondsRealtime(0.26f); // Duración del parpadeo: 1 segundo
+                // Volver al sprite original solo si sigue siendo el momento adecuado
+                if (didDialogueStart && lineIndex < portraitSprites.Length && portraitSprites[lineIndex] == idleSprite)
+                {
+                    portraitImage.sprite = idleSprite;
+                }
+            }
         }
     }
 

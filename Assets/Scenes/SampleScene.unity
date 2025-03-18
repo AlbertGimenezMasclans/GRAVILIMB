@@ -1655,6 +1655,18 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1449516896}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: idleSprite
+      value: 
+      objectReference: {fileID: 1918823127, guid: 3c36350fcdb84fb49a90667f8c049eba, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: blinkSprite
+      value: 
+      objectReference: {fileID: -1472736098, guid: 3c36350fcdb84fb49a90667f8c049eba, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: typingSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 58cde1960b458a94ca8c69d8f5044be1, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueMark
       value: 
       objectReference: {fileID: 190089146}
@@ -1700,7 +1712,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[2]
-      value: Vas aprendiendo como van los <color=#96d5ec>controles</color> ?
+      value: Vas aprendiendo como van los <color=#96d5ec>controles</color>?
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[3]
@@ -3832,6 +3844,18 @@ PrefabInstance:
       propertyPath: Input_TB
       value: 
       objectReference: {fileID: 1449516896}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: idleSprite
+      value: 
+      objectReference: {fileID: 1110948326, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: blinkSprite
+      value: 
+      objectReference: {fileID: 905979242, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: typingSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 130654a53c1dda34796fc2eeb085e2a4, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueMark
       value: 
