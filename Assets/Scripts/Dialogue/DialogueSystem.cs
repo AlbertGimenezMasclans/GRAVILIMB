@@ -9,15 +9,17 @@ public class DialogueSystem : MonoBehaviour
     [SerializeField] private GameObject dialogueMark;
     [SerializeField] private GameObject textBox;
     [SerializeField] private TMP_Text dialogueText;
-    [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
+    [SerializeField, TextArea(1, 4)] private string[] dialogueLines; // Diálogos normales
+    [SerializeField, TextArea(1, 4)] private string[] headlessDialogueLines; // Diálogos adicionales para desmembrado
     [SerializeField] private GameObject textBoxPortrait;
-    [SerializeField] private Sprite[] portraitSprites;
+    [SerializeField] private Sprite[] portraitSprites; // Retratos normales
+    [SerializeField] private Sprite[] headlessPortraitSprites; // Retratos para desmembrado
     [SerializeField] private Image Input_TB;
     [SerializeField] private bool useAlternativePosition = false;
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
-    [SerializeField] private AudioClip typingSound; // Sonido para cada dos caracteres, asignado desde Inspector
-    [SerializeField] private Sprite idleSprite;     // Sprite específico que activará el parpadeo
-    [SerializeField] private Sprite blinkSprite;   // Sprite de parpadeo
+    [SerializeField] private AudioClip typingSound;
+    [SerializeField] private Sprite idleSprite;
+    [SerializeField] private Sprite blinkSprite;
     
     private float typingTime = 0.05f;
     private float commaPauseTime = 0.25f;
@@ -29,89 +31,52 @@ public class DialogueSystem : MonoBehaviour
     private AudioSource audioSource;
     private AudioClip dialogueAdvanceSound;
     private AudioClip dialogueEndSound;
-    private Image portraitImage; // Referencia al componente Image del portrait
-    private List<Animator> sceneAnimators; // Lista para almacenar todos los animadores de la escena
-    private List<AnimatorUpdateMode> originalUpdateModes; // Lista para guardar los modos originales
+    private Image portraitImage;
+    private List<Animator> sceneAnimators;
+    private List<AnimatorUpdateMode> originalUpdateModes;
+    private string[] activeDialogueLines;
+    private Sprite[] activePortraitSprites;
 
     public bool IsDialogueActive => didDialogueStart;
-    private PlayerMovement playerMovement;
+    private PlayerMovement playerMovement; // Para el estado normal
+    private GameObject playerObject; // Objeto que entró al trigger (cuerpo o cabeza)
 
     void Start()
     {
         audioSource = gameObject.GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
-        // Cargar los sonidos desde Resources/SFX (dentro de Assets/Resources)
         dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
         dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
 
-        // Validar que los sonidos se hayan cargado
-        if (dialogueAdvanceSound == null)
-        {
-            Debug.LogError("No se pudo cargar DialogueNEXT desde Resources/SFX. Asegúrate de que esté en Assets/Resources/SFX");
-        }
-        if (dialogueEndSound == null)
-        {
-            Debug.LogError("No se pudo cargar DialogueEND desde Resources/SFX. Asegúrate de que esté en Assets/Resources/SFX");
-        }
-        if (typingSound == null)
-        {
-            Debug.LogWarning("TypingSound no está asignado en el Inspector.");
-        }
+        if (dialogueAdvanceSound == null) Debug.LogError("No se pudo cargar DialogueNEXT desde Resources/SFX.");
+        if (dialogueEndSound == null) Debug.LogError("No se pudo cargar DialogueEND desde Resources/SFX.");
+        if (typingSound == null) Debug.LogWarning("TypingSound no está asignado.");
 
-        if (textBox == null)
-        {
-            Debug.LogError("TextBox no está asignado en el Inspector.");
-            return;
-        }
-
+        if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
-        if (textBoxRect == null)
-        {
-            Debug.LogError("TextBox no tiene un componente RectTransform.");
-            return;
-        }
+        if (textBoxRect == null) { Debug.LogError("TextBox no tiene RectTransform."); return; }
         originalTextBoxPosition = textBoxRect.anchoredPosition;
 
-        if (dialogueText == null)
-        {
-            Debug.LogError("DialogueText no está asignado en el Inspector.");
-            return;
-        }
+        if (dialogueText == null) { Debug.LogError("DialogueText no está asignado."); return; }
 
         if (textBoxPortrait != null)
         {
             portraitImage = textBoxPortrait.GetComponent<Image>();
-            if (!textBox.activeSelf)
-            {
-                textBoxPortrait.SetActive(false);
-            }
+            if (!textBox.activeSelf) textBoxPortrait.SetActive(false);
         }
 
-        if (Input_TB != null)
-        {
-            Input_TB.gameObject.SetActive(false);
-        }
-        else
-        {
-            Debug.LogError("Input_TB (Image) no está asignado en el Inspector.");
-        }
+        if (Input_TB != null) Input_TB.gameObject.SetActive(false);
+        else Debug.LogError("Input_TB no está asignado.");
 
         if (portraitSprites != null && portraitSprites.Length != dialogueLines.Length)
-        {
-            Debug.LogWarning("El número de portraitSprites no coincide con el número de dialogueLines.");
-        }
+            Debug.LogWarning("El número de portraitSprites no coincide con dialogueLines.");
+        if (headlessPortraitSprites != null && headlessPortraitSprites.Length != headlessDialogueLines.Length)
+            Debug.LogWarning("El número de headlessPortraitSprites no coincide con headlessDialogueLines.");
 
-        // Iniciar la corrutina de parpadeo si hay un idleSprite y blinkSprite asignados
         if (idleSprite != null && blinkSprite != null && portraitImage != null)
-        {
             StartCoroutine(BlinkRoutine());
-        }
 
-        // Inicializar las listas para animadores
         sceneAnimators = new List<Animator>();
         originalUpdateModes = new List<AnimatorUpdateMode>();
     }
@@ -120,22 +85,19 @@ public class DialogueSystem : MonoBehaviour
     {
         if (isPlayerRange && Input.GetKeyDown(KeyCode.C))
         {
-            if (playerMovement != null && playerMovement.IsGrounded())
+            if (!didDialogueStart)
             {
-                if (!didDialogueStart)
-                {
-                    StartDialogue();
-                }
-                else if (dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(dialogueLines[lineIndex]))
-                {
-                    NextDialogueLine();
-                }
-                else
-                {
-                    StopAllCoroutines();
-                    dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(dialogueLines[lineIndex]);
-                    if (Input_TB != null) Input_TB.gameObject.SetActive(true);
-                }
+                StartDialogue();
+            }
+            else if (dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(activeDialogueLines[lineIndex]))
+            {
+                NextDialogueLine();
+            }
+            else
+            {
+                StopAllCoroutines();
+                dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(activeDialogueLines[lineIndex]);
+                if (Input_TB != null) Input_TB.gameObject.SetActive(true);
             }
         }
     }
@@ -154,29 +116,62 @@ public class DialogueSystem : MonoBehaviour
         lineIndex = 0;
         Time.timeScale = 0f;
 
-        // Girar el NPC en dirección opuesta al jugador, considerando la gravedad
         FacePlayer();
-
-        // Configurar todos los animadores para usar UnscaledTime
         ConfigureAnimatorsForDialogue(true);
+
+        // Determinar si el jugador está desmembrado
+        bool isDismembered = false;
+        if (playerMovement != null)
+        {
+            isDismembered = playerMovement.isDismembered;
+        }
+        else if (playerObject != null && playerObject.GetComponent<Dismember>() != null)
+        {
+            isDismembered = true;
+        }
+
+        // Configurar los diálogos activos
+        if (isDismembered && headlessDialogueLines != null && headlessDialogueLines.Length > 0)
+        {
+            // Combinar diálogos normales con los de desmembrado
+            activeDialogueLines = new string[dialogueLines.Length + headlessDialogueLines.Length];
+            dialogueLines.CopyTo(activeDialogueLines, 0);
+            headlessDialogueLines.CopyTo(activeDialogueLines, dialogueLines.Length);
+
+            // Combinar retratos (si hay retratos para desmembrado, si no, repetir los normales)
+            if (headlessPortraitSprites != null && headlessPortraitSprites.Length > 0)
+            {
+                activePortraitSprites = new Sprite[portraitSprites.Length + headlessPortraitSprites.Length];
+                portraitSprites.CopyTo(activePortraitSprites, 0);
+                headlessPortraitSprites.CopyTo(activePortraitSprites, portraitSprites.Length);
+            }
+            else
+            {
+                activePortraitSprites = new Sprite[dialogueLines.Length + headlessDialogueLines.Length];
+                for (int i = 0; i < activePortraitSprites.Length; i++)
+                {
+                    activePortraitSprites[i] = portraitSprites[Mathf.Min(i, portraitSprites.Length - 1)];
+                }
+            }
+        }
+        else
+        {
+            // Solo diálogos normales si no está desmembrado
+            activeDialogueLines = dialogueLines;
+            activePortraitSprites = portraitSprites;
+        }
 
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
         if (textBoxRect != null)
-        {
             textBoxRect.anchoredPosition = useAlternativePosition ? alternativeTextBoxPosition : originalTextBoxPosition;
-        }
 
         UpdatePortrait();
 
         if (playerMovement != null)
-        {
             playerMovement.SetDialogueActive(this);
-        }
 
         if (Input_TB != null)
-        {
             Input_TB.gameObject.SetActive(false);
-        }
 
         StartCoroutine(ShowLine());
     }
@@ -184,7 +179,7 @@ public class DialogueSystem : MonoBehaviour
     private void NextDialogueLine()
     {
         lineIndex++;
-        if (lineIndex < dialogueLines.Length)
+        if (lineIndex < activeDialogueLines.Length)
         {
             PlayDialogueSound(dialogueAdvanceSound);
             if (Input_TB != null) Input_TB.gameObject.SetActive(false);
@@ -200,30 +195,25 @@ public class DialogueSystem : MonoBehaviour
             if (textBoxPortrait != null) textBoxPortrait.SetActive(false);
             Time.timeScale = 1f;
 
-            // Restaurar los modos originales de los animadores
             ConfigureAnimatorsForDialogue(false);
 
             if (playerMovement != null)
-            {
                 playerMovement.SetDialogueActive(null);
-            }
 
             if (Input_TB != null)
-            {
-                Input_TB.gameObject.SetActive(true);
-            }
+                Input_TB.gameObject.SetActive(false);
         }
     }
 
     private IEnumerator ShowLine()
     {
-        dialogueText.text = dialogueLines[lineIndex];
+        dialogueText.text = activeDialogueLines[lineIndex];
         dialogueText.maxVisibleCharacters = 0;
         dialogueText.ForceMeshUpdate();
 
-        int totalVisibleChars = GetVisibleCharacterCount(dialogueLines[lineIndex]);
+        int totalVisibleChars = GetVisibleCharacterCount(activeDialogueLines[lineIndex]);
         int visibleCount = 0;
-        string currentLine = dialogueLines[lineIndex];
+        string currentLine = activeDialogueLines[lineIndex];
         int nonSpaceCharCount = 0;
 
         while (visibleCount < totalVisibleChars)
@@ -237,31 +227,15 @@ public class DialogueSystem : MonoBehaviour
             {
                 nonSpaceCharCount++;
                 if (nonSpaceCharCount % 2 == 0)
-                {
                     PlayDialogueSound(typingSound);
-                }
             }
 
             if (currentChar == ',')
-            {
                 yield return new WaitForSecondsRealtime(commaPauseTime);
-            }
-            else if (currentChar == '.')
-            {
+            else if (currentChar == '.' || currentChar == '?' || currentChar == '!')
                 yield return new WaitForSecondsRealtime(periodPauseTime);
-            }
-            else if (currentChar == '?')
-            {
-                yield return new WaitForSecondsRealtime(periodPauseTime);
-            }
-            else if (currentChar == '!')
-            {
-                yield return new WaitForSecondsRealtime(periodPauseTime);
-            }
             else
-            {
                 yield return new WaitForSecondsRealtime(typingTime);
-            }
         }
 
         if (Input_TB != null) Input_TB.gameObject.SetActive(true);
@@ -279,10 +253,7 @@ public class DialogueSystem : MonoBehaviour
             else if (c == '>') inTag = false;
             else if (!inTag)
             {
-                if (visibleCount == visibleIndex)
-                {
-                    return c;
-                }
+                if (visibleCount == visibleIndex) return c;
                 visibleCount++;
             }
         }
@@ -308,23 +279,17 @@ public class DialogueSystem : MonoBehaviour
         if (textBoxPortrait != null)
         {
             textBoxPortrait.SetActive(true);
-            if (portraitImage != null && portraitSprites != null && lineIndex < portraitSprites.Length)
-            {
-                portraitImage.sprite = portraitSprites[lineIndex];
-            }
+            if (portraitImage != null && activePortraitSprites != null && lineIndex < activePortraitSprites.Length)
+                portraitImage.sprite = activePortraitSprites[lineIndex];
             else if (portraitImage != null)
-            {
                 portraitImage.sprite = null;
-            }
         }
     }
 
     private void PlayDialogueSound(AudioClip clip)
     {
         if (audioSource != null && clip != null)
-        {
             audioSource.PlayOneShot(clip);
-        }
     }
 
     private IEnumerator BlinkRoutine()
@@ -338,10 +303,8 @@ public class DialogueSystem : MonoBehaviour
             {
                 portraitImage.sprite = blinkSprite;
                 yield return new WaitForSecondsRealtime(0.26f);
-                if (didDialogueStart && lineIndex < portraitSprites.Length && portraitSprites[lineIndex] == idleSprite)
-                {
+                if (didDialogueStart && lineIndex < activePortraitSprites.Length && activePortraitSprites[lineIndex] == idleSprite)
                     portraitImage.sprite = idleSprite;
-                }
             }
         }
     }
@@ -365,9 +328,7 @@ public class DialogueSystem : MonoBehaviour
             for (int i = 0; i < sceneAnimators.Count; i++)
             {
                 if (sceneAnimators[i] != null)
-                {
                     sceneAnimators[i].updateMode = originalUpdateModes[i];
-                }
             }
         }
     }
@@ -376,36 +337,26 @@ public class DialogueSystem : MonoBehaviour
     {
         if (playerMovement != null)
         {
-            // Obtener la dirección en la que mira el jugador (basada en su escala en X)
             float playerFacingDirection = Mathf.Sign(playerMovement.transform.localScale.x);
-            bool isPlayerGravityNormal = playerMovement.IsGravityNormal(); // Obtener el estado de la gravedad del jugador
+            bool isPlayerGravityNormal = playerMovement.IsGravityNormal();
             Vector3 currentScale = transform.localScale;
 
-            // Ajustar la dirección del NPC según la gravedad del jugador
             if (isPlayerGravityNormal)
-            {
-                // Gravedad normal: jugador mirando derecha -> NPC izquierda, y viceversa
-                if (playerFacingDirection > 0) // Jugador mira a la derecha, NPC mira a la izquierda
-                {
-                    transform.localScale = new Vector3(Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
-                }
-                else if (playerFacingDirection < 0) // Jugador mira a la izquierda, NPC mira a la derecha
-                {
-                    transform.localScale = new Vector3(-Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
-                }
-            }
+                transform.localScale = new Vector3(
+                    playerFacingDirection > 0 ? Mathf.Abs(currentScale.x) : -Mathf.Abs(currentScale.x),
+                    currentScale.y, currentScale.z);
             else
-            {
-                // Gravedad invertida: jugador mirando derecha -> NPC derecha, y viceversa
-                if (playerFacingDirection > 0) // Jugador mira a la derecha, NPC mira a la derecha
-                {
-                    transform.localScale = new Vector3(-Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
-                }
-                else if (playerFacingDirection < 0) // Jugador mira a la izquierda, NPC mira a la izquierda
-                {
-                    transform.localScale = new Vector3(Mathf.Abs(currentScale.x), currentScale.y, currentScale.z);
-                }
-            }
+                transform.localScale = new Vector3(
+                    playerFacingDirection > 0 ? -Mathf.Abs(currentScale.x) : Mathf.Abs(currentScale.x),
+                    currentScale.y, currentScale.z);
+        }
+        else if (playerObject != null)
+        {
+            float playerFacingDirection = Mathf.Sign(playerObject.transform.localScale.x);
+            Vector3 currentScale = transform.localScale;
+            transform.localScale = new Vector3(
+                playerFacingDirection > 0 ? Mathf.Abs(currentScale.x) : -Mathf.Abs(currentScale.x),
+                currentScale.y, currentScale.z);
         }
     }
 
@@ -415,7 +366,18 @@ public class DialogueSystem : MonoBehaviour
         {
             isPlayerRange = true;
             if (dialogueMark != null) dialogueMark.SetActive(true);
+
+            playerObject = collision.gameObject;
             playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
+
+            if (playerMovement == null && collision.gameObject.GetComponent<Dismember>() != null)
+            {
+                Debug.Log("Detectada cabeza desmembrada.");
+            }
+            else if (playerMovement != null)
+            {
+                Debug.Log("Detectado cuerpo completo. isDismembered: " + playerMovement.isDismembered);
+            }
         }
     }
 
@@ -426,6 +388,7 @@ public class DialogueSystem : MonoBehaviour
             isPlayerRange = false;
             if (dialogueMark != null) dialogueMark.SetActive(false);
             playerMovement = null;
+            playerObject = null;
         }
     }
 }

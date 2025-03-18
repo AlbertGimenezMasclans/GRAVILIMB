@@ -207,6 +207,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void DismemberHead()
     {
+        headObject.tag = "Player";
         if (headObject != null && bodyObject != null)
         {
             isDismembered = true;

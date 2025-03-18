@@ -2212,7 +2212,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459166877580452727, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Size.y
-      value: 0.21021159
+      value: 0.2764461
       objectReference: {fileID: 0}
     - target: {fileID: 459166877580452727, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Offset.x
@@ -2220,7 +2220,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459166877580452727, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Offset.y
-      value: -0.028613962
+      value: -0.06173124
       objectReference: {fileID: 0}
     - target: {fileID: 459166877580452727, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_SpriteTilingProperty.border.w
@@ -2341,7 +2341,7 @@ PrefabInstance:
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: typingSound
       value: 
-      objectReference: {fileID: 8300000, guid: 6986e48d8f1309241880ff6d5a9d400d, type: 3}
+      objectReference: {fileID: 8300000, guid: 9eab6aafffe280240ac5a85d84d42889, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueMark
       value: 
@@ -2372,15 +2372,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.size
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.size
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[0]
-      value: Que... Que miras?
+      value: Que miras?
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[1]
@@ -2388,11 +2388,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[2]
-      value: Pero que con eso?
+      value: Y que?
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[3]
-      value: <color=#c500ff>Rarito</color>...
+      value: Que se supone que eres?
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.data[0]
@@ -2405,7 +2405,7 @@ PrefabInstance:
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.data[2]
       value: 
-      objectReference: {fileID: -1013279470, guid: ec6b98934dafdb94181d73fcd4f573d6, type: 3}
+      objectReference: {fileID: 578182486, guid: ec6b98934dafdb94181d73fcd4f573d6, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.data[3]
       value: 
@@ -3753,7 +3753,7 @@ GameObject:
   - component: {fileID: 1536204009}
   m_Layer: 0
   m_Name: PlayerHead
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4338,7 +4338,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459166877580452727, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Size.y
-      value: 0.17435613
+      value: 0.22406188
       objectReference: {fileID: 0}
     - target: {fileID: 459166877580452727, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Offset.x
@@ -4346,7 +4346,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 459166877580452727, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_Offset.y
-      value: 0.015464183
+      value: -0.0093886815
       objectReference: {fileID: 0}
     - target: {fileID: 2337772732244123404, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4484,6 +4484,30 @@ PrefabInstance:
       propertyPath: portraitSprites.Array.data[3]
       value: 
       objectReference: {fileID: -479710967, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: headlessDialogueLines.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: headlessPortraitSprites.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: headlessDialogueLines.Array.data[0]
+      value: Un momento...
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: headlessDialogueLines.Array.data[1]
+      value: Y tu cuerpo?
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: headlessPortraitSprites.Array.data[0]
+      value: 
+      objectReference: {fileID: 1110948326, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: headlessPortraitSprites.Array.data[1]
+      value: 
+      objectReference: {fileID: 1888215662, guid: e669082add788c849b22e72acc48f0c8, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
