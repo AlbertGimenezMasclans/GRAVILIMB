@@ -3381,6 +3381,7 @@ MonoBehaviour:
   bodyObject: {fileID: 1368078077}
   isDismembered: 0
   isGrounded: 0
+  isSelectingMode: 0
 --- !u!212 &1176550083
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3643,6 +3644,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1197844569}
   - component: {fileID: 1197844568}
+  - component: {fileID: 1197844570}
   m_Layer: 0
   m_Name: Hab-Selector
   m_TagString: Untagged
@@ -3722,6 +3724,23 @@ Transform:
   - {fileID: 285577209}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1197844570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1197844567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efe26e693a801e8498d661000185452c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gravityObject: {fileID: 2062016757}
+  dismemberObject: {fileID: 285577208}
+  shootingObject: {fileID: 766078621}
+  cursor: {fileID: 1092658996}
+  playerMovement: {fileID: 1176550082}
 --- !u!1 &1259906636
 GameObject:
   m_ObjectHideFlags: 0
