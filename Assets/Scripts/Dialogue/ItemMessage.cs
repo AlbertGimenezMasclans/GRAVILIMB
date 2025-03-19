@@ -15,7 +15,9 @@ public class ItemMessage : MonoBehaviour
     [SerializeField] private TMP_Text textField2; // Segundo campo de texto
     [SerializeField] private AudioClip fanfareSong; // Sonido "Fanfare Song" especificado en el Inspector
     [SerializeField] private Image Input_TB; // Imagen para indicar que se puede avanzar
-    
+    [SerializeField] private GameObject prefabToMove; // Prefab existente cuya posición se cambiará
+    [SerializeField] private Vector3 newPrefabPosition; // Nuevas coordenadas para el prefab
+
     private float typingTime = 0.05f;
     private float commaPauseTime = 0.25f;
     private float periodPauseTime = 0.48f;
@@ -35,6 +37,7 @@ public class ItemMessage : MonoBehaviour
     private bool isWaitingForGround; // Para controlar la espera del suelo
     private bool hasCollided; // Para rastrear si ya colisionó
     private float originalPitch;
+    private SpriteRenderer spriteRenderer; // Referencia al SpriteRenderer para controlar visibilidad
 
     public bool IsDialogueActive => didDialogueStart;
 
@@ -44,6 +47,13 @@ public class ItemMessage : MonoBehaviour
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         originalPitch = audioSource.pitch;
+
+        // Obtener referencia al SpriteRenderer
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            Debug.LogWarning("No se encontró SpriteRenderer en el objeto.");
+        }
 
         dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
         dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
@@ -95,6 +105,8 @@ public class ItemMessage : MonoBehaviour
         if (isWaitingForGround && playerMovement != null && playerMovement.IsGrounded())
         {
             isWaitingForGround = false;
+            // Hacer el sprite visible antes de la animación
+            if (spriteRenderer != null) spriteRenderer.enabled = true;
             SetPlayerKeyItemAnimation();
             StartCoroutine(PlayFanfareAndStartDialogue());
         }
@@ -188,6 +200,12 @@ public class ItemMessage : MonoBehaviour
             }
 
             if (Input_TB != null) Input_TB.gameObject.SetActive(false); // Ocultar Input_TB al finalizar
+
+            // Hacer el sprite invisible cuando termine el diálogo
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.enabled = false;
+            }
         }
     }
 
@@ -307,12 +325,15 @@ public class ItemMessage : MonoBehaviour
     {
         if (playerAnimator != null)
         {
-            // Forzar la animación a Protagonist_KeyItem usando un parámetro booleano
             playerAnimator.SetBool("PlayKeyItem", true);
-            // Asegurar que otras animaciones no interfieran
             playerAnimator.SetFloat("Speed", 0f);
             playerAnimator.SetBool("IsGrounded", true);
             playerAnimator.SetFloat("VerticalSpeed", 0f);
+
+            if (prefabToMove != null && playerMovement != null)
+            {
+                prefabToMove.transform.position = playerMovement.transform.position + newPrefabPosition; // Relativo al jugador
+            }
         }
     }
 
@@ -323,16 +344,12 @@ public class ItemMessage : MonoBehaviour
             // Marcar que ya colisionó para evitar múltiples activaciones
             hasCollided = true;
 
-            // Hacer el objeto invisible
-            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            // Hacer el sprite invisible al colisionar
             if (spriteRenderer != null)
             {
                 spriteRenderer.enabled = false;
             }
-            else
-            {
-                Debug.LogWarning("No se encontró SpriteRenderer en el objeto. Asegúrate de que tenga uno si quieres que se haga invisible.");
-            }
+
             if (dialogueMark != null) dialogueMark.SetActive(false);
 
             // Obtener referencias al PlayerMovement y Animator
@@ -348,12 +365,13 @@ public class ItemMessage : MonoBehaviour
                 if (playerMovement.IsGrounded())
                 {
                     // Si está en el suelo, establecer animación Protagonist_KeyItem y reproducir fanfare antes del diálogo
+                    if (spriteRenderer != null) spriteRenderer.enabled = true; // Hacer visible el sprite
                     SetPlayerKeyItemAnimation();
                     StartCoroutine(PlayFanfareAndStartDialogue());
                 }
                 else
                 {
-                    // Si no está en el suelo, esperar a que lo esté
+                    // Si no está en el suelo, esperar a que lo esté (sprite ya está invisible)
                     isWaitingForGround = true;
                 }
             }
