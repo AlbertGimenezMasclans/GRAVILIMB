@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
     private float lastGravityChange;
     private float gravityChangeDelay = 1f;
     private bool hasTouchedGround = false;
-    private bool isRed = false;
+    private bool isShooting = false;
     private float facingDirection = 1f;
     private bool isSelectingMode = false;
     private bool isMovementLocked = false; // Bloquea el movimiento cuando está en true
@@ -89,7 +89,7 @@ public class PlayerMovement : MonoBehaviour
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
             }
 
-            if (Input.GetKeyDown(KeyCode.Z) && !isRed && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
+            if (Input.GetKeyDown(KeyCode.Z) && !isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
             {
                 ChangeGravity();
             }
@@ -106,15 +106,14 @@ public class PlayerMovement : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.A))
                 {
                     spriteRenderer.color = Color.white;
-                    isRed = false;
+                    isShooting = false;
                     if (habSelector != null) habSelector.SetActive(false);
                     Time.timeScale = 1f;
                     isSelectingMode = false;
                 }
                 if (Input.GetKeyDown(KeyCode.D))
                 {
-                    spriteRenderer.color = Color.red;
-                    isRed = true;
+                    isShooting = true;
                     if (habSelector != null) habSelector.SetActive(false);
                     Time.timeScale = 1f;
                     isSelectingMode = false;
@@ -131,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
                 isSelectingMode = false;
             }
 
-            if (isRed && Input.GetKeyDown(KeyCode.Z))
+            if (isShooting && Input.GetKeyDown(KeyCode.Z))
             {
                 FireProjectile();
             }
@@ -298,7 +297,7 @@ public class PlayerMovement : MonoBehaviour
             transform.position = bodyObject.transform.position;
 
             spriteRenderer.color = Color.white;
-            isRed = false;
+            isShooting = false;
 
             transform.localScale = bodyObject.transform.localScale;
 

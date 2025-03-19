@@ -95,7 +95,6 @@ public class ItemMessage : MonoBehaviour
         if (isWaitingForGround && playerMovement != null && playerMovement.IsGrounded())
         {
             isWaitingForGround = false;
-            playerMovement.SetMovementLocked(false); // Desbloquear movimiento
             SetPlayerKeyItemAnimation();
             StartCoroutine(PlayFanfareAndStartDialogue());
         }
@@ -121,7 +120,7 @@ public class ItemMessage : MonoBehaviour
         if (fanfareSong != null && audioSource != null)
         {
             audioSource.PlayOneShot(fanfareSong);
-            // Esperar la duración del sonido más 1 segundo
+            // Esperar la duración del sonido más 0.35 segundos
             yield return new WaitForSecondsRealtime(fanfareSong.length + 0.35f);
         }
         StartDialogue();
@@ -177,7 +176,10 @@ public class ItemMessage : MonoBehaviour
             ConfigureAnimatorsForDialogue(false);
 
             if (playerMovement != null)
+            {
                 playerMovement.SetDialogueActive(null);
+                playerMovement.SetMovementLocked(false); // Restaurar controles al finalizar el mensaje
+            }
 
             // Resetear la animación a Idle cuando el diálogo termine
             if (playerAnimator != null)
@@ -339,6 +341,9 @@ public class ItemMessage : MonoBehaviour
 
             if (playerMovement != null)
             {
+                // Bloquear los controles inmediatamente al colisionar
+                playerMovement.SetMovementLocked(true);
+
                 // Verificar si el jugador está en el suelo
                 if (playerMovement.IsGrounded())
                 {
@@ -348,8 +353,7 @@ public class ItemMessage : MonoBehaviour
                 }
                 else
                 {
-                    // Si no está en el suelo, bloquear movimiento y esperar a que lo esté
-                    playerMovement.SetMovementLocked(true);
+                    // Si no está en el suelo, esperar a que lo esté
                     isWaitingForGround = true;
                 }
             }
