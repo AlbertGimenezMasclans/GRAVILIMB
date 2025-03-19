@@ -3380,6 +3380,7 @@ MonoBehaviour:
   headObject: {fileID: 1536204004}
   bodyObject: {fileID: 1368078077}
   isDismembered: 0
+  rb: {fileID: 0}
   isGrounded: 0
   isSelectingMode: 0
 --- !u!212 &1176550083
@@ -3651,7 +3652,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &1197844568
 SpriteRenderer:
   m_ObjectHideFlags: 0
