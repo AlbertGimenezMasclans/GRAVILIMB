@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     public GameObject bodyObject;
     public bool isDismembered = false;
 
-    private Rigidbody2D rb;
+    public Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
     private Animator animator;
@@ -26,8 +26,9 @@ public class PlayerMovement : MonoBehaviour
     private bool hasTouchedGround = false;
     private bool isShooting = false;
     private float facingDirection = 1f;
-    public bool isSelectingMode = false; // Hacer público para que HabSelector lo use
+    public bool isSelectingMode = false;
     private bool isMovementLocked = false;
+    private bool hasSelectedWithX = false; // Nueva bandera para evitar reactivación
 
     private object activeDialogueSystem;
 
@@ -46,60 +47,43 @@ public class PlayerMovement : MonoBehaviour
 
         if (headObject != null) headObject.SetActive(false);
         if (bodyObject != null) bodyObject.SetActive(false);
+
+        if (animator != null) animator.updateMode = AnimatorUpdateMode.UnscaledTime;
     }
 
     void Update()
     {
-        // Verificar si hay un sistema de diálogo activo
         if (activeDialogueSystem != null)
         {
-            if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive)
-            {
-                return;
-            }
-            else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive)
-            {
-                return;
-            }
+            if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive) return;
+            else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive) return;
         }
 
-        // Bloquear movimiento si está desmembrado o locked
-        if (isMovementLocked || isDismembered)
+        if (isMovementLocked)
         {
             rb.velocity = new Vector2(0f, rb.velocity.y);
-            animator.SetFloat("Speed", 0f);
             return;
         }
 
-        // Manejar la selección con X
+        if (isDismembered)
+        {
+            rb.velocity = new Vector2(0f, rb.velocity.y);
+            animator.SetFloat("Speed", 0f);
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+                ReturnToNormal();
+            }
+            return;
+        }
+
         if (Input.GetKey(KeyCode.X))
         {
-            if (habSelector != null && !isSelectingMode)
+            // Solo activar si no hemos seleccionado ya con "Z" mientras X está pulsada
+            if (!isSelectingMode && !hasSelectedWithX)
             {
-                habSelector.SetActive(true);
-            }
-            Time.timeScale = 0.3f;
-            isSelectingMode = true;
-
-            // Acciones específicas mientras X está pulsada
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                spriteRenderer.color = Color.white;
-                isShooting = false;
-                if (habSelector != null) habSelector.SetActive(false);
-                Time.timeScale = 1f;
-                isSelectingMode = false;
-            }
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                isShooting = true;
-                if (habSelector != null) habSelector.SetActive(false);
-                Time.timeScale = 1f;
-                isSelectingMode = false;
-            }
-            if (Input.GetKeyDown(KeyCode.S) && isGrounded)
-            {
-                DismemberHead();
+                if (habSelector != null) habSelector.SetActive(true);
+                Time.timeScale = 0f;
+                isSelectingMode = true;
             }
         }
         else
@@ -107,8 +91,8 @@ public class PlayerMovement : MonoBehaviour
             if (habSelector != null) habSelector.SetActive(false);
             Time.timeScale = 1f;
             isSelectingMode = false;
+            hasSelectedWithX = false; // Resetear al soltar X
 
-            // Solo procesar movimiento y otras acciones si X no está pulsada
             if (!isDismembered)
             {
                 float moveInput = 0f;
@@ -133,22 +117,21 @@ public class PlayerMovement : MonoBehaviour
                     rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
                 }
 
-                if (Input.GetKeyDown(KeyCode.Z) && !isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
+                if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
                 {
-                    ChangeGravity();
+                    if (!isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
+                    {
+                        ChangeGravity();
+                    }
+                    else if (isShooting)
+                    {
+                        FireProjectile();
+                    }
                 }
 
-                if (isShooting && Input.GetKeyDown(KeyCode.Z))
+                if (Input.GetKeyDown(KeyCode.S) && isGrounded && !isSelectingMode)
                 {
-                    FireProjectile();
-                }
-            }
-            else
-            {
-                rb.velocity = Vector2.zero;
-                if (Input.GetKeyDown(KeyCode.Z))
-                {
-                    ReturnToNormal();
+                    DismemberHead();
                 }
             }
         }
@@ -221,7 +204,7 @@ public class PlayerMovement : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    private void DismemberHead()
+    public void DismemberHead()
     {
         headObject.tag = "Player";
         if (headObject != null && bodyObject != null)
@@ -262,10 +245,6 @@ public class PlayerMovement : MonoBehaviour
                 headRb.velocity = Vector2.zero;
             }
         }
-        else
-        {
-            Debug.LogError("headObject o bodyObject no están asignados en el Inspector");
-        }
     }
 
     private void ReturnToNormal()
@@ -293,10 +272,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void RecomposePlayer()
     {
-        if (isDismembered)
-        {
-            ReturnToNormal();
-        }
+        if (isDismembered) ReturnToNormal();
     }
 
     public void SetDialogueActive(object dialogue)
@@ -319,9 +295,22 @@ public class PlayerMovement : MonoBehaviour
         isMovementLocked = locked;
     }
 
-    // Método para que HabSelector verifique si X está pulsada
     public bool IsXPressed()
     {
         return Input.GetKey(KeyCode.X);
+    }
+
+    public void SetShootingMode(bool shooting)
+    {
+        isShooting = shooting;
+        hasSelectedWithX = true; // Marcar que hemos seleccionado mientras X está pulsada
+    }
+
+    public void ExitSelectingMode()
+    {
+        if (habSelector != null) habSelector.SetActive(false);
+        Time.timeScale = 1f;
+        isSelectingMode = false;
+        hasSelectedWithX = true; // Marcar que hemos salido del modo selección
     }
 }

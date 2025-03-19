@@ -6,17 +6,16 @@ using UnityEngine.UI;
 
 public class ItemMessage : MonoBehaviour
 {
-    [SerializeField] private GameObject dialogueMark;
     [SerializeField] private GameObject textBox;
-    [SerializeField, TextArea(1, 4)] private string[] dialogueLines; // Diálogos normales
+    [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
     [SerializeField] private bool useAlternativePosition = false;
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
-    [SerializeField] private TMP_Text textField1; // Primer campo de texto
-    [SerializeField] private TMP_Text textField2; // Segundo campo de texto
-    [SerializeField] private AudioClip fanfareSong; // Sonido "Fanfare Song" especificado en el Inspector
-    [SerializeField] private Image Input_TB; // Imagen para indicar que se puede avanzar
-    [SerializeField] private GameObject prefabToMove; // Prefab existente cuya posición se cambiará
-    [SerializeField] private Vector3 newPrefabPosition; // Nuevas coordenadas para el prefab
+    [SerializeField] private TMP_Text textField1;
+    [SerializeField] private TMP_Text textField2;
+    [SerializeField] private AudioClip fanfareSong;
+    [SerializeField] private Image Input_TB;
+    [SerializeField] private GameObject prefabToMove;
+    [SerializeField] private Vector3 newPrefabPosition;
 
     private float typingTime = 0.05f;
     private float commaPauseTime = 0.25f;
@@ -27,17 +26,17 @@ public class ItemMessage : MonoBehaviour
     private AudioSource audioSource;
     private AudioClip dialogueAdvanceSound;
     private AudioClip dialogueEndSound;
-    private AudioClip typingSound; // Sonido fijo "Dialogue2"
+    private AudioClip typingSound;
     private List<Animator> sceneAnimators;
     private List<AnimatorUpdateMode> originalUpdateModes;
     private string[] activeDialogueLines;
-    private TMP_Text dialogueText; // Campo activo seleccionado
-    private PlayerMovement playerMovement; // Para verificar el estado del jugador
-    private Animator playerAnimator; // Para controlar la animación del jugador
-    private bool isWaitingForGround; // Para controlar la espera del suelo
-    private bool hasCollided; // Para rastrear si ya colisionó
+    private TMP_Text dialogueText;
+    private PlayerMovement playerMovement;
+    private Animator playerAnimator;
+    private bool isWaitingForGround;
+    private bool hasCollided;
     private float originalPitch;
-    private SpriteRenderer spriteRenderer; // Referencia al SpriteRenderer para controlar visibilidad
+    private SpriteRenderer spriteRenderer;
 
     public bool IsDialogueActive => didDialogueStart;
 
@@ -47,53 +46,22 @@ public class ItemMessage : MonoBehaviour
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         originalPitch = audioSource.pitch;
-
-        // Obtener referencia al SpriteRenderer
         spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer == null)
-        {
-            Debug.LogWarning("No se encontró SpriteRenderer en el objeto.");
-        }
 
         dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
         dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
         typingSound = Resources.Load<AudioClip>("SFX/Dialogue2");
-
-        if (dialogueAdvanceSound == null) Debug.LogError("No se pudo cargar DialogueNEXT desde Resources/SFX.");
-        if (dialogueEndSound == null) Debug.LogError("No se pudo cargar DialogueEND desde Resources/SFX.");
-        if (typingSound == null) Debug.LogError("No se pudo cargar Dialogue2 desde Resources/SFX.");
-        if (fanfareSong == null) Debug.LogWarning("Fanfare Song no está asignado en el Inspector.");
 
         if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
         if (textBoxRect == null) { Debug.LogError("TextBox no tiene RectTransform."); return; }
         originalTextBoxPosition = textBoxRect.anchoredPosition;
 
-        // Determinar qué campo de texto usar
-        if (textField1 != null)
-        {
-            dialogueText = textField1;
-            if (textField2 != null) textField2.gameObject.SetActive(false); // Desactiva el otro si está asignado
-        }
-        else if (textField2 != null)
-        {
-            dialogueText = textField2;
-        }
-        else
-        {
-            Debug.LogError("Ningún campo de texto (textField1 o textField2) está asignado en el Inspector.");
-        }
+        dialogueText = textField1 != null ? textField1 : textField2;
+        if (textField2 != null && dialogueText == textField1) textField2.gameObject.SetActive(false);
+        if (dialogueText != null && !didDialogueStart) dialogueText.gameObject.SetActive(false);
 
-        // Asegurarse de que el texto esté inicialmente oculto si no está activo
-        if (dialogueText != null && !didDialogueStart)
-        {
-            dialogueText.gameObject.SetActive(false);
-        }
-
-        if (Input_TB != null)
-            Input_TB.gameObject.SetActive(false);
-        else
-            Debug.LogError("Input_TB no está asignado en el Inspector.");
+        if (Input_TB != null) Input_TB.gameObject.SetActive(false);
 
         sceneAnimators = new List<Animator>();
         originalUpdateModes = new List<AnimatorUpdateMode>();
@@ -101,17 +69,14 @@ public class ItemMessage : MonoBehaviour
 
     void Update()
     {
-        // Manejar la espera hasta que el jugador toque el suelo
         if (isWaitingForGround && playerMovement != null && playerMovement.IsGrounded())
         {
             isWaitingForGround = false;
-            // Hacer el sprite visible antes de la animación
             if (spriteRenderer != null) spriteRenderer.enabled = true;
             SetPlayerKeyItemAnimation();
             StartCoroutine(PlayFanfareAndStartDialogue());
         }
 
-        // Control del diálogo una vez iniciado
         if (didDialogueStart && Input.GetKeyDown(KeyCode.C))
         {
             if (dialogueText != null && dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(activeDialogueLines[lineIndex]))
@@ -122,7 +87,7 @@ public class ItemMessage : MonoBehaviour
             {
                 StopAllCoroutines();
                 dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(activeDialogueLines[lineIndex]);
-                if (Input_TB != null) Input_TB.gameObject.SetActive(true); // Mostrar Input_TB cuando termine de escribir
+                if (Input_TB != null) Input_TB.gameObject.SetActive(true);
             }
         }
     }
@@ -132,7 +97,6 @@ public class ItemMessage : MonoBehaviour
         if (fanfareSong != null && audioSource != null)
         {
             audioSource.PlayOneShot(fanfareSong);
-            // Esperar la duración del sonido más 0.35 segundos
             yield return new WaitForSecondsRealtime(fanfareSong.length + 0.35f);
         }
         StartDialogue();
@@ -140,30 +104,23 @@ public class ItemMessage : MonoBehaviour
 
     private void StartDialogue()
     {
-        if (textBox == null || dialogueText == null || dialogueLines == null || dialogueLines.Length == 0)
-        {
-            Debug.LogError("Faltan referencias o dialogueLines está vacío.");
-            return;
-        }
+        if (textBox == null || dialogueText == null || dialogueLines == null || dialogueLines.Length == 0) return;
 
         didDialogueStart = true;
         textBox.SetActive(true);
-        dialogueText.gameObject.SetActive(true); // Activar el campo de texto seleccionado
+        dialogueText.gameObject.SetActive(true);
         lineIndex = 0;
         Time.timeScale = 0f;
 
         ConfigureAnimatorsForDialogue(true);
 
         activeDialogueLines = dialogueLines;
-
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
         if (textBoxRect != null)
             textBoxRect.anchoredPosition = useAlternativePosition ? alternativeTextBoxPosition : originalTextBoxPosition;
 
-        if (playerMovement != null)
-            playerMovement.SetDialogueActive(this);
-
-        if (Input_TB != null) Input_TB.gameObject.SetActive(false); // Asegurarse de que Input_TB esté oculto al inicio
+        if (playerMovement != null) playerMovement.SetDialogueActive(this);
+        if (Input_TB != null) Input_TB.gameObject.SetActive(false);
 
         StartCoroutine(ShowLine());
     }
@@ -174,7 +131,7 @@ public class ItemMessage : MonoBehaviour
         if (lineIndex < activeDialogueLines.Length)
         {
             PlayDialogueSound(dialogueAdvanceSound);
-            if (Input_TB != null) Input_TB.gameObject.SetActive(false); // Ocultar Input_TB al avanzar
+            if (Input_TB != null) Input_TB.gameObject.SetActive(false);
             StartCoroutine(ShowLine());
         }
         else
@@ -182,7 +139,7 @@ public class ItemMessage : MonoBehaviour
             PlayDialogueSound(dialogueEndSound);
             didDialogueStart = false;
             textBox.SetActive(false);
-            dialogueText.gameObject.SetActive(false); // Ocultar el campo de texto al finalizar
+            dialogueText.gameObject.SetActive(false);
             Time.timeScale = 1f;
 
             ConfigureAnimatorsForDialogue(false);
@@ -190,22 +147,15 @@ public class ItemMessage : MonoBehaviour
             if (playerMovement != null)
             {
                 playerMovement.SetDialogueActive(null);
-                playerMovement.SetMovementLocked(false); // Restaurar controles al finalizar el mensaje
+                playerMovement.SetMovementLocked(false);
             }
 
-            // Resetear la animación a Idle cuando el diálogo termine
             if (playerAnimator != null)
             {
-                playerAnimator.SetBool("PlayKeyItem", false);
+                playerAnimator.SetBool("PlayKeyItem", false); // Resetear al terminar el diálogo
             }
-
-            if (Input_TB != null) Input_TB.gameObject.SetActive(false); // Ocultar Input_TB al finalizar
-
-            // Hacer el sprite invisible cuando termine el diálogo
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.enabled = false;
-            }
+            if (Input_TB != null) Input_TB.gameObject.SetActive(false);
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
         }
     }
 
@@ -228,23 +178,18 @@ public class ItemMessage : MonoBehaviour
             dialogueText.maxVisibleCharacters = visibleCount;
 
             char currentChar = GetCharAtVisibleIndex(currentLine, visibleCount - 1);
-
             if (currentChar != ' ')
             {
                 nonSpaceCharCount++;
-                if (nonSpaceCharCount % 2 == 0)
-                    PlayDialogueSound(typingSound);
+                if (nonSpaceCharCount % 2 == 0) PlayDialogueSound(typingSound);
             }
 
-            if (currentChar == ',')
-                yield return new WaitForSecondsRealtime(commaPauseTime);
-            else if (currentChar == '.' || currentChar == '?' || currentChar == '!')
-                yield return new WaitForSecondsRealtime(periodPauseTime);
-            else
-                yield return new WaitForSecondsRealtime(typingTime);
+            if (currentChar == ',') yield return new WaitForSecondsRealtime(commaPauseTime);
+            else if (currentChar == '.' || currentChar == '?' || currentChar == '!') yield return new WaitForSecondsRealtime(periodPauseTime);
+            else yield return new WaitForSecondsRealtime(typingTime);
         }
 
-        if (Input_TB != null) Input_TB.gameObject.SetActive(true); // Mostrar Input_TB cuando termine de escribir
+        if (Input_TB != null) Input_TB.gameObject.SetActive(true);
     }
 
     private char GetCharAtVisibleIndex(string line, int visibleIndex)
@@ -284,15 +229,7 @@ public class ItemMessage : MonoBehaviour
     {
         if (audioSource != null && clip != null)
         {
-            // Forzar pitch a 2.38 solo para typingSound
-            if (clip == typingSound)
-            {
-                audioSource.pitch = 2.38f;
-            }
-            else
-            {
-                audioSource.pitch = originalPitch; // Restaurar pitch original para otros sonidos
-            }
+            audioSource.pitch = clip == typingSound ? 2.38f : originalPitch;
             audioSource.PlayOneShot(clip);
         }
     }
@@ -315,8 +252,7 @@ public class ItemMessage : MonoBehaviour
         {
             for (int i = 0; i < sceneAnimators.Count; i++)
             {
-                if (sceneAnimators[i] != null)
-                    sceneAnimators[i].updateMode = originalUpdateModes[i];
+                if (sceneAnimators[i] != null) sceneAnimators[i].updateMode = originalUpdateModes[i];
             }
         }
     }
@@ -325,6 +261,7 @@ public class ItemMessage : MonoBehaviour
     {
         if (playerAnimator != null)
         {
+            // Configurar el Animator para la animación KeyItem
             playerAnimator.SetBool("PlayKeyItem", true);
             playerAnimator.SetFloat("Speed", 0f);
             playerAnimator.SetBool("IsGrounded", true);
@@ -332,7 +269,7 @@ public class ItemMessage : MonoBehaviour
 
             if (prefabToMove != null && playerMovement != null)
             {
-                prefabToMove.transform.position = playerMovement.transform.position + newPrefabPosition; // Relativo al jugador
+                prefabToMove.transform.position = playerMovement.transform.position + newPrefabPosition;
             }
         }
     }
@@ -341,48 +278,28 @@ public class ItemMessage : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player") && !hasCollided)
         {
-            // Marcar que ya colisionó para evitar múltiples activaciones
             hasCollided = true;
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
 
-            // Hacer el sprite invisible al colisionar
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.enabled = false;
-            }
-
-            if (dialogueMark != null) dialogueMark.SetActive(false);
-
-            // Obtener referencias al PlayerMovement y Animator
             playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
             playerAnimator = collision.gameObject.GetComponent<Animator>();
 
             if (playerMovement != null)
             {
-                // Bloquear los controles inmediatamente al colisionar
+                // Bloquear el movimiento horizontal y dejar que caiga
                 playerMovement.SetMovementLocked(true);
+                playerMovement.rb.velocity = new Vector2(0f, playerMovement.rb.velocity.y); // Solo mantener velocidad vertical
 
-                // Verificar si el jugador está en el suelo
                 if (playerMovement.IsGrounded())
                 {
-                    // Si está en el suelo, establecer animación Protagonist_KeyItem y reproducir fanfare antes del diálogo
-                    if (spriteRenderer != null) spriteRenderer.enabled = true; // Hacer visible el sprite
+                    if (spriteRenderer != null) spriteRenderer.enabled = true;
                     SetPlayerKeyItemAnimation();
                     StartCoroutine(PlayFanfareAndStartDialogue());
                 }
                 else
                 {
-                    // Si no está en el suelo, esperar a que lo esté (sprite ya está invisible)
                     isWaitingForGround = true;
                 }
-            }
-            else
-            {
-                Debug.LogError("No se encontró PlayerMovement en el objeto con tag 'Player'.");
-            }
-
-            if (playerAnimator == null)
-            {
-                Debug.LogError("No se encontró Animator en el objeto con tag 'Player'.");
             }
         }
     }
