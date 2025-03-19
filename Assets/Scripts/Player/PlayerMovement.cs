@@ -28,9 +28,14 @@ public class PlayerMovement : MonoBehaviour
     private float facingDirection = 1f;
     public bool isSelectingMode = false;
     private bool isMovementLocked = false;
-    private bool hasSelectedWithX = false; // Nueva bandera para evitar reactivación
+    private bool hasSelectedWithX = false;
 
     private object activeDialogueSystem;
+
+    // Variables para sonidos
+    private AudioSource audioSource;
+    public AudioClip jumpSound;          // Sonido al saltar
+    public AudioClip landSound;          // Sonido al tocar el suelo
 
     void Start()
     {
@@ -38,6 +43,7 @@ public class PlayerMovement : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>(); // Obtener el AudioSource (asegúrate de que esté en el GameObject)
         gravityScale = rb.gravityScale;
         lastGravityChange = -gravityChangeDelay;
 
@@ -59,17 +65,11 @@ public class PlayerMovement : MonoBehaviour
             else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive) return;
         }
 
-        if (isMovementLocked)
-        {
-            rb.velocity = new Vector2(0f, rb.velocity.y);
-            return;
-        }
-
-        if (isDismembered)
+        if (isMovementLocked || isDismembered)
         {
             rb.velocity = new Vector2(0f, rb.velocity.y);
             animator.SetFloat("Speed", 0f);
-            if (Input.GetKeyDown(KeyCode.Z))
+            if (isDismembered && Input.GetKeyDown(KeyCode.Z))
             {
                 ReturnToNormal();
             }
@@ -78,7 +78,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetKey(KeyCode.X))
         {
-            // Solo activar si no hemos seleccionado ya con "Z" mientras X está pulsada
             if (!isSelectingMode && !hasSelectedWithX)
             {
                 if (habSelector != null) habSelector.SetActive(true);
@@ -91,48 +90,46 @@ public class PlayerMovement : MonoBehaviour
             if (habSelector != null) habSelector.SetActive(false);
             Time.timeScale = 1f;
             isSelectingMode = false;
-            hasSelectedWithX = false; // Resetear al soltar X
+            hasSelectedWithX = false;
 
-            if (!isDismembered)
+            float moveInput = 0f;
+            if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
+            else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
+            rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+
+            animator.SetFloat("Speed", Mathf.Abs(moveInput));
+            animator.SetBool("IsGrounded", isGrounded);
+            float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
+            animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
+
+            if (moveInput != 0)
             {
-                float moveInput = 0f;
-                if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
-                else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
-                rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+                facingDirection = Mathf.Sign(moveInput);
+                transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
+            }
 
-                animator.SetFloat("Speed", Mathf.Abs(moveInput));
-                animator.SetBool("IsGrounded", isGrounded);
-                float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
-                animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
+            if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+            {
+                float jumpDirection = isGravityNormal ? 1f : -1f;
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
+                PlayJumpSound(); // Reproducir sonido de salto
+            }
 
-                if (moveInput != 0)
+            if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
+            {
+                if (!isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
                 {
-                    facingDirection = Mathf.Sign(moveInput);
-                    transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
+                    ChangeGravity();
                 }
-
-                if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+                else if (isShooting)
                 {
-                    float jumpDirection = isGravityNormal ? 1f : -1f;
-                    rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
+                    FireProjectile();
                 }
+            }
 
-                if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
-                {
-                    if (!isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
-                    {
-                        ChangeGravity();
-                    }
-                    else if (isShooting)
-                    {
-                        FireProjectile();
-                    }
-                }
-
-                if (Input.GetKeyDown(KeyCode.S) && isGrounded && !isSelectingMode)
-                {
-                    DismemberHead();
-                }
+            if (Input.GetKeyDown(KeyCode.S) && isGrounded && !isSelectingMode)
+            {
+                DismemberHead();
             }
         }
     }
@@ -147,6 +144,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 isGrounded = true;
                 hasTouchedGround = true;
+                PlayLandSound(); // Reproducir sonido al tocar el suelo
             }
         }
     }
@@ -156,6 +154,23 @@ public class PlayerMovement : MonoBehaviour
         if (((1 << collision.gameObject.layer) & groundLayer) != 0)
         {
             isGrounded = false;
+        }
+    }
+
+    // Métodos para reproducir sonidos
+    private void PlayJumpSound()
+    {
+        if (jumpSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(jumpSound);
+        }
+    }
+
+    private void PlayLandSound()
+    {
+        if (landSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(landSound);
         }
     }
 
