@@ -34,6 +34,7 @@ public class ItemMessage : MonoBehaviour
     private Animator playerAnimator; // Para controlar la animación del jugador
     private bool isWaitingForGround; // Para controlar la espera del suelo
     private bool hasCollided; // Para rastrear si ya colisionó
+    private float originalPitch;
 
     public bool IsDialogueActive => didDialogueStart;
 
@@ -41,6 +42,8 @@ public class ItemMessage : MonoBehaviour
     {
         audioSource = gameObject.GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+
+        originalPitch = audioSource.pitch;
 
         dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
         dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
@@ -260,7 +263,18 @@ public class ItemMessage : MonoBehaviour
     private void PlayDialogueSound(AudioClip clip)
     {
         if (audioSource != null && clip != null)
+        {
+            // Forzar pitch a 2.38 solo para typingSound
+            if (clip == typingSound)
+            {
+                audioSource.pitch = 2.38f;
+            }
+            else
+            {
+                audioSource.pitch = originalPitch; // Restaurar pitch original para otros sonidos
+            }
             audioSource.PlayOneShot(clip);
+        }
     }
 
     private void ConfigureAnimatorsForDialogue(bool isStarting)
