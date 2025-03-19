@@ -27,8 +27,9 @@ public class PlayerMovement : MonoBehaviour
     private bool isRed = false;
     private float facingDirection = 1f;
     private bool isSelectingMode = false;
+    private bool isMovementLocked = false; // Bloquea el movimiento cuando está en true
 
-    private DialogueSystem activeDialogueSystem;
+    private object activeDialogueSystem; // Cambiado de DialogueSystem a object para compatibilidad
 
     void Start()
     {
@@ -49,9 +50,18 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (activeDialogueSystem != null && activeDialogueSystem.IsDialogueActive)
+        // Verificar si hay un sistema de diálogo activo
+        if (activeDialogueSystem != null)
         {
-            return;
+            // Comprobar si el diálogo está activo, dependiendo del tipo
+            if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive)
+            {
+                return;
+            }
+            else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive)
+            {
+                return;
+            }
         }
 
         if (!isDismembered)
@@ -135,6 +145,27 @@ public class PlayerMovement : MonoBehaviour
                 ReturnToNormal();
             }
         }
+        
+        if (activeDialogueSystem != null)
+    {
+        // Comprobar si el diálogo está activo, dependiendo del tipo
+        if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive)
+        {
+            return;
+        }
+        else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive)
+        {
+            return;
+        }
+    }
+
+    // Bloquear el movimiento si isMovementLocked es true o si está desmembrado
+    if (isMovementLocked || isDismembered)
+    {
+        rb.velocity = new Vector2(0f, rb.velocity.y); // Mantener velocidad vertical pero bloquear horizontal
+        animator.SetFloat("Speed", 0f); // Asegurar que la animación refleje la falta de movimiento
+        return;
+    }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -283,7 +314,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void SetDialogueActive(DialogueSystem dialogue)
+    public void SetDialogueActive(object dialogue) // Cambiado a object para compatibilidad con ItemMessage
     {
         activeDialogueSystem = dialogue;
     }
@@ -296,5 +327,9 @@ public class PlayerMovement : MonoBehaviour
     public bool IsGravityNormal()
     {
         return isGravityNormal;
+    }
+    public void SetMovementLocked(bool locked)
+    {
+        isMovementLocked = locked;
     }
 }

@@ -8,7 +8,8 @@ public class DialogueSystem : MonoBehaviour
 {
     [SerializeField] private GameObject dialogueMark;
     [SerializeField] private GameObject textBox;
-    [SerializeField] private TMP_Text dialogueText;
+    [SerializeField] private TMP_Text textField1; // Primer campo de texto
+    [SerializeField] private TMP_Text textField2; // Segundo campo de texto
     [SerializeField, TextArea(1, 4)] private string[] dialogueLines; // Diálogos normales
     [SerializeField, TextArea(1, 4)] private string[] headlessDialogueLines; // Diálogos adicionales para desmembrado
     [SerializeField] private GameObject textBoxPortrait;
@@ -36,6 +37,7 @@ public class DialogueSystem : MonoBehaviour
     private List<AnimatorUpdateMode> originalUpdateModes;
     private string[] activeDialogueLines;
     private Sprite[] activePortraitSprites;
+    private TMP_Text dialogueText; // Campo activo seleccionado
 
     public bool IsDialogueActive => didDialogueStart;
     private PlayerMovement playerMovement; // Para el estado normal
@@ -58,7 +60,26 @@ public class DialogueSystem : MonoBehaviour
         if (textBoxRect == null) { Debug.LogError("TextBox no tiene RectTransform."); return; }
         originalTextBoxPosition = textBoxRect.anchoredPosition;
 
-        if (dialogueText == null) { Debug.LogError("DialogueText no está asignado."); return; }
+        // Determinar qué campo de texto usar
+        if (textField1 != null)
+        {
+            dialogueText = textField1;
+            if (textField2 != null) textField2.gameObject.SetActive(false); // Desactiva el otro si está asignado
+        }
+        else if (textField2 != null)
+        {
+            dialogueText = textField2;
+        }
+        else
+        {
+            Debug.LogError("Ningún campo de texto (Text Field 1 o Text Field 2) está asignado en el Inspector.");
+        }
+
+        // Asegurarse de que el texto esté inicialmente oculto si no está activo
+        if (dialogueText != null && !didDialogueStart)
+        {
+            dialogueText.gameObject.SetActive(false);
+        }
 
         if (textBoxPortrait != null)
         {
@@ -89,11 +110,11 @@ public class DialogueSystem : MonoBehaviour
             {
                 StartDialogue();
             }
-            else if (dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(activeDialogueLines[lineIndex]))
+            else if (dialogueText != null && dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(activeDialogueLines[lineIndex]))
             {
                 NextDialogueLine();
             }
-            else
+            else if (dialogueText != null)
             {
                 StopAllCoroutines();
                 dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(activeDialogueLines[lineIndex]);
@@ -113,6 +134,7 @@ public class DialogueSystem : MonoBehaviour
         didDialogueStart = true;
         textBox.SetActive(true);
         if (dialogueMark != null) dialogueMark.SetActive(false);
+        dialogueText.gameObject.SetActive(true); // Activar el campo de texto seleccionado
         lineIndex = 0;
         Time.timeScale = 0f;
 
@@ -193,6 +215,7 @@ public class DialogueSystem : MonoBehaviour
             textBox.SetActive(false);
             if (dialogueMark != null) dialogueMark.SetActive(true);
             if (textBoxPortrait != null) textBoxPortrait.SetActive(false);
+            dialogueText.gameObject.SetActive(false); // Ocultar el campo de texto al finalizar
             Time.timeScale = 1f;
 
             ConfigureAnimatorsForDialogue(false);
@@ -207,6 +230,8 @@ public class DialogueSystem : MonoBehaviour
 
     private IEnumerator ShowLine()
     {
+        if (dialogueText == null) yield break;
+
         dialogueText.text = activeDialogueLines[lineIndex];
         dialogueText.maxVisibleCharacters = 0;
         dialogueText.ForceMeshUpdate();
