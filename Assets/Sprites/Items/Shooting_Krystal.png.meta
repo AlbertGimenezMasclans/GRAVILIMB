@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: eafbc5de38a6ba545aa32a0ef73db199
+guid: 65fed3d1581930d4ebca87af4ab1c817
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -93,17 +93,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Shoot_Crystal_0
+      name: Shooting_Krystal_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 64
+        y: 48
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -111,20 +124,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 03df5157432f76748b53dac7be34005b
-      internalID: 92606647
+      spriteID: bd135415399805e49b7b113c7c929251
+      internalID: -1880756058
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Shoot_Crystal_1
+      name: Shooting_Krystal_1
       rect:
         serializedVersion: 2
         x: 16
-        y: 64
+        y: 48
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -132,20 +145,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c458d411d7f95f345ae28bf728eb052e
-      internalID: -1033727254
+      spriteID: a47a581bddcfade4db3bb0daee322b34
+      internalID: -359559112
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Shoot_Crystal_2
+      name: Shooting_Krystal_2
       rect:
         serializedVersion: 2
         x: 32
-        y: 64
+        y: 48
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -153,62 +166,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b0b856288a33d9444957b323f212473c
-      internalID: 378267916
+      spriteID: ec1766e3a6013154a890ab192f5f89a7
+      internalID: 782880604
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Shoot_Crystal_3
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 64
-        width: 16
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 452cbd61a9d017a4cabdad218faf6df7
-      internalID: 1701263898
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Shoot_Crystal_4
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 64
-        width: 16
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: c5f2cdf9898c9814d87a19e713ebddcf
-      internalID: -993454172
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Shoot_Crystal_5
+      name: Shooting_Krystal_3
       rect:
         serializedVersion: 2
         x: 0
         y: 32
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -216,20 +187,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9c28b19da4efa0344b30490d1a9c5f60
-      internalID: 1696527418
+      spriteID: 9b374c12fdc326b468c301a0fd46b910
+      internalID: 1628821819
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Shoot_Crystal_6
+      name: Shooting_Krystal_4
       rect:
         serializedVersion: 2
         x: 16
         y: 32
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +208,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cd1842d1046778b4fb68dccaaf6cec77
-      internalID: -702795363
+      spriteID: a28a6f6c531015f4794107bc2c020879
+      internalID: -703819570
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Shoot_Crystal_7
+      name: Shooting_Krystal_5
       rect:
         serializedVersion: 2
         x: 32
         y: 32
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -258,20 +229,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b8737dddf4daf234a8d8e4413b376c21
-      internalID: 1573825649
+      spriteID: f1d2f136dfbe35c43a563ff6207d8196
+      internalID: 1680665011
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Shoot_Crystal_8
+      name: Shooting_Krystal_6
       rect:
         serializedVersion: 2
-        x: 48
-        y: 32
+        x: 0
+        y: 16
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -279,20 +250,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f7c17ac421a2e8649a5b01af22780806
-      internalID: -1543450794
+      spriteID: a1b584cd09800aa4f8866c31a540c3dc
+      internalID: -1664410997
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Shoot_Crystal_9
+      name: Shooting_Krystal_7
       rect:
         serializedVersion: 2
-        x: 64
-        y: 32
+        x: 16
+        y: 16
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -300,20 +271,41 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e0b8fd5740242cc418af1da099003829
-      internalID: 1495314198
+      spriteID: b627ea21278d84f4b846781e4b343330
+      internalID: -365376770
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Shoot_Crystal_10
+      name: Shooting_Krystal_8
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5fde936c12711f444b86a4374b36f4d3
+      internalID: 1161049952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Shooting_Krystal_9
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 16
-        height: 32
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -321,29 +313,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a3cbeb03dbc04204a92fce0124c3a4a2
-      internalID: -676428921
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Shoot_Crystal_11
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 0
-        width: 16
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d2ef0747d4c9f554bbd40788b09bf8c9
-      internalID: -1967878072
+      spriteID: e327e7b546d319d43beb13d2103471e1
+      internalID: 157323092
       vertices: []
       indices: 
       edges: []
@@ -359,18 +330,16 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Shoot_Crystal_0: 92606647
-      Shoot_Crystal_1: -1033727254
-      Shoot_Crystal_10: -676428921
-      Shoot_Crystal_11: -1967878072
-      Shoot_Crystal_2: 378267916
-      Shoot_Crystal_3: 1701263898
-      Shoot_Crystal_4: -993454172
-      Shoot_Crystal_5: 1696527418
-      Shoot_Crystal_6: -702795363
-      Shoot_Crystal_7: 1573825649
-      Shoot_Crystal_8: -1543450794
-      Shoot_Crystal_9: 1495314198
+      Shooting_Krystal_0: -1880756058
+      Shooting_Krystal_1: -359559112
+      Shooting_Krystal_2: 782880604
+      Shooting_Krystal_3: 1628821819
+      Shooting_Krystal_4: -703819570
+      Shooting_Krystal_5: 1680665011
+      Shooting_Krystal_6: -1664410997
+      Shooting_Krystal_7: -365376770
+      Shooting_Krystal_8: 1161049952
+      Shooting_Krystal_9: 157323092
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
