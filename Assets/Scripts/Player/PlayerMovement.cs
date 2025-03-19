@@ -26,10 +26,10 @@ public class PlayerMovement : MonoBehaviour
     private bool hasTouchedGround = false;
     private bool isShooting = false;
     private float facingDirection = 1f;
-    private bool isSelectingMode = false;
-    private bool isMovementLocked = false; // Bloquea el movimiento cuando está en true
+    public bool isSelectingMode = false; // Hacer público para que HabSelector lo use
+    private bool isMovementLocked = false;
 
-    private object activeDialogueSystem; // Cambiado de DialogueSystem a object para compatibilidad
+    private object activeDialogueSystem;
 
     void Start()
     {
@@ -53,7 +53,6 @@ public class PlayerMovement : MonoBehaviour
         // Verificar si hay un sistema de diálogo activo
         if (activeDialogueSystem != null)
         {
-            // Comprobar si el diálogo está activo, dependiendo del tipo
             if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive)
             {
                 return;
@@ -64,107 +63,95 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        if (!isDismembered)
+        // Bloquear movimiento si está desmembrado o locked
+        if (isMovementLocked || isDismembered)
         {
-            float moveInput = 0f;
-            if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
-            else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
-            rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+            rb.velocity = new Vector2(0f, rb.velocity.y);
+            animator.SetFloat("Speed", 0f);
+            return;
+        }
 
-            // Actualizar parámetros del Animator
-            animator.SetFloat("Speed", Mathf.Abs(moveInput));
-            animator.SetBool("IsGrounded", isGrounded);
-            float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
-            animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
-
-            if (moveInput != 0)
+        // Manejar la selección con X
+        if (Input.GetKey(KeyCode.X))
+        {
+            if (habSelector != null && !isSelectingMode)
             {
-                facingDirection = Mathf.Sign(moveInput);
-                transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
+                habSelector.SetActive(true);
             }
+            Time.timeScale = 0.3f;
+            isSelectingMode = true;
 
-            if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+            // Acciones específicas mientras X está pulsada
+            if (Input.GetKeyDown(KeyCode.A))
             {
-                float jumpDirection = isGravityNormal ? 1f : -1f;
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Z) && !isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
-            {
-                ChangeGravity();
-            }
-
-            if (Input.GetKey(KeyCode.X))
-            {
-                if (habSelector != null && !isSelectingMode)
-                {
-                    habSelector.SetActive(true);
-                }
-                Time.timeScale = 0.3f;
-                isSelectingMode = true;
-
-                if (Input.GetKeyDown(KeyCode.A))
-                {
-                    spriteRenderer.color = Color.white;
-                    isShooting = false;
-                    if (habSelector != null) habSelector.SetActive(false);
-                    Time.timeScale = 1f;
-                    isSelectingMode = false;
-                }
-                if (Input.GetKeyDown(KeyCode.D))
-                {
-                    isShooting = true;
-                    if (habSelector != null) habSelector.SetActive(false);
-                    Time.timeScale = 1f;
-                    isSelectingMode = false;
-                }
-                if (Input.GetKeyDown(KeyCode.S) && isGrounded)
-                {
-                    DismemberHead();
-                }
-            }
-            else
-            {
+                spriteRenderer.color = Color.white;
+                isShooting = false;
                 if (habSelector != null) habSelector.SetActive(false);
                 Time.timeScale = 1f;
                 isSelectingMode = false;
             }
-
-            if (isShooting && Input.GetKeyDown(KeyCode.Z))
+            if (Input.GetKeyDown(KeyCode.D))
             {
-                FireProjectile();
+                isShooting = true;
+                if (habSelector != null) habSelector.SetActive(false);
+                Time.timeScale = 1f;
+                isSelectingMode = false;
+            }
+            if (Input.GetKeyDown(KeyCode.S) && isGrounded)
+            {
+                DismemberHead();
             }
         }
         else
         {
-            rb.velocity = Vector2.zero;
+            if (habSelector != null) habSelector.SetActive(false);
+            Time.timeScale = 1f;
+            isSelectingMode = false;
 
-            if (Input.GetKeyDown(KeyCode.Z))
+            // Solo procesar movimiento y otras acciones si X no está pulsada
+            if (!isDismembered)
             {
-                ReturnToNormal();
+                float moveInput = 0f;
+                if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
+                else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
+                rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+
+                animator.SetFloat("Speed", Mathf.Abs(moveInput));
+                animator.SetBool("IsGrounded", isGrounded);
+                float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
+                animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
+
+                if (moveInput != 0)
+                {
+                    facingDirection = Mathf.Sign(moveInput);
+                    transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
+                }
+
+                if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+                {
+                    float jumpDirection = isGravityNormal ? 1f : -1f;
+                    rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
+                }
+
+                if (Input.GetKeyDown(KeyCode.Z) && !isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
+                {
+                    ChangeGravity();
+                }
+
+                if (isShooting && Input.GetKeyDown(KeyCode.Z))
+                {
+                    FireProjectile();
+                }
+            }
+            else
+            {
+                rb.velocity = Vector2.zero;
+                if (Input.GetKeyDown(KeyCode.Z))
+                {
+                    ReturnToNormal();
+                }
             }
         }
-        
-        if (activeDialogueSystem != null)
-    {
-        // Comprobar si el diálogo está activo, dependiendo del tipo
-        if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive)
-        {
-            return;
-        }
-        else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive)
-        {
-            return;
-        }
-    }
-
-    // Bloquear el movimiento si isMovementLocked es true o si está desmembrado
-    if (isMovementLocked || isDismembered)
-    {
-        rb.velocity = new Vector2(0f, rb.velocity.y); // Mantener velocidad vertical pero bloquear horizontal
-        animator.SetFloat("Speed", 0f); // Asegurar que la animación refleje la falta de movimiento
-        return;
-    }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -201,7 +188,6 @@ public class PlayerMovement : MonoBehaviour
         lastGravityChange = Time.time;
         rb.velocity = new Vector2(rb.velocity.x, 0f);
 
-        // Si está en el suelo y quieto, forzar la animación de caída
         if (isGrounded && Mathf.Abs(rb.velocity.x) < 0.1f)
         {
             isGrounded = false;
@@ -313,7 +299,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void SetDialogueActive(object dialogue) // Cambiado a object para compatibilidad con ItemMessage
+    public void SetDialogueActive(object dialogue)
     {
         activeDialogueSystem = dialogue;
     }
@@ -327,8 +313,15 @@ public class PlayerMovement : MonoBehaviour
     {
         return isGravityNormal;
     }
+
     public void SetMovementLocked(bool locked)
     {
         isMovementLocked = locked;
+    }
+
+    // Método para que HabSelector verifique si X está pulsada
+    public bool IsXPressed()
+    {
+        return Input.GetKey(KeyCode.X);
     }
 }
