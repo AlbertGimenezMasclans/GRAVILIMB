@@ -1519,6 +1519,9 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 324783869238861195, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      insertIndex: 4
+      addedObject: {fileID: 1307234057}
+    - targetCorrespondingSourceObject: {fileID: 324783869238861195, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1307234052}
   m_SourcePrefab: {fileID: 100100000, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
@@ -3387,7 +3390,10 @@ MonoBehaviour:
   isGrounded: 0
   isSelectingMode: 0
   jumpSound: {fileID: 8300000, guid: cff8eac4fb5a08f42aab14c8b5e65fa3, type: 3}
-  landSound: {fileID: 8300000, guid: 87f7860572055454e8d67677a590271f, type: 3}
+  canChangeGravity: 0
+  canShoot: 0
+  canDismember: 0
+  lockedLogo: {fileID: -1976180591, guid: d4d67a7634ba5ce44ab6a2cfc813eade, type: 3}
 --- !u!212 &1176550083
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3843,6 +3849,10 @@ MonoBehaviour:
   shootingObject: {fileID: 766078621}
   cursor: {fileID: 1092658996}
   playerMovement: {fileID: 1176550082}
+  lockedSprite: {fileID: -1976180591, guid: d4d67a7634ba5ce44ab6a2cfc813eade, type: 3}
+  gravitySprite: {fileID: 492439081, guid: 3fe35897e19f1aa4c9453aef12ac700f, type: 3}
+  dismemberSprite: {fileID: 118669590, guid: 31197fa307d2b824f9aab50299ea2489, type: 3}
+  shootingSprite: {fileID: -486776795, guid: 9dc23554ef58ad74d85dc13147e752cb, type: 3}
 --- !u!1 &1259906636
 GameObject:
   m_ObjectHideFlags: 0
@@ -3999,6 +4009,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1307234057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1307234047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b87c4b09f1b5ead43979c773fff7ce7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abilityToUnlock: shoot
 --- !u!1 &1348434414
 GameObject:
   m_ObjectHideFlags: 0
@@ -5021,13 +5044,21 @@ PrefabInstance:
       value: -0.0075470917
       objectReference: {fileID: 0}
     - target: {fileID: 6071182378240184559, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.x
+      value: 0.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 6071182378240184559, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 0.16
+      value: 0.17
       objectReference: {fileID: 0}
     - target: {fileID: 6995838324936482662, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 1661140448, guid: 17ba3d7dd111dcc4185d6246d9ca3229, type: 3}
+    - target: {fileID: 6995838324936482662, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7580960150486033385, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: m_Pitch
       value: 1
@@ -5092,7 +5123,10 @@ PrefabInstance:
     - {fileID: 8573126779568912435, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 324783869238861195, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      insertIndex: 4
+      addedObject: {fileID: 1641622113}
   m_SourcePrefab: {fileID: 100100000, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
 --- !u!4 &1641622107 stripped
 Transform:
@@ -5104,6 +5138,19 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 324783869238861195, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
   m_PrefabInstance: {fileID: 1641622106}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1641622113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641622108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b87c4b09f1b5ead43979c773fff7ce7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abilityToUnlock: gravity
 --- !u!1 &1663090874
 GameObject:
   m_ObjectHideFlags: 0
@@ -5330,6 +5377,9 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 324783869238861195, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      insertIndex: 4
+      addedObject: {fileID: 1966740814}
+    - targetCorrespondingSourceObject: {fileID: 324783869238861195, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1966740809}
   m_SourcePrefab: {fileID: 100100000, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
@@ -5364,6 +5414,19 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1966740814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1966740808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b87c4b09f1b5ead43979c773fff7ce7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abilityToUnlock: dismember
 --- !u!1 &1972736067
 GameObject:
   m_ObjectHideFlags: 0

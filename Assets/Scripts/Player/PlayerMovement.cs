@@ -29,13 +29,23 @@ public class PlayerMovement : MonoBehaviour
     public bool isSelectingMode = false;
     private bool isMovementLocked = false;
     private bool hasSelectedWithX = false;
+    private bool justExitedSelection = false; // Bandera para evitar reapertura inmediata
 
     private object activeDialogueSystem;
 
     // Variables para sonidos
     private AudioSource audioSource;
-    public AudioClip jumpSound;          // Sonido al saltar
-    public AudioClip landSound;          // Sonido al tocar el suelo
+    public AudioClip jumpSound;
+    private int footstepIndex = 0;
+    private float footstepTimer = 0f;
+
+    // Booleanos para habilidades (bloqueadas por defecto)
+    public bool canChangeGravity = false;
+    public bool canShoot = false;
+    public bool canDismember = false;
+
+    // Sprite para habilidades bloqueadas
+    public Sprite lockedLogo; // Asigna "Locked_Logo_0" en el Inspector
 
     void Start()
     {
@@ -43,7 +53,7 @@ public class PlayerMovement : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>(); // Obtener el AudioSource (asegúrate de que esté en el GameObject)
+        audioSource = GetComponent<AudioSource>();
         gravityScale = rb.gravityScale;
         lastGravityChange = -gravityChangeDelay;
 
@@ -76,21 +86,28 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        if (Input.GetKey(KeyCode.X))
+        // Abrir HabSelector solo si hay al menos una habilidad desbloqueada y se mantiene X
+        bool hasAnyAbility = canChangeGravity || canShoot || canDismember;
+        if (Input.GetKey(KeyCode.X) && hasAnyAbility && !justExitedSelection)
         {
-            if (!isSelectingMode && !hasSelectedWithX)
+            if (!isSelectingMode)
             {
                 if (habSelector != null) habSelector.SetActive(true);
                 Time.timeScale = 0f;
                 isSelectingMode = true;
+                UpdateHabSelectorUI(); // Actualizar UI al abrir
             }
         }
         else
         {
-            if (habSelector != null) habSelector.SetActive(false);
+            // Si X no está presionada o acabamos de salir, desactivar HabSelector
+            if (habSelector != null && !isSelectingMode) habSelector.SetActive(false);
             Time.timeScale = 1f;
             isSelectingMode = false;
             hasSelectedWithX = false;
+
+            // Solo resetear justExitedSelection cuando X se suelta
+            if (!Input.GetKey(KeyCode.X)) justExitedSelection = false;
 
             float moveInput = 0f;
             if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
@@ -112,24 +129,20 @@ public class PlayerMovement : MonoBehaviour
             {
                 float jumpDirection = isGravityNormal ? 1f : -1f;
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
-                PlayJumpSound(); // Reproducir sonido de salto
+                PlayJumpSound();
             }
 
+            // Usar habilidades solo fuera del modo selección
             if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
             {
-                if (!isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay)
+                if (!isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay && canChangeGravity)
                 {
                     ChangeGravity();
                 }
-                else if (isShooting)
+                else if (isShooting && canShoot)
                 {
                     FireProjectile();
                 }
-            }
-
-            if (Input.GetKeyDown(KeyCode.S) && isGrounded && !isSelectingMode)
-            {
-                DismemberHead();
             }
         }
     }
@@ -144,7 +157,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 isGrounded = true;
                 hasTouchedGround = true;
-                PlayLandSound(); // Reproducir sonido al tocar el suelo
             }
         }
     }
@@ -157,7 +169,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // Métodos para reproducir sonidos
+    // Métodos para sonidos
     private void PlayJumpSound()
     {
         if (jumpSound != null && audioSource != null)
@@ -166,12 +178,37 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void PlayLandSound()
+    // Actualizar UI del HabSelector
+    private void UpdateHabSelectorUI()
     {
-        if (landSound != null && audioSource != null)
+        if (habSelector == null) return;
+
+        HabSelector habScript = habSelector.GetComponent<HabSelector>();
+        if (habScript != null)
         {
-            audioSource.PlayOneShot(landSound);
+            habScript.UpdateUI(canChangeGravity, canShoot, canDismember);
         }
+    }
+
+    // Desbloquear habilidades
+    public void UnlockAbility(string abilityName)
+    {
+        switch (abilityName.ToLower())
+        {
+            case "gravity":
+                canChangeGravity = true;
+                break;
+            case "shoot":
+                canShoot = true;
+                break;
+            case "dismember":
+                canDismember = true;
+                break;
+            default:
+                Debug.LogWarning("Habilidad desconocida: " + abilityName);
+                break;
+        }
+        UpdateHabSelectorUI();
     }
 
     private void ChangeGravity()
@@ -318,7 +355,6 @@ public class PlayerMovement : MonoBehaviour
     public void SetShootingMode(bool shooting)
     {
         isShooting = shooting;
-        hasSelectedWithX = true; // Marcar que hemos seleccionado mientras X está pulsada
     }
 
     public void ExitSelectingMode()
@@ -326,6 +362,7 @@ public class PlayerMovement : MonoBehaviour
         if (habSelector != null) habSelector.SetActive(false);
         Time.timeScale = 1f;
         isSelectingMode = false;
-        hasSelectedWithX = true; // Marcar que hemos salido del modo selección
+        hasSelectedWithX = false;
+        justExitedSelection = true; // Marcar que acabamos de salir
     }
 }
