@@ -17,11 +17,11 @@ public class PlayerMovement : MonoBehaviour
 
     public Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
-    private BoxCollider2D boxCollider;
+    public BoxCollider2D boxCollider;
     private Animator animator;
     public bool isGrounded;
     private float gravityScale;
-    private bool isGravityNormal = true;
+    public bool isGravityNormal = true;
     private float lastGravityChange;
     private float gravityChangeDelay = 1f;
     private bool hasTouchedGround = false;
@@ -200,14 +200,13 @@ public class PlayerMovement : MonoBehaviour
         UpdateHabSelectorUI();
     }
 
-    private void ChangeGravity()
+    public void ChangeGravity()
     {
         rb.gravityScale = -rb.gravityScale;
         isGravityNormal = !isGravityNormal;
         Vector3 center = boxCollider.bounds.center;
         transform.RotateAround(center, Vector3.forward, 180f);
         transform.RotateAround(center, Vector3.up, 180f);
-        lastGravityChange = Time.time;
         rb.velocity = new Vector2(rb.velocity.x, 0f);
         if (isGrounded && Mathf.Abs(rb.velocity.x) < 0.1f)
         {

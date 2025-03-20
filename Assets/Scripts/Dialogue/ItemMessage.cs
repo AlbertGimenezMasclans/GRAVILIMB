@@ -76,7 +76,7 @@ public class ItemMessage : MonoBehaviour
         {
             isWaitingForGround = false;
             if (spriteRenderer != null) spriteRenderer.enabled = true;
-            SetPlayerKeyItemAnimation();
+            SetPlayerKeyItemAnimation(); // Forzar KeyItem inmediatamente al tocar el suelo
             StartCoroutine(PlayFanfareAndStartDialogue());
         }
 
@@ -161,7 +161,7 @@ public class ItemMessage : MonoBehaviour
             if (spriteRenderer != null) spriteRenderer.enabled = false;
 
             if (coinControllerUI != null)
-                coinControllerUI.SetCoinUIPanelActive(true); // Reactivar la UI al terminar el mensaje
+                coinControllerUI.SetCoinUIPanelActive(true);
         }
     }
 
@@ -178,7 +178,13 @@ public class ItemMessage : MonoBehaviour
             if (playerMovement != null)
             {
                 if (coinControllerUI != null)
-                    coinControllerUI.OnItemCollision(); // Desactivar la UI al colisionar
+                    coinControllerUI.OnItemCollision();
+
+                // Ajustar gravedad si está invertida, sin establecer Idle inmediatamente
+                if (!playerMovement.IsGravityNormal())
+                {
+                    AdjustGravityWithInertia();
+                }
 
                 playerMovement.SetMovementLocked(true);
                 playerMovement.rb.velocity = new Vector2(0f, playerMovement.rb.velocity.y);
@@ -186,13 +192,52 @@ public class ItemMessage : MonoBehaviour
                 if (playerMovement.IsGrounded())
                 {
                     if (spriteRenderer != null) spriteRenderer.enabled = true;
-                    SetPlayerKeyItemAnimation();
+                    SetPlayerKeyItemAnimation(); // Forzar KeyItem si ya está en el suelo
                     StartCoroutine(PlayFanfareAndStartDialogue());
                 }
                 else
                 {
-                    isWaitingForGround = true;
+                    isWaitingForGround = true; // Esperar a tocar el suelo
                 }
+            }
+        }
+    }
+
+    private void AdjustGravityWithInertia()
+    {
+        if (playerMovement != null)
+        {
+            playerMovement.rb.gravityScale = Mathf.Abs(playerMovement.rb.gravityScale); // Gravedad positiva
+            playerMovement.isGravityNormal = true;
+
+            Vector3 center = playerMovement.boxCollider.bounds.center;
+            playerMovement.transform.RotateAround(center, Vector3.forward, 180f);
+            playerMovement.transform.RotateAround(center, Vector3.up, 180f);
+        }
+    }
+
+    private void SetIdleAnimation()
+    {
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetFloat("Speed", 0f);
+            playerAnimator.SetBool("IsGrounded", playerMovement.IsGrounded());
+            playerAnimator.SetFloat("VerticalSpeed", playerMovement.rb.velocity.y);
+        }
+    }
+
+    private void SetPlayerKeyItemAnimation()
+    {
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetBool("PlayKeyItem", true);
+            playerAnimator.SetFloat("Speed", 0f);
+            playerAnimator.SetBool("IsGrounded", true);
+            playerAnimator.SetFloat("VerticalSpeed", 0f);
+
+            if (prefabToMove != null && playerMovement != null)
+            {
+                prefabToMove.transform.position = playerMovement.transform.position + newPrefabPosition;
             }
         }
     }
@@ -291,22 +336,6 @@ public class ItemMessage : MonoBehaviour
             for (int i = 0; i < sceneAnimators.Count; i++)
             {
                 if (sceneAnimators[i] != null) sceneAnimators[i].updateMode = originalUpdateModes[i];
-            }
-        }
-    }
-
-    private void SetPlayerKeyItemAnimation()
-    {
-        if (playerAnimator != null)
-        {
-            playerAnimator.SetBool("PlayKeyItem", true);
-            playerAnimator.SetFloat("Speed", 0f);
-            playerAnimator.SetBool("IsGrounded", true);
-            playerAnimator.SetFloat("VerticalSpeed", 0f);
-
-            if (prefabToMove != null && playerMovement != null)
-            {
-                prefabToMove.transform.position = playerMovement.transform.position + newPrefabPosition;
             }
         }
     }
