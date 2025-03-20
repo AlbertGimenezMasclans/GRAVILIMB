@@ -32,21 +32,18 @@ public class PlayerMovement : MonoBehaviour
     private bool hasSelectedWithX = false;
     private bool justExitedSelection = false;
 
-    private object activeDialogueSystem;
+    public object activeDialogueSystem; // Público para que CoinControllerUI lo acceda
 
-    // Variables para sonidos
     private AudioSource audioSource;
     public AudioClip jumpSound;
-    private int footstepIndex = 0;
-    private float footstepTimer = 0f;
 
-    // Booleanos para habilidades (bloqueadas por defecto)
     public bool canChangeGravity = false;
     public bool canShoot = false;
     public bool canDismember = false;
 
-    // Sprite para habilidades bloqueadas
-    public Sprite lockedLogo; // Asigna "Locked_Logo_0" en el Inspector
+    public Sprite lockedLogo;
+
+    [SerializeField] private CoinControllerUI coinControllerUI;
 
     void Start()
     {
@@ -66,6 +63,11 @@ public class PlayerMovement : MonoBehaviour
         if (bodyObject != null) bodyObject.SetActive(false);
 
         if (animator != null) animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+
+        if (coinControllerUI == null)
+        {
+            Debug.LogError("CoinControllerUI no está asignado en PlayerMovement.");
+        }
     }
 
     void Update()
@@ -74,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive) return;
             else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive) return;
+            activeDialogueSystem = null; // Limpiar cuando el diálogo termina
         }
 
         if (isMovementLocked || isDismembered)
@@ -167,18 +170,17 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void PlayJumpSound()
-{
-    if (jumpSound != null && audioSource != null)
     {
-        audioSource.pitch = 1.5f; // Forzar el pitch a 1.5
-        audioSource.PlayOneShot(jumpSound);
+        if (jumpSound != null && audioSource != null)
+        {
+            audioSource.pitch = 1.5f;
+            audioSource.PlayOneShot(jumpSound);
+        }
     }
-}
 
     private void UpdateHabSelectorUI()
     {
         if (habSelector == null) return;
-
         HabSelector habScript = habSelector.GetComponent<HabSelector>();
         if (habScript != null)
         {
@@ -190,18 +192,10 @@ public class PlayerMovement : MonoBehaviour
     {
         switch (abilityName.ToLower())
         {
-            case "gravity":
-                canChangeGravity = true;
-                break;
-            case "shoot":
-                canShoot = true;
-                break;
-            case "dismember":
-                canDismember = true;
-                break;
-            default:
-                Debug.LogWarning("Habilidad desconocida: " + abilityName);
-                break;
+            case "gravity": canChangeGravity = true; break;
+            case "shoot": canShoot = true; break;
+            case "dismember": canDismember = true; break;
+            default: Debug.LogWarning("Habilidad desconocida: " + abilityName); break;
         }
         UpdateHabSelectorUI();
     }
@@ -210,14 +204,11 @@ public class PlayerMovement : MonoBehaviour
     {
         rb.gravityScale = -rb.gravityScale;
         isGravityNormal = !isGravityNormal;
-
         Vector3 center = boxCollider.bounds.center;
         transform.RotateAround(center, Vector3.forward, 180f);
         transform.RotateAround(center, Vector3.up, 180f);
-
         lastGravityChange = Time.time;
         rb.velocity = new Vector2(rb.velocity.x, 0f);
-
         if (isGrounded && Mathf.Abs(rb.velocity.x) < 0.1f)
         {
             isGrounded = false;
@@ -237,7 +228,6 @@ public class PlayerMovement : MonoBehaviour
                 projectile.transform.position = firePoint.position;
                 projectile.transform.rotation = Quaternion.identity;
                 projectile.SetActive(true);
-
                 Rigidbody2D projectileRb = projectile.GetComponent<Rigidbody2D>();
                 projectileRb.gravityScale = 0f;
                 Vector2 shootDirection = transform.right * facingDirection;
@@ -257,33 +247,26 @@ public class PlayerMovement : MonoBehaviour
         if (headObject != null && bodyObject != null)
         {
             isDismembered = true;
-
             spriteRenderer.enabled = false;
             if (boxCollider != null) boxCollider.enabled = false;
             rb.velocity = Vector2.zero;
-
             if (habSelector != null) habSelector.SetActive(false);
             Time.timeScale = 1f;
             isSelectingMode = false;
-
             bodyObject.SetActive(true);
             headObject.SetActive(true);
-
             bodyObject.transform.position = transform.position;
             bodyObject.transform.rotation = transform.rotation;
             bodyObject.transform.localScale = transform.localScale;
-
             Vector3 headOffset = new Vector3(0f, boxCollider.size.y * 0.5f, 0f);
             headObject.transform.position = transform.position + (isGravityNormal ? headOffset : -headOffset);
             headObject.transform.localScale = transform.localScale;
-
             Rigidbody2D bodyRb = bodyObject.GetComponent<Rigidbody2D>();
             if (bodyRb != null)
             {
                 bodyRb.bodyType = RigidbodyType2D.Static;
                 bodyRb.velocity = Vector2.zero;
             }
-
             Rigidbody2D headRb = headObject.GetComponent<Rigidbody2D>();
             if (headRb != null)
             {
@@ -299,20 +282,14 @@ public class PlayerMovement : MonoBehaviour
         if (headObject != null && bodyObject != null)
         {
             isDismembered = false;
-
             spriteRenderer.enabled = true;
             if (boxCollider != null) boxCollider.enabled = true;
-
             headObject.SetActive(false);
             bodyObject.SetActive(false);
-
             transform.position = bodyObject.transform.position;
-
             spriteRenderer.color = Color.white;
             isShooting = false;
-
             transform.localScale = bodyObject.transform.localScale;
-
             Time.timeScale = 1f;
         }
     }
@@ -325,32 +302,14 @@ public class PlayerMovement : MonoBehaviour
     public void SetDialogueActive(object dialogue)
     {
         activeDialogueSystem = dialogue;
+        // No necesitamos notificar a CoinControllerUI aquí, ya que lo maneja en Update
     }
 
-    public bool IsGrounded()
-    {
-        return isGrounded;
-    }
-
-    public bool IsGravityNormal()
-    {
-        return isGravityNormal;
-    }
-
-    public void SetMovementLocked(bool locked)
-    {
-        isMovementLocked = locked;
-    }
-
-    public bool IsXPressed()
-    {
-        return Input.GetKey(KeyCode.X);
-    }
-
-    public void SetShootingMode(bool shooting)
-    {
-        isShooting = shooting;
-    }
+    public bool IsGrounded() => isGrounded;
+    public bool IsGravityNormal() => isGravityNormal;
+    public void SetMovementLocked(bool locked) => isMovementLocked = locked;
+    public bool IsXPressed() => Input.GetKey(KeyCode.X);
+    public void SetShootingMode(bool shooting) => isShooting = shooting;
 
     public void ExitSelectingMode()
     {

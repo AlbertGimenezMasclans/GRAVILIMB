@@ -37,6 +37,7 @@ public class ItemMessage : MonoBehaviour
     private bool hasCollided;
     private float originalPitch;
     private SpriteRenderer spriteRenderer;
+    private CoinControllerUI coinControllerUI;
 
     public bool IsDialogueActive => didDialogueStart;
 
@@ -52,9 +53,11 @@ public class ItemMessage : MonoBehaviour
         dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
         typingSound = Resources.Load<AudioClip>("SFX/Dialogue2");
 
+        coinControllerUI = FindObjectOfType<CoinControllerUI>();
+        if (coinControllerUI == null) Debug.LogError("CoinControllerUI no encontrado en la escena.");
+
         if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
-        if (textBoxRect == null) { Debug.LogError("TextBox no tiene RectTransform."); return; }
         originalTextBoxPosition = textBoxRect.anchoredPosition;
 
         dialogueText = textField1 != null ? textField1 : textField2;
@@ -152,10 +155,45 @@ public class ItemMessage : MonoBehaviour
 
             if (playerAnimator != null)
             {
-                playerAnimator.SetBool("PlayKeyItem", false); // Resetear al terminar el diálogo
+                playerAnimator.SetBool("PlayKeyItem", false);
             }
             if (Input_TB != null) Input_TB.gameObject.SetActive(false);
             if (spriteRenderer != null) spriteRenderer.enabled = false;
+
+            if (coinControllerUI != null)
+                coinControllerUI.SetCoinUIPanelActive(true); // Reactivar la UI al terminar el mensaje
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && !hasCollided)
+        {
+            hasCollided = true;
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
+
+            playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
+            playerAnimator = collision.gameObject.GetComponent<Animator>();
+
+            if (playerMovement != null)
+            {
+                if (coinControllerUI != null)
+                    coinControllerUI.OnItemCollision(); // Desactivar la UI al colisionar
+
+                playerMovement.SetMovementLocked(true);
+                playerMovement.rb.velocity = new Vector2(0f, playerMovement.rb.velocity.y);
+
+                if (playerMovement.IsGrounded())
+                {
+                    if (spriteRenderer != null) spriteRenderer.enabled = true;
+                    SetPlayerKeyItemAnimation();
+                    StartCoroutine(PlayFanfareAndStartDialogue());
+                }
+                else
+                {
+                    isWaitingForGround = true;
+                }
+            }
         }
     }
 
@@ -261,7 +299,6 @@ public class ItemMessage : MonoBehaviour
     {
         if (playerAnimator != null)
         {
-            // Configurar el Animator para la animación KeyItem
             playerAnimator.SetBool("PlayKeyItem", true);
             playerAnimator.SetFloat("Speed", 0f);
             playerAnimator.SetBool("IsGrounded", true);
@@ -270,36 +307,6 @@ public class ItemMessage : MonoBehaviour
             if (prefabToMove != null && playerMovement != null)
             {
                 prefabToMove.transform.position = playerMovement.transform.position + newPrefabPosition;
-            }
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player") && !hasCollided)
-        {
-            hasCollided = true;
-            if (spriteRenderer != null) spriteRenderer.enabled = false;
-
-            playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
-            playerAnimator = collision.gameObject.GetComponent<Animator>();
-
-            if (playerMovement != null)
-            {
-                // Bloquear el movimiento horizontal y dejar que caiga
-                playerMovement.SetMovementLocked(true);
-                playerMovement.rb.velocity = new Vector2(0f, playerMovement.rb.velocity.y); // Solo mantener velocidad vertical
-
-                if (playerMovement.IsGrounded())
-                {
-                    if (spriteRenderer != null) spriteRenderer.enabled = true;
-                    SetPlayerKeyItemAnimation();
-                    StartCoroutine(PlayFanfareAndStartDialogue());
-                }
-                else
-                {
-                    isWaitingForGround = true;
-                }
             }
         }
     }

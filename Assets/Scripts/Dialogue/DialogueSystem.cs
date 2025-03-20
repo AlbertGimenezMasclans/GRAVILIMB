@@ -8,20 +8,20 @@ public class DialogueSystem : MonoBehaviour
 {
     [SerializeField] private GameObject dialogueMark;
     [SerializeField] private GameObject textBox;
-    [SerializeField] private TMP_Text textField1; // Primer campo de texto
-    [SerializeField] private TMP_Text textField2; // Segundo campo de texto
-    [SerializeField, TextArea(1, 4)] private string[] dialogueLines; // Diálogos normales
-    [SerializeField, TextArea(1, 4)] private string[] headlessDialogueLines; // Diálogos adicionales para desmembrado
+    [SerializeField] private TMP_Text textField1;
+    [SerializeField] private TMP_Text textField2;
+    [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
+    [SerializeField, TextArea(1, 4)] private string[] headlessDialogueLines;
     [SerializeField] private GameObject textBoxPortrait;
-    [SerializeField] private Sprite[] portraitSprites; // Retratos normales
-    [SerializeField] private Sprite[] headlessPortraitSprites; // Retratos para desmembrado
+    [SerializeField] private Sprite[] portraitSprites;
+    [SerializeField] private Sprite[] headlessPortraitSprites;
     [SerializeField] private Image Input_TB;
     [SerializeField] private bool useAlternativePosition = false;
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
     [SerializeField] private AudioClip typingSound;
     [SerializeField] private Sprite idleSprite;
     [SerializeField] private Sprite blinkSprite;
-    
+
     private float typingTime = 0.05f;
     private float commaPauseTime = 0.25f;
     private float periodPauseTime = 0.48f;
@@ -37,11 +37,12 @@ public class DialogueSystem : MonoBehaviour
     private List<AnimatorUpdateMode> originalUpdateModes;
     private string[] activeDialogueLines;
     private Sprite[] activePortraitSprites;
-    private TMP_Text dialogueText; // Campo activo seleccionado
+    private TMP_Text dialogueText;
 
     public bool IsDialogueActive => didDialogueStart;
-    private PlayerMovement playerMovement; // Para el estado normal
-    private GameObject playerObject; // Objeto que entró al trigger (cuerpo o cabeza)
+    private PlayerMovement playerMovement;
+    private GameObject playerObject;
+    private CoinControllerUI coinControllerUI; // Nueva referencia
 
     void Start()
     {
@@ -51,35 +52,16 @@ public class DialogueSystem : MonoBehaviour
         dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
         dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
 
-        if (dialogueAdvanceSound == null) Debug.LogError("No se pudo cargar DialogueNEXT desde Resources/SFX.");
-        if (dialogueEndSound == null) Debug.LogError("No se pudo cargar DialogueEND desde Resources/SFX.");
-        if (typingSound == null) Debug.LogWarning("TypingSound no está asignado.");
+        coinControllerUI = FindObjectOfType<CoinControllerUI>(); // Buscar en la escena
+        if (coinControllerUI == null) Debug.LogError("CoinControllerUI no encontrado en la escena.");
 
         if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
-        if (textBoxRect == null) { Debug.LogError("TextBox no tiene RectTransform."); return; }
         originalTextBoxPosition = textBoxRect.anchoredPosition;
 
-        // Determinar qué campo de texto usar
-        if (textField1 != null)
-        {
-            dialogueText = textField1;
-            if (textField2 != null) textField2.gameObject.SetActive(false); // Desactiva el otro si está asignado
-        }
-        else if (textField2 != null)
-        {
-            dialogueText = textField2;
-        }
-        else
-        {
-            Debug.LogError("Ningún campo de texto (Text Field 1 o Text Field 2) está asignado en el Inspector.");
-        }
-
-        // Asegurarse de que el texto esté inicialmente oculto si no está activo
-        if (dialogueText != null && !didDialogueStart)
-        {
-            dialogueText.gameObject.SetActive(false);
-        }
+        dialogueText = textField1 != null ? textField1 : textField2;
+        if (textField2 != null && dialogueText == textField1) textField2.gameObject.SetActive(false);
+        if (dialogueText != null && !didDialogueStart) dialogueText.gameObject.SetActive(false);
 
         if (textBoxPortrait != null)
         {
@@ -88,12 +70,6 @@ public class DialogueSystem : MonoBehaviour
         }
 
         if (Input_TB != null) Input_TB.gameObject.SetActive(false);
-        else Debug.LogError("Input_TB no está asignado.");
-
-        if (portraitSprites != null && portraitSprites.Length != dialogueLines.Length)
-            Debug.LogWarning("El número de portraitSprites no coincide con dialogueLines.");
-        if (headlessPortraitSprites != null && headlessPortraitSprites.Length != headlessDialogueLines.Length)
-            Debug.LogWarning("El número de headlessPortraitSprites no coincide con headlessDialogueLines.");
 
         if (idleSprite != null && blinkSprite != null && portraitImage != null)
             StartCoroutine(BlinkRoutine());
@@ -125,23 +101,18 @@ public class DialogueSystem : MonoBehaviour
 
     private void StartDialogue()
     {
-        if (textBox == null || dialogueText == null || dialogueLines == null || dialogueLines.Length == 0)
-        {
-            Debug.LogError("Faltan referencias o dialogueLines está vacío.");
-            return;
-        }
+        if (textBox == null || dialogueText == null || dialogueLines == null || dialogueLines.Length == 0) return;
 
         didDialogueStart = true;
         textBox.SetActive(true);
         if (dialogueMark != null) dialogueMark.SetActive(false);
-        dialogueText.gameObject.SetActive(true); // Activar el campo de texto seleccionado
+        dialogueText.gameObject.SetActive(true);
         lineIndex = 0;
         Time.timeScale = 0f;
 
         FacePlayer();
         ConfigureAnimatorsForDialogue(true);
 
-        // Determinar si el jugador está desmembrado
         bool isDismembered = false;
         if (playerMovement != null)
         {
@@ -152,15 +123,12 @@ public class DialogueSystem : MonoBehaviour
             isDismembered = true;
         }
 
-        // Configurar los diálogos activos
         if (isDismembered && headlessDialogueLines != null && headlessDialogueLines.Length > 0)
         {
-            // Combinar diálogos normales con los de desmembrado
             activeDialogueLines = new string[dialogueLines.Length + headlessDialogueLines.Length];
             dialogueLines.CopyTo(activeDialogueLines, 0);
             headlessDialogueLines.CopyTo(activeDialogueLines, dialogueLines.Length);
 
-            // Combinar retratos (si hay retratos para desmembrado, si no, repetir los normales)
             if (headlessPortraitSprites != null && headlessPortraitSprites.Length > 0)
             {
                 activePortraitSprites = new Sprite[portraitSprites.Length + headlessPortraitSprites.Length];
@@ -178,7 +146,6 @@ public class DialogueSystem : MonoBehaviour
         }
         else
         {
-            // Solo diálogos normales si no está desmembrado
             activeDialogueLines = dialogueLines;
             activePortraitSprites = portraitSprites;
         }
@@ -191,6 +158,9 @@ public class DialogueSystem : MonoBehaviour
 
         if (playerMovement != null)
             playerMovement.SetDialogueActive(this);
+
+        if (coinControllerUI != null)
+            coinControllerUI.gameObject.SetActive(false); // Desactivar la UI al iniciar el diálogo
 
         if (Input_TB != null)
             Input_TB.gameObject.SetActive(false);
@@ -215,13 +185,16 @@ public class DialogueSystem : MonoBehaviour
             textBox.SetActive(false);
             if (dialogueMark != null) dialogueMark.SetActive(true);
             if (textBoxPortrait != null) textBoxPortrait.SetActive(false);
-            dialogueText.gameObject.SetActive(false); // Ocultar el campo de texto al finalizar
+            dialogueText.gameObject.SetActive(false);
             Time.timeScale = 1f;
 
             ConfigureAnimatorsForDialogue(false);
 
             if (playerMovement != null)
                 playerMovement.SetDialogueActive(null);
+
+            if (coinControllerUI != null)
+                coinControllerUI.gameObject.SetActive(true); // Reactivar la UI al terminar el diálogo
 
             if (Input_TB != null)
                 Input_TB.gameObject.SetActive(false);
@@ -391,18 +364,8 @@ public class DialogueSystem : MonoBehaviour
         {
             isPlayerRange = true;
             if (dialogueMark != null) dialogueMark.SetActive(true);
-
             playerObject = collision.gameObject;
             playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
-
-            if (playerMovement == null && collision.gameObject.GetComponent<Dismember>() != null)
-            {
-                Debug.Log("Detectada cabeza desmembrada.");
-            }
-            else if (playerMovement != null)
-            {
-                Debug.Log("Detectado cuerpo completo. isDismembered: " + playerMovement.isDismembered);
-            }
         }
     }
 
