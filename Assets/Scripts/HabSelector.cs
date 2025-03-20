@@ -28,7 +28,7 @@ public class HabSelector : MonoBehaviour
 
     [Header("Text References")]
     [SerializeField, Tooltip("Text component for displaying the ability name (title)")] private TextMeshProUGUI abilityNameText;
-    [SerializeField, Tooltip("Additional text component to show/hide with the selector")] private TextMeshProUGUI ZText; // Nuevo campo para el texto adicional
+    [SerializeField, Tooltip("Additional text component to show/hide with the selector")] private TextMeshProUGUI ZText;
     
     [Header("References")]
     [SerializeField, Tooltip("Reference to the PlayerMovement script")] private PlayerMovement playerMovement;
@@ -36,13 +36,12 @@ public class HabSelector : MonoBehaviour
     [Header("Audio")]
     [SerializeField, Tooltip("Sound played when moving the cursor")] private AudioClip moveSound;
 
-    // Variables para el cursor
     private SpriteRenderer cursorRenderer;
     private AudioSource audioSource;
-    private float spriteTimer = 0f; // Temporizador para cambio de sprite
-    private float cooldownTimer = 0f; // Temporizador para cooldown de movimiento
-    private bool isInCooldown = false; // Indica si estamos en cooldown de movimiento
-    private bool isAlternating = false; // Indica si estamos alternando sprites
+    private float spriteTimer = 0f;
+    private float cooldownTimer = 0f;
+    private bool isInCooldown = false;
+    private bool isAlternating = false;
 
     private enum SelectedHab { Gravity, Dismember, Shooting }
     private SelectedHab currentSelection = SelectedHab.Gravity;
@@ -50,7 +49,6 @@ public class HabSelector : MonoBehaviour
 
     void Start()
     {
-        // Validaciones iniciales
         if (playerMovement == null || cursor == null || abilityNameText == null || 
             originalCursorSprite == null || selectionCursorSprite == null)
         {
@@ -68,7 +66,6 @@ public class HabSelector : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
-        // Validar el texto adicional
         if (ZText == null)
         {
             Debug.LogWarning("Additional Text no asignado en HabSelector. No se mostrará ningún texto adicional.");
@@ -76,31 +73,29 @@ public class HabSelector : MonoBehaviour
 
         UpdateUI(playerMovement.canChangeGravity, playerMovement.canShoot, playerMovement.canDismember);
         UpdateCursorPosition();
-        abilityNameText.gameObject.SetActive(false); // Ocultar texto del título al inicio
-        if (ZText != null) ZText.gameObject.SetActive(false); // Ocultar texto adicional al inicio
-        cursorRenderer.sprite = originalCursorSprite; // Sprite inicial
+        abilityNameText.gameObject.SetActive(false);
+        if (ZText != null) ZText.gameObject.SetActive(false);
+        cursorRenderer.sprite = originalCursorSprite;
     }
 
     void Update()
     {
         if (playerMovement != null && playerMovement.IsXPressed() && playerMovement.isSelectingMode)
         {
-            // Mostrar ambos textos al entrar en modo selección
             if (!abilityNameText.gameObject.activeSelf)
             {
                 abilityNameText.gameObject.SetActive(true);
                 if (ZText != null) ZText.gameObject.SetActive(true);
                 UpdateAbilityNameText();
+                UpdateUI(playerMovement.canChangeGravity, playerMovement.canShoot, playerMovement.canDismember);
             }
 
-            // Iniciar alternancia si no está activa
             if (!isAlternating)
             {
                 isAlternating = true;
                 spriteTimer = 0f;
             }
 
-            // Manejar temporizador de cooldown si está activo
             if (isInCooldown)
             {
                 cooldownTimer += Time.unscaledDeltaTime;
@@ -111,7 +106,6 @@ public class HabSelector : MonoBehaviour
                 }
             }
 
-            // Alternar sprites cada spriteChangeInterval
             if (isAlternating)
             {
                 spriteTimer += Time.unscaledDeltaTime;
@@ -122,7 +116,6 @@ public class HabSelector : MonoBehaviour
                 }
             }
 
-            // Permitir movimiento solo si no está en cooldown
             if (!isInCooldown)
             {
                 if (Input.GetKeyDown(KeyCode.RightArrow)) MoveCursorRight();
@@ -131,7 +124,6 @@ public class HabSelector : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.DownArrow)) MoveCursorDown();
             }
 
-            // Activar habilidad con Z
             if (Input.GetKeyDown(KeyCode.Z))
             {
                 switch (currentSelection)
@@ -155,7 +147,7 @@ public class HabSelector : MonoBehaviour
                         }
                         break;
                     case SelectedHab.Dismember:
-                        if (playerMovement.canDismember)
+                        if (playerMovement.canDismember && playerMovement.IsGrounded())
                         {
                             playerMovement.DismemberHead();
                             playerMovement.ExitSelectingMode();
@@ -168,7 +160,6 @@ public class HabSelector : MonoBehaviour
         }
         else
         {
-            // Salir del modo selección: reiniciar estados
             abilityNameText.gameObject.SetActive(false);
             if (ZText != null) ZText.gameObject.SetActive(false);
             isInCooldown = false;
@@ -235,22 +226,21 @@ public class HabSelector : MonoBehaviour
 
     private void MoveCursorDown()
     {
-        return; // No hay movimiento hacia abajo
+        return;
     }
 
     private void OnCursorMoved()
     {
         UpdateCursorPosition();
         UpdateAbilityNameText();
-        isInCooldown = true; // Activar cooldown de movimiento
+        isInCooldown = true;
         cooldownTimer = 0f;
         if (moveSound != null && audioSource != null)
         {
-            audioSource.PlayOneShot(moveSound); // Reproducir sonido
+            audioSource.PlayOneShot(moveSound);
         }
-        // Reiniciar el temporizador de sprite para sincronizar la alternancia
         spriteTimer = 0f;
-        cursorRenderer.sprite = selectionCursorSprite; // Iniciar con sprite de selección
+        cursorRenderer.sprite = selectionCursorSprite;
     }
 
     private void UpdateCursorPosition()

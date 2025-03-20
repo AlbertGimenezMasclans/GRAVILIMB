@@ -3,47 +3,80 @@ using TMPro;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Movement Settings")]
+    [Tooltip("Horizontal movement speed")]
     public float moveSpeed = 5f;
+    [Tooltip("Force applied when jumping")]
     public float jumpForce = 5f;
+    [Tooltip("Layer mask for ground detection")]
     public LayerMask groundLayer;
+
+    [Header("Ability Selection")]
+    [Tooltip("UI object for ability selection")]
     public GameObject habSelector;
+    [Tooltip("Prefab for projectile spawning")]
     public GameObject projectilePrefab;
+    [Tooltip("Speed of fired projectiles")]
     public float projectileSpeed = 10f;
+    [Tooltip("Point where projectiles spawn")]
     public Transform firePoint;
 
+    [Header("Dismemberment")]
+    [Tooltip("Head object for dismemberment")]
     public GameObject headObject;
+    [Tooltip("Body object for dismemberment")]
     public GameObject bodyObject;
+    [Tooltip("Is the player currently dismembered?")]
     public bool isDismembered = false;
 
+    [Header("Components")]
+    [Tooltip("Player's Rigidbody2D component")]
     public Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
+    [Tooltip("Player's BoxCollider2D component")]
     public BoxCollider2D boxCollider;
     private Animator animator;
+
+    [Header("State Variables")]
+    [Tooltip("Is the player touching the ground?")]
     public bool isGrounded;
     private float gravityScale;
+    [Tooltip("Is gravity in normal direction?")]
     public bool isGravityNormal = true;
     private float lastGravityChange;
     private float gravityChangeDelay = 1f;
     private bool hasTouchedGround = false;
     private bool isShooting = false;
     private float facingDirection = 1f;
+    [Tooltip("Is the player in ability selection mode?")]
     public bool isSelectingMode = false;
     private bool isMovementLocked = false;
     private bool hasSelectedWithX = false;
     private bool justExitedSelection = false;
 
-    public object activeDialogueSystem; // P�blico para que CoinControllerUI lo acceda
+    [Header("Dialogue System")]
+    [Tooltip("Currently active dialogue system")]
+    public object activeDialogueSystem;
 
+    [Header("Audio")]
     private AudioSource audioSource;
+    [Tooltip("Sound played when jumping")]
     public AudioClip jumpSound;
 
+    [Header("Abilities")]
+    [Tooltip("Can the player change gravity?")]
     public bool canChangeGravity = false;
+    [Tooltip("Can the player shoot projectiles?")]
     public bool canShoot = false;
+    [Tooltip("Can the player dismember?")]
     public bool canDismember = false;
 
+    [Header("UI Elements")]
+    [Tooltip("Sprite shown for locked abilities")]
     public Sprite lockedLogo;
-
-    [SerializeField] private CoinControllerUI coinControllerUI;
+    [SerializeField]
+    [Tooltip("Reference to CoinControllerUI")]
+    private CoinControllerUI coinControllerUI;
 
     void Start()
     {
@@ -66,7 +99,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (coinControllerUI == null)
         {
-            Debug.LogError("CoinControllerUI no est� asignado en PlayerMovement.");
+            Debug.LogError("CoinControllerUI no está asignado en PlayerMovement.");
         }
     }
 
@@ -90,13 +123,11 @@ public class PlayerMovement : MonoBehaviour
         return;
     }
 
-    // Eliminamos la verificación de isWaitingForItemGround porque ItemMessage ahora lo maneja todo
     animator.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
     animator.SetBool("IsGrounded", isGrounded);
     float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
     animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
 
-    // Resto del código de Update sigue igual
     bool hasAnyAbility = canChangeGravity || canShoot || canDismember;
     if (Input.GetKey(KeyCode.X) && hasAnyAbility && !justExitedSelection)
     {
@@ -150,18 +181,19 @@ public class PlayerMovement : MonoBehaviour
 }
 
     void OnCollisionEnter2D(Collision2D collision)
+{
+    if (((1 << collision.gameObject.layer) & groundLayer) != 0)
     {
-        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
+        Vector2 normal = collision.contacts[0].normal;
+        float dot = Vector2.Dot(normal, isGravityNormal ? Vector2.up : Vector2.down);
+        if (dot > 0.5f)
         {
-            Vector2 normal = collision.contacts[0].normal;
-            float dot = Vector2.Dot(normal, isGravityNormal ? Vector2.up : Vector2.down);
-            if (dot > 0.5f)
-            {
-                isGrounded = true;
-                hasTouchedGround = true;
-            }
+            isGrounded = true;
+            hasTouchedGround = true;
+            Debug.Log($"OnCollisionEnter2D: isGrounded={isGrounded}, VerticalSpeed={animator.GetFloat("VerticalSpeed")}, Speed={animator.GetFloat("Speed")}, Time.timeScale={Time.timeScale}");
         }
     }
+}
 
     void OnCollisionExit2D(Collision2D collision)
     {
@@ -203,21 +235,21 @@ public class PlayerMovement : MonoBehaviour
     }
 
     public void ChangeGravity()
+{
+    rb.gravityScale = -rb.gravityScale;
+    isGravityNormal = !isGravityNormal;
+    Vector3 center = boxCollider.bounds.center;
+    transform.RotateAround(center, Vector3.forward, 180f);
+    transform.RotateAround(center, Vector3.up, 180f);
+    rb.velocity = new Vector2(rb.velocity.x, 0f);
+
+    if (isGrounded && Mathf.Abs(rb.velocity.x) < 0.1f)
     {
-        rb.gravityScale = -rb.gravityScale;
-        isGravityNormal = !isGravityNormal;
-        Vector3 center = boxCollider.bounds.center;
-        transform.RotateAround(center, Vector3.forward, 180f);
-        transform.RotateAround(center, Vector3.up, 180f);
-        rb.velocity = new Vector2(rb.velocity.x, 0f);
-        if (isGrounded && Mathf.Abs(rb.velocity.x) < 0.1f)
-        {
-            isGrounded = false;
-            animator.SetBool("IsGrounded", false);
-            float adjustedVerticalSpeed = isGravityNormal ? -0.1f : 0.1f;
-            animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
-        }
+        animator.SetBool("IsGrounded", true);
+        animator.SetFloat("VerticalSpeed", 0f);
     }
+    Debug.Log($"ChangeGravity: isGrounded={isGrounded}, VerticalSpeed={animator.GetFloat("VerticalSpeed")}, Speed={animator.GetFloat("Speed")}, Time.timeScale={Time.timeScale}");
+}
 
     void FireProjectile()
     {
@@ -244,6 +276,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void DismemberHead()
     {
+        if (!isGrounded || !canDismember) return; // Solo permitir desmembramiento si está en el suelo y tiene la habilidad
+
         headObject.tag = "Player";
         if (headObject != null && bodyObject != null)
         {
@@ -301,10 +335,16 @@ public class PlayerMovement : MonoBehaviour
     }
 
     public void SetDialogueActive(object dialogue)
+{
+    activeDialogueSystem = dialogue;
+    if (dialogue == null && animator != null) // Cuando el diálogo termina
     {
-        activeDialogueSystem = dialogue;
-        // No necesitamos notificar a CoinControllerUI aqu�, ya que lo maneja en Update
+        animator.SetBool("IsGrounded", isGrounded);
+        animator.SetFloat("VerticalSpeed", 0f);
+        animator.SetFloat("Speed", 0f);
+        Debug.Log("Dialogue Ended: Forcing Animator to Idle state");
     }
+}
 
     public bool IsGrounded() => isGrounded;
     public bool IsGravityNormal() => isGravityNormal;

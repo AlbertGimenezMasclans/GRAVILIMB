@@ -6,20 +6,46 @@ using UnityEngine.UI;
 
 public class DialogueSystem : MonoBehaviour
 {
+    [Header("UI Elements")]
+    [Tooltip("Icon shown when player is in dialogue range")]
     [SerializeField] private GameObject dialogueMark;
+    [Tooltip("Main dialogue text box container")]
     [SerializeField] private GameObject textBox;
+    [Tooltip("Primary text field for dialogue (preferred if both are set)")]
     [SerializeField] private TMP_Text textField1;
+    [Tooltip("Secondary text field for dialogue")]
     [SerializeField] private TMP_Text textField2;
-    [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
-    [SerializeField, TextArea(1, 4)] private string[] headlessDialogueLines;
-    [SerializeField] private GameObject textBoxPortrait;
-    [SerializeField] private Sprite[] portraitSprites;
-    [SerializeField] private Sprite[] headlessPortraitSprites;
+    [Tooltip("Input indicator image")]
     [SerializeField] private Image Input_TB;
+
+    [Header("Dialogue Content")]
+    [Tooltip("Lines of dialogue for normal state")]
+    [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
+    [Tooltip("Lines of dialogue when player is dismembered")]
+    [SerializeField, TextArea(1, 4)] private string[] headlessDialogueLines;
+
+    [Header("Portrait Settings")]
+    [Tooltip("GameObject containing the portrait image")]
+    [SerializeField] private GameObject textBoxPortrait;
+    [Tooltip("Sprites for normal dialogue portraits")]
+    [SerializeField] private Sprite[] portraitSprites;
+    [Tooltip("Sprites for headless dialogue portraits")]
+    [SerializeField] private Sprite[] headlessPortraitSprites;
+
+    [Header("Position Settings")]
+    [Tooltip("Use an alternative position for the text box?")]
     [SerializeField] private bool useAlternativePosition = false;
+    [Tooltip("Custom position for text box when using alternative position")]
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
+
+    [Header("Audio Settings")]
+    [Tooltip("Sound played during text typing")]
     [SerializeField] private AudioClip typingSound;
+
+    [Header("Blink Animation")]
+    [Tooltip("Default portrait sprite when idle")]
     [SerializeField] private Sprite idleSprite;
+    [Tooltip("Portrait sprite during blink animation")]
     [SerializeField] private Sprite blinkSprite;
 
     private float typingTime = 0.05f;
@@ -42,7 +68,7 @@ public class DialogueSystem : MonoBehaviour
     public bool IsDialogueActive => didDialogueStart;
     private PlayerMovement playerMovement;
     private GameObject playerObject;
-    private CoinControllerUI coinControllerUI; // Nueva referencia
+    private CoinControllerUI coinControllerUI;
 
     void Start()
     {
@@ -52,10 +78,10 @@ public class DialogueSystem : MonoBehaviour
         dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
         dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
 
-        coinControllerUI = FindObjectOfType<CoinControllerUI>(); // Buscar en la escena
-        if (coinControllerUI == null) Debug.LogError("CoinControllerUI no encontrado en la escena.");
+        coinControllerUI = FindObjectOfType<CoinControllerUI>();
+        if (coinControllerUI == null) Debug.LogError("CoinControllerUI not found in the scene.");
 
-        if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
+        if (textBox == null) { Debug.LogError("TextBox is not assigned."); return; }
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
         originalTextBoxPosition = textBoxRect.anchoredPosition;
 
@@ -160,7 +186,7 @@ public class DialogueSystem : MonoBehaviour
             playerMovement.SetDialogueActive(this);
 
         if (coinControllerUI != null)
-            coinControllerUI.gameObject.SetActive(false); // Desactivar la UI al iniciar el diálogo
+            coinControllerUI.gameObject.SetActive(false);
 
         if (Input_TB != null)
             Input_TB.gameObject.SetActive(false);
@@ -194,7 +220,7 @@ public class DialogueSystem : MonoBehaviour
                 playerMovement.SetDialogueActive(null);
 
             if (coinControllerUI != null)
-                coinControllerUI.gameObject.SetActive(true); // Reactivar la UI al terminar el diálogo
+                coinControllerUI.gameObject.SetActive(true);
 
             if (Input_TB != null)
                 Input_TB.gameObject.SetActive(false);
