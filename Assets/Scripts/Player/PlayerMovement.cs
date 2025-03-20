@@ -44,7 +44,7 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Is gravity in normal direction?")]
     public bool isGravityNormal = true;
     private float lastGravityChange;
-    private float gravityChangeDelay = 1f;
+    private float gravityChangeDelay = 0.5f;
     private bool hasTouchedGround = false;
     private bool isShooting = false;
     private float facingDirection = 1f;
@@ -168,9 +168,10 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
         {
-            if (!isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay && canChangeGravity)
+            if (!isShooting && isGrounded && Time.time >= lastGravityChange + gravityChangeDelay && canChangeGravity) // Cambiar gravedad solo en el suelo
             {
                 ChangeGravity();
+                lastGravityChange = Time.time; // Actualizar el tiempo del último cambio
             }
             else if (isShooting && canShoot)
             {
@@ -248,7 +249,7 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("IsGrounded", true);
         animator.SetFloat("VerticalSpeed", 0f);
     }
-    Debug.Log($"ChangeGravity: isGrounded={isGrounded}, VerticalSpeed={animator.GetFloat("VerticalSpeed")}, Speed={animator.GetFloat("Speed")}, Time.timeScale={Time.timeScale}");
+    lastGravityChange = Time.time; // Actualizar el tiempo del cambio
 }
 
     void FireProjectile()
