@@ -3,31 +3,40 @@ using TMPro;
 
 public class HabSelector : MonoBehaviour
 {
-    [SerializeField] private GameObject gravityObject;
-    [SerializeField] private GameObject dismemberObject;
-    [SerializeField] private GameObject shootingObject;
-    [SerializeField] private GameObject cursor;
-    [SerializeField] private PlayerMovement playerMovement;
+    [Header("Hability Objects")]
+    [SerializeField, Tooltip("GameObject representing the Gravity ability icon")] private GameObject gravityObject;
+    [SerializeField, Tooltip("GameObject representing the Dismember ability icon")] private GameObject dismemberObject;
+    [SerializeField, Tooltip("GameObject representing the Shooting ability icon")] private GameObject shootingObject;
+    
+    [Header("Cursor Settings")]
+    [SerializeField, Tooltip("GameObject representing the cursor")] private GameObject cursor;
+    [SerializeField, Tooltip("Sprite for the cursor in its default state")] private Sprite originalCursorSprite;
+    [SerializeField, Tooltip("Sprite for the cursor when selecting/moving")] private Sprite selectionCursorSprite;
+    [SerializeField, Tooltip("Time interval (in seconds) for alternating cursor sprites")] private float spriteChangeInterval = 0.5f;
+    [SerializeField, Tooltip("Cooldown (in seconds) between cursor movements")] private float moveCooldown = 1.0f;
 
-    // Sprites para habilidades
-    [SerializeField] private Sprite lockedSprite;
-    [SerializeField] private Sprite gravitySprite;
-    [SerializeField] private Sprite dismemberSprite;
-    [SerializeField] private Sprite shootingSprite;
+    [Header("Ability Sprites")]
+    [SerializeField, Tooltip("Sprite shown when an ability is locked")] private Sprite lockedSprite;
+    [SerializeField, Tooltip("Sprite for the Gravity ability when unlocked")] private Sprite gravitySprite;
+    [SerializeField, Tooltip("Sprite for the Dismember ability when unlocked")] private Sprite dismemberSprite;
+    [SerializeField, Tooltip("Sprite for the Shooting ability when unlocked")] private Sprite shootingSprite;
 
-    // Texto y nombres de habilidades
-    [SerializeField] private TextMeshProUGUI abilityNameText;
-    [SerializeField] private string gravityName = "Zer0 Bootz";
-    [SerializeField] private string shootingName = "Gun";
-    [SerializeField] private string dismemberName = "Head Space";
+    [Header("Ability Names")]
+    [SerializeField, Tooltip("Name displayed for the Gravity ability")] private string gravityName = "Zer0 Bootz";
+    [SerializeField, Tooltip("Name displayed for the Shooting ability")] private string shootingName = "Gun";
+    [SerializeField, Tooltip("Name displayed for the Dismember ability")] private string dismemberName = "Head Space";
+
+    [Header("Text References")]
+    [SerializeField, Tooltip("Text component for displaying the ability name (title)")] private TextMeshProUGUI abilityNameText;
+    [SerializeField, Tooltip("Additional text component to show/hide with the selector")] private TextMeshProUGUI ZText; // Nuevo campo para el texto adicional
+    
+    [Header("References")]
+    [SerializeField, Tooltip("Reference to the PlayerMovement script")] private PlayerMovement playerMovement;
+    
+    [Header("Audio")]
+    [SerializeField, Tooltip("Sound played when moving the cursor")] private AudioClip moveSound;
 
     // Variables para el cursor
-    [SerializeField] private Sprite originalCursorSprite; // Sprite original del cursor
-    [SerializeField] private Sprite selectionCursorSprite; // Sprite al mover/seleccionar
-    [SerializeField] private float spriteChangeInterval = 0.5f; // Intervalo de cambio de sprite (0.5s)
-    [SerializeField] private float moveCooldown = 1.0f; // Cooldown total al moverte (1s)
-    [SerializeField] private AudioClip moveSound; // Sonido al moverse
-
     private SpriteRenderer cursorRenderer;
     private AudioSource audioSource;
     private float spriteTimer = 0f; // Temporizador para cambio de sprite
@@ -59,9 +68,16 @@ public class HabSelector : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
+        // Validar el texto adicional
+        if (ZText == null)
+        {
+            Debug.LogWarning("Additional Text no asignado en HabSelector. No se mostrará ningún texto adicional.");
+        }
+
         UpdateUI(playerMovement.canChangeGravity, playerMovement.canShoot, playerMovement.canDismember);
         UpdateCursorPosition();
-        abilityNameText.gameObject.SetActive(false); // Ocultar texto al inicio
+        abilityNameText.gameObject.SetActive(false); // Ocultar texto del título al inicio
+        if (ZText != null) ZText.gameObject.SetActive(false); // Ocultar texto adicional al inicio
         cursorRenderer.sprite = originalCursorSprite; // Sprite inicial
     }
 
@@ -69,10 +85,11 @@ public class HabSelector : MonoBehaviour
     {
         if (playerMovement != null && playerMovement.IsXPressed() && playerMovement.isSelectingMode)
         {
-            // Mostrar texto al entrar en modo selección
+            // Mostrar ambos textos al entrar en modo selección
             if (!abilityNameText.gameObject.activeSelf)
             {
                 abilityNameText.gameObject.SetActive(true);
+                if (ZText != null) ZText.gameObject.SetActive(true);
                 UpdateAbilityNameText();
             }
 
@@ -125,6 +142,7 @@ public class HabSelector : MonoBehaviour
                             playerMovement.SetShootingMode(false);
                             playerMovement.ExitSelectingMode();
                             abilityNameText.gameObject.SetActive(false);
+                            if (ZText != null) ZText.gameObject.SetActive(false);
                         }
                         break;
                     case SelectedHab.Shooting:
@@ -133,6 +151,7 @@ public class HabSelector : MonoBehaviour
                             playerMovement.SetShootingMode(true);
                             playerMovement.ExitSelectingMode();
                             abilityNameText.gameObject.SetActive(false);
+                            if (ZText != null) ZText.gameObject.SetActive(false);
                         }
                         break;
                     case SelectedHab.Dismember:
@@ -141,6 +160,7 @@ public class HabSelector : MonoBehaviour
                             playerMovement.DismemberHead();
                             playerMovement.ExitSelectingMode();
                             abilityNameText.gameObject.SetActive(false);
+                            if (ZText != null) ZText.gameObject.SetActive(false);
                         }
                         break;
                 }
@@ -150,6 +170,7 @@ public class HabSelector : MonoBehaviour
         {
             // Salir del modo selección: reiniciar estados
             abilityNameText.gameObject.SetActive(false);
+            if (ZText != null) ZText.gameObject.SetActive(false);
             isInCooldown = false;
             isAlternating = false;
             cursorRenderer.sprite = originalCursorSprite;
