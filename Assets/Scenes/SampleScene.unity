@@ -1501,6 +1501,18 @@ PrefabInstance:
       propertyPath: dialogueLines.Array.data[3]
       value: Prueba a disparar a la pared roja que hay atras.
       objectReference: {fileID: 0}
+    - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      propertyPath: newPrefabPositionInverted.y
+      value: -1.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      propertyPath: alternativeTextBoxPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      propertyPath: alternativeTextBoxPosition.y
+      value: -600
+      objectReference: {fileID: 0}
     - target: {fileID: 6071182378240184559, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: m_Size.x
       value: 0.1455359
@@ -3675,7 +3687,9 @@ MonoBehaviour:
   bodyObject: {fileID: 1368078077}
   isDismembered: 0
   rb: {fileID: 0}
+  boxCollider: {fileID: 0}
   isGrounded: 0
+  isGravityNormal: 1
   isSelectingMode: 0
   jumpSound: {fileID: 8300000, guid: cff8eac4fb5a08f42aab14c8b5e65fa3, type: 3}
   canChangeGravity: 0
@@ -5715,6 +5729,18 @@ PrefabInstance:
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[3]
       value: Prueba a disparar a la pared roja que hay atras.
+      objectReference: {fileID: 0}
+    - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      propertyPath: newPrefabPositionInverted.y
+      value: -1.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      propertyPath: alternativeTextBoxPosition.x
+      value: -600
+      objectReference: {fileID: 0}
+    - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
+      propertyPath: alternativeTextBoxPosition.y
+      value: -600
       objectReference: {fileID: 0}
     - target: {fileID: 6071182378240184559, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: m_Size.x

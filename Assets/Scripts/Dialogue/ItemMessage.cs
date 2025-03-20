@@ -15,7 +15,8 @@ public class ItemMessage : MonoBehaviour
     [SerializeField] private AudioClip fanfareSong;
     [SerializeField] private Image Input_TB;
     [SerializeField] private GameObject prefabToMove;
-    [SerializeField] private Vector3 newPrefabPosition;
+    [SerializeField] private Vector3 newPrefabPosition; // Posición normal
+    [SerializeField] private Vector3 newPrefabPositionInverted; // Posición alternativa para gravedad invertida
 
     private float typingTime = 0.05f;
     private float commaPauseTime = 0.25f;
@@ -38,6 +39,7 @@ public class ItemMessage : MonoBehaviour
     private float originalPitch;
     private SpriteRenderer spriteRenderer;
     private CoinControllerUI coinControllerUI;
+    private bool useInvertedPositions; // Para determinar si usamos posiciones alternativas
 
     public bool IsDialogueActive => didDialogueStart;
 
@@ -68,6 +70,9 @@ public class ItemMessage : MonoBehaviour
 
         sceneAnimators = new List<Animator>();
         originalUpdateModes = new List<AnimatorUpdateMode>();
+
+        // Por ahora, la posición invertida será igual a la normal hasta que la especifiques en el Inspector
+        if (newPrefabPositionInverted == Vector3.zero) newPrefabPositionInverted = newPrefabPosition;
     }
 
     void Update()
@@ -76,7 +81,7 @@ public class ItemMessage : MonoBehaviour
         {
             isWaitingForGround = false;
             if (spriteRenderer != null) spriteRenderer.enabled = true;
-            SetPlayerKeyItemAnimation(); // Forzar KeyItem inmediatamente al tocar el suelo
+            SetPlayerKeyItemAnimation();
             StartCoroutine(PlayFanfareAndStartDialogue());
         }
 
@@ -120,7 +125,10 @@ public class ItemMessage : MonoBehaviour
         activeDialogueLines = dialogueLines;
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
         if (textBoxRect != null)
-            textBoxRect.anchoredPosition = useAlternativePosition ? alternativeTextBoxPosition : originalTextBoxPosition;
+        {
+            // Usar posición alternativa si la gravedad está invertida, o la configurada en useAlternativePosition
+            textBoxRect.anchoredPosition = (useInvertedPositions || useAlternativePosition) ? alternativeTextBoxPosition : originalTextBoxPosition;
+        }
 
         if (playerMovement != null) playerMovement.SetDialogueActive(this);
         if (Input_TB != null) Input_TB.gameObject.SetActive(false);
@@ -180,11 +188,8 @@ public class ItemMessage : MonoBehaviour
                 if (coinControllerUI != null)
                     coinControllerUI.OnItemCollision();
 
-                // Ajustar gravedad si está invertida, sin establecer Idle inmediatamente
-                if (!playerMovement.IsGravityNormal())
-                {
-                    AdjustGravityWithInertia();
-                }
+                // Comprobar si la gravedad está invertida para usar posiciones alternativas
+                useInvertedPositions = !playerMovement.IsGravityNormal();
 
                 playerMovement.SetMovementLocked(true);
                 playerMovement.rb.velocity = new Vector2(0f, playerMovement.rb.velocity.y);
@@ -192,37 +197,14 @@ public class ItemMessage : MonoBehaviour
                 if (playerMovement.IsGrounded())
                 {
                     if (spriteRenderer != null) spriteRenderer.enabled = true;
-                    SetPlayerKeyItemAnimation(); // Forzar KeyItem si ya está en el suelo
+                    SetPlayerKeyItemAnimation();
                     StartCoroutine(PlayFanfareAndStartDialogue());
                 }
                 else
                 {
-                    isWaitingForGround = true; // Esperar a tocar el suelo
+                    isWaitingForGround = true;
                 }
             }
-        }
-    }
-
-    private void AdjustGravityWithInertia()
-    {
-        if (playerMovement != null)
-        {
-            playerMovement.rb.gravityScale = Mathf.Abs(playerMovement.rb.gravityScale); // Gravedad positiva
-            playerMovement.isGravityNormal = true;
-
-            Vector3 center = playerMovement.boxCollider.bounds.center;
-            playerMovement.transform.RotateAround(center, Vector3.forward, 180f);
-            playerMovement.transform.RotateAround(center, Vector3.up, 180f);
-        }
-    }
-
-    private void SetIdleAnimation()
-    {
-        if (playerAnimator != null)
-        {
-            playerAnimator.SetFloat("Speed", 0f);
-            playerAnimator.SetBool("IsGrounded", playerMovement.IsGrounded());
-            playerAnimator.SetFloat("VerticalSpeed", playerMovement.rb.velocity.y);
         }
     }
 
@@ -237,7 +219,9 @@ public class ItemMessage : MonoBehaviour
 
             if (prefabToMove != null && playerMovement != null)
             {
-                prefabToMove.transform.position = playerMovement.transform.position + newPrefabPosition;
+                // Usar posición alternativa si la gravedad está invertida
+                Vector3 targetPosition = useInvertedPositions ? newPrefabPositionInverted : newPrefabPosition;
+                prefabToMove.transform.position = playerMovement.transform.position + targetPosition;
             }
         }
     }

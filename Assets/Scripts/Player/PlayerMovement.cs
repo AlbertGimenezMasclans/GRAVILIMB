@@ -32,7 +32,7 @@ public class PlayerMovement : MonoBehaviour
     private bool hasSelectedWithX = false;
     private bool justExitedSelection = false;
 
-    public object activeDialogueSystem; // Público para que CoinControllerUI lo acceda
+    public object activeDialogueSystem; // Pï¿½blico para que CoinControllerUI lo acceda
 
     private AudioSource audioSource;
     public AudioClip jumpSound;
@@ -66,86 +66,88 @@ public class PlayerMovement : MonoBehaviour
 
         if (coinControllerUI == null)
         {
-            Debug.LogError("CoinControllerUI no está asignado en PlayerMovement.");
+            Debug.LogError("CoinControllerUI no estï¿½ asignado en PlayerMovement.");
         }
     }
 
     void Update()
+{
+    if (activeDialogueSystem != null)
     {
-        if (activeDialogueSystem != null)
+        if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive) return;
+        else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive) return;
+        activeDialogueSystem = null;
+    }
+
+    if (isMovementLocked || isDismembered)
+    {
+        rb.velocity = new Vector2(0f, rb.velocity.y);
+        animator.SetFloat("Speed", 0f);
+        if (isDismembered && Input.GetKeyDown(KeyCode.Z))
         {
-            if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive) return;
-            else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive) return;
-            activeDialogueSystem = null; // Limpiar cuando el diálogo termina
+            ReturnToNormal();
+        }
+        return;
+    }
+
+    // Eliminamos la verificaciÃ³n de isWaitingForItemGround porque ItemMessage ahora lo maneja todo
+    animator.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
+    animator.SetBool("IsGrounded", isGrounded);
+    float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
+    animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
+
+    // Resto del cÃ³digo de Update sigue igual
+    bool hasAnyAbility = canChangeGravity || canShoot || canDismember;
+    if (Input.GetKey(KeyCode.X) && hasAnyAbility && !justExitedSelection)
+    {
+        if (!isSelectingMode)
+        {
+            if (habSelector != null) habSelector.SetActive(true);
+            Time.timeScale = 0f;
+            isSelectingMode = true;
+            UpdateHabSelectorUI();
+        }
+    }
+    else
+    {
+        if (habSelector != null && !isSelectingMode) habSelector.SetActive(false);
+        Time.timeScale = 1f;
+        isSelectingMode = false;
+        hasSelectedWithX = false;
+
+        if (!Input.GetKey(KeyCode.X)) justExitedSelection = false;
+
+        float moveInput = 0f;
+        if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
+        else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
+        rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+
+        if (moveInput != 0)
+        {
+            facingDirection = Mathf.Sign(moveInput);
+            transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
         }
 
-        if (isMovementLocked || isDismembered)
+        if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
         {
-            rb.velocity = new Vector2(0f, rb.velocity.y);
-            animator.SetFloat("Speed", 0f);
-            if (isDismembered && Input.GetKeyDown(KeyCode.Z))
-            {
-                ReturnToNormal();
-            }
-            return;
+            float jumpDirection = isGravityNormal ? 1f : -1f;
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
+            PlayJumpSound();
         }
 
-        bool hasAnyAbility = canChangeGravity || canShoot || canDismember;
-        if (Input.GetKey(KeyCode.X) && hasAnyAbility && !justExitedSelection)
+        if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
         {
-            if (!isSelectingMode)
+            if (!isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay && canChangeGravity)
             {
-                if (habSelector != null) habSelector.SetActive(true);
-                Time.timeScale = 0f;
-                isSelectingMode = true;
-                UpdateHabSelectorUI();
+                ChangeGravity();
             }
-        }
-        else
-        {
-            if (habSelector != null && !isSelectingMode) habSelector.SetActive(false);
-            Time.timeScale = 1f;
-            isSelectingMode = false;
-            hasSelectedWithX = false;
-
-            if (!Input.GetKey(KeyCode.X)) justExitedSelection = false;
-
-            float moveInput = 0f;
-            if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
-            else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
-            rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
-
-            animator.SetFloat("Speed", Mathf.Abs(moveInput));
-            animator.SetBool("IsGrounded", isGrounded);
-            float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
-            animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
-
-            if (moveInput != 0)
+            else if (isShooting && canShoot)
             {
-                facingDirection = Mathf.Sign(moveInput);
-                transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
-            }
-
-            if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
-            {
-                float jumpDirection = isGravityNormal ? 1f : -1f;
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
-                PlayJumpSound();
-            }
-
-            if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
-            {
-                if (!isShooting && hasTouchedGround && Time.time >= lastGravityChange + gravityChangeDelay && canChangeGravity)
-                {
-                    ChangeGravity();
-                }
-                else if (isShooting && canShoot)
-                {
-                    FireProjectile();
-                }
+                FireProjectile();
             }
         }
     }
+}
 
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -301,7 +303,7 @@ public class PlayerMovement : MonoBehaviour
     public void SetDialogueActive(object dialogue)
     {
         activeDialogueSystem = dialogue;
-        // No necesitamos notificar a CoinControllerUI aquí, ya que lo maneja en Update
+        // No necesitamos notificar a CoinControllerUI aquï¿½, ya que lo maneja en Update
     }
 
     public bool IsGrounded() => isGrounded;
