@@ -8,54 +8,115 @@ public class HabSelector : MonoBehaviour
     [SerializeField] private GameObject shootingObject;
     [SerializeField] private GameObject cursor;
     [SerializeField] private PlayerMovement playerMovement;
-    [SerializeField] private Sprite lockedSprite; // Sprite del candado, asignado en el Inspector del HabSelector
-    [SerializeField] private Sprite gravitySprite; // Sprite desbloqueado para gravedad
-    [SerializeField] private Sprite dismemberSprite; // Sprite desbloqueado para desmembrar
-    [SerializeField] private Sprite shootingSprite; // Sprite desbloqueado para disparar
 
-    // Referencia al TextMeshProUGUI y mensajes personalizables desde el Inspector
-    [SerializeField] private TextMeshProUGUI abilityNameText; // Asigna en el Inspector
-    [SerializeField] private string gravityName = "Zer0 Bootz"; // Nombre para Gravity
-    [SerializeField] private string shootingName = "Gun"; // Nombre para Shooting
-    [SerializeField] private string dismemberName = "Head Space"; // Nombre para Dismember
+    // Sprites para habilidades
+    [SerializeField] private Sprite lockedSprite;
+    [SerializeField] private Sprite gravitySprite;
+    [SerializeField] private Sprite dismemberSprite;
+    [SerializeField] private Sprite shootingSprite;
+
+    // Texto y nombres de habilidades
+    [SerializeField] private TextMeshProUGUI abilityNameText;
+    [SerializeField] private string gravityName = "Zer0 Bootz";
+    [SerializeField] private string shootingName = "Gun";
+    [SerializeField] private string dismemberName = "Head Space";
+
+    // Variables para el cursor
+    [SerializeField] private Sprite originalCursorSprite; // Sprite original del cursor
+    [SerializeField] private Sprite selectionCursorSprite; // Sprite al mover/seleccionar
+    [SerializeField] private float spriteChangeInterval = 0.5f; // Intervalo de cambio de sprite (0.5s)
+    [SerializeField] private float moveCooldown = 1.0f; // Cooldown total al moverte (1s)
+    [SerializeField] private AudioClip moveSound; // Sonido al moverse
+
+    private SpriteRenderer cursorRenderer;
+    private AudioSource audioSource;
+    private float spriteTimer = 0f; // Temporizador para cambio de sprite
+    private float cooldownTimer = 0f; // Temporizador para cooldown de movimiento
+    private bool isInCooldown = false; // Indica si estamos en cooldown de movimiento
+    private bool isAlternating = false; // Indica si estamos alternando sprites
 
     private enum SelectedHab { Gravity, Dismember, Shooting }
     private SelectedHab currentSelection = SelectedHab.Gravity;
-    private const float LOCKED_SCALE = 0.647712f; // Escala fija para el candado
+    private const float LOCKED_SCALE = 0.62f;
 
     void Start()
     {
-        if (playerMovement == null) { Debug.LogError("PlayerMovement no asignado."); return; }
-        if (gravityObject == null || dismemberObject == null || shootingObject == null) { Debug.LogError("GameObjects no asignados."); return; }
-        if (cursor == null) { Debug.LogError("Cursor no asignado."); return; }
-        if (lockedSprite == null) { Debug.LogError("LockedSprite no asignado en HabSelector."); return; }
-        if (abilityNameText == null) { Debug.LogError("TextMeshProUGUI no asignado en HabSelector."); return; }
+        // Validaciones iniciales
+        if (playerMovement == null || cursor == null || abilityNameText == null || 
+            originalCursorSprite == null || selectionCursorSprite == null)
+        {
+            Debug.LogError("Faltan referencias en HabSelector.");
+            return;
+        }
+
+        cursorRenderer = cursor.GetComponent<SpriteRenderer>();
+        if (cursorRenderer == null)
+        {
+            Debug.LogError("El cursor no tiene SpriteRenderer.");
+            return;
+        }
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         UpdateUI(playerMovement.canChangeGravity, playerMovement.canShoot, playerMovement.canDismember);
         UpdateCursorPosition();
-
-        // Inicialmente ocultar el texto
-        abilityNameText.gameObject.SetActive(false);
+        abilityNameText.gameObject.SetActive(false); // Ocultar texto al inicio
+        cursorRenderer.sprite = originalCursorSprite; // Sprite inicial
     }
 
     void Update()
     {
         if (playerMovement != null && playerMovement.IsXPressed() && playerMovement.isSelectingMode)
         {
-            // Mostrar el texto mientras X está presionada y estamos en modo selección
-            if (abilityNameText != null && !abilityNameText.gameObject.activeSelf)
+            // Mostrar texto al entrar en modo selección
+            if (!abilityNameText.gameObject.activeSelf)
             {
                 abilityNameText.gameObject.SetActive(true);
-                UpdateAbilityNameText(); // Mostrar el nombre inicial
+                UpdateAbilityNameText();
             }
 
-            if (Input.GetKeyDown(KeyCode.RightArrow)) MoveCursorRight();
-            else if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveCursorLeft();
-            else if (Input.GetKeyDown(KeyCode.UpArrow)) MoveCursorUp();
-            else if (Input.GetKeyDown(KeyCode.DownArrow)) MoveCursorDown();
-            else if (Input.GetKeyDown(KeyCode.Z))
+            // Iniciar alternancia si no está activa
+            if (!isAlternating)
             {
-                // Activar habilidad solo si está desbloqueada y ocultar el texto después
+                isAlternating = true;
+                spriteTimer = 0f;
+            }
+
+            // Manejar temporizador de cooldown si está activo
+            if (isInCooldown)
+            {
+                cooldownTimer += Time.unscaledDeltaTime;
+                if (cooldownTimer >= moveCooldown)
+                {
+                    isInCooldown = false;
+                    cooldownTimer = 0f;
+                }
+            }
+
+            // Alternar sprites cada spriteChangeInterval
+            if (isAlternating)
+            {
+                spriteTimer += Time.unscaledDeltaTime;
+                if (spriteTimer >= spriteChangeInterval)
+                {
+                    cursorRenderer.sprite = cursorRenderer.sprite == originalCursorSprite ? selectionCursorSprite : originalCursorSprite;
+                    spriteTimer = 0f;
+                }
+            }
+
+            // Permitir movimiento solo si no está en cooldown
+            if (!isInCooldown)
+            {
+                if (Input.GetKeyDown(KeyCode.RightArrow)) MoveCursorRight();
+                else if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveCursorLeft();
+                else if (Input.GetKeyDown(KeyCode.UpArrow)) MoveCursorUp();
+                else if (Input.GetKeyDown(KeyCode.DownArrow)) MoveCursorDown();
+            }
+
+            // Activar habilidad con Z
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
                 switch (currentSelection)
                 {
                     case SelectedHab.Gravity:
@@ -63,7 +124,7 @@ public class HabSelector : MonoBehaviour
                         {
                             playerMovement.SetShootingMode(false);
                             playerMovement.ExitSelectingMode();
-                            if (abilityNameText != null) abilityNameText.gameObject.SetActive(false); // Ocultar texto
+                            abilityNameText.gameObject.SetActive(false);
                         }
                         break;
                     case SelectedHab.Shooting:
@@ -71,7 +132,7 @@ public class HabSelector : MonoBehaviour
                         {
                             playerMovement.SetShootingMode(true);
                             playerMovement.ExitSelectingMode();
-                            if (abilityNameText != null) abilityNameText.gameObject.SetActive(false); // Ocultar texto
+                            abilityNameText.gameObject.SetActive(false);
                         }
                         break;
                     case SelectedHab.Dismember:
@@ -79,7 +140,7 @@ public class HabSelector : MonoBehaviour
                         {
                             playerMovement.DismemberHead();
                             playerMovement.ExitSelectingMode();
-                            if (abilityNameText != null) abilityNameText.gameObject.SetActive(false); // Ocultar texto
+                            abilityNameText.gameObject.SetActive(false);
                         }
                         break;
                 }
@@ -87,11 +148,13 @@ public class HabSelector : MonoBehaviour
         }
         else
         {
-            // Ocultar el texto cuando X no está presionada o no estamos en modo selección
-            if (abilityNameText != null && abilityNameText.gameObject.activeSelf)
-            {
-                abilityNameText.gameObject.SetActive(false);
-            }
+            // Salir del modo selección: reiniciar estados
+            abilityNameText.gameObject.SetActive(false);
+            isInCooldown = false;
+            isAlternating = false;
+            cursorRenderer.sprite = originalCursorSprite;
+            spriteTimer = 0f;
+            cooldownTimer = 0f;
         }
     }
 
@@ -101,15 +164,16 @@ public class HabSelector : MonoBehaviour
         {
             case SelectedHab.Gravity:
                 if (playerMovement.canDismember) currentSelection = SelectedHab.Dismember;
+                else return;
                 break;
             case SelectedHab.Shooting:
                 if (playerMovement.canDismember) currentSelection = SelectedHab.Dismember;
+                else return;
                 break;
             case SelectedHab.Dismember:
                 return;
         }
-        UpdateCursorPosition();
-        UpdateAbilityNameText(); // Actualizar texto al mover el cursor
+        OnCursorMoved();
     }
 
     private void MoveCursorLeft()
@@ -118,15 +182,16 @@ public class HabSelector : MonoBehaviour
         {
             case SelectedHab.Gravity:
                 if (playerMovement.canShoot) currentSelection = SelectedHab.Shooting;
+                else return;
                 break;
             case SelectedHab.Dismember:
                 if (playerMovement.canShoot) currentSelection = SelectedHab.Shooting;
+                else return;
                 break;
             case SelectedHab.Shooting:
                 return;
         }
-        UpdateCursorPosition();
-        UpdateAbilityNameText(); // Actualizar texto al mover el cursor
+        OnCursorMoved();
     }
 
     private void MoveCursorUp()
@@ -135,26 +200,41 @@ public class HabSelector : MonoBehaviour
         {
             case SelectedHab.Dismember:
                 if (playerMovement.canChangeGravity) currentSelection = SelectedHab.Gravity;
+                else return;
                 break;
             case SelectedHab.Shooting:
                 if (playerMovement.canChangeGravity) currentSelection = SelectedHab.Gravity;
+                else return;
                 break;
             case SelectedHab.Gravity:
                 return;
         }
-        UpdateCursorPosition();
-        UpdateAbilityNameText(); // Actualizar texto al mover el cursor
+        OnCursorMoved();
     }
 
     private void MoveCursorDown()
     {
-        return; // No hay movimiento hacia abajo en este diseño
+        return; // No hay movimiento hacia abajo
+    }
+
+    private void OnCursorMoved()
+    {
+        UpdateCursorPosition();
+        UpdateAbilityNameText();
+        isInCooldown = true; // Activar cooldown de movimiento
+        cooldownTimer = 0f;
+        if (moveSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(moveSound); // Reproducir sonido
+        }
+        // Reiniciar el temporizador de sprite para sincronizar la alternancia
+        spriteTimer = 0f;
+        cursorRenderer.sprite = selectionCursorSprite; // Iniciar con sprite de selección
     }
 
     private void UpdateCursorPosition()
     {
         if (cursor == null) return;
-
         switch (currentSelection)
         {
             case SelectedHab.Gravity:
@@ -187,9 +267,8 @@ public class HabSelector : MonoBehaviour
             SpriteRenderer gravityRenderer = gravityObject.GetComponent<SpriteRenderer>();
             if (gravityRenderer != null)
             {
-                gravityRenderer.sprite = gravityUnlocked ? gravitySprite : lockedSprite; // Usa lockedSprite desde el Inspector
-                if (!gravityUnlocked)
-                    gravityObject.transform.localScale = new Vector3(LOCKED_SCALE, LOCKED_SCALE, LOCKED_SCALE);
+                gravityRenderer.sprite = gravityUnlocked ? gravitySprite : lockedSprite;
+                if (!gravityUnlocked) gravityObject.transform.localScale = new Vector3(LOCKED_SCALE, LOCKED_SCALE, LOCKED_SCALE);
             }
         }
         if (shootingObject != null)
@@ -197,9 +276,8 @@ public class HabSelector : MonoBehaviour
             SpriteRenderer shootRenderer = shootingObject.GetComponent<SpriteRenderer>();
             if (shootRenderer != null)
             {
-                shootRenderer.sprite = shootUnlocked ? shootingSprite : lockedSprite; // Usa lockedSprite desde el Inspector
-                if (!shootUnlocked)
-                    shootingObject.transform.localScale = new Vector3(LOCKED_SCALE, LOCKED_SCALE, LOCKED_SCALE);
+                shootRenderer.sprite = shootUnlocked ? shootingSprite : lockedSprite;
+                if (!shootUnlocked) shootingObject.transform.localScale = new Vector3(LOCKED_SCALE, LOCKED_SCALE, LOCKED_SCALE);
             }
         }
         if (dismemberObject != null)
@@ -207,9 +285,8 @@ public class HabSelector : MonoBehaviour
             SpriteRenderer dismemberRenderer = dismemberObject.GetComponent<SpriteRenderer>();
             if (dismemberRenderer != null)
             {
-                dismemberRenderer.sprite = dismemberUnlocked ? dismemberSprite : lockedSprite; // Usa lockedSprite desde el Inspector
-                if (!dismemberUnlocked)
-                    dismemberObject.transform.localScale = new Vector3(LOCKED_SCALE, LOCKED_SCALE, LOCKED_SCALE);
+                dismemberRenderer.sprite = dismemberUnlocked ? dismemberSprite : lockedSprite;
+                if (!dismemberUnlocked) dismemberObject.transform.localScale = new Vector3(LOCKED_SCALE, LOCKED_SCALE, LOCKED_SCALE);
             }
         }
     }
@@ -217,17 +294,16 @@ public class HabSelector : MonoBehaviour
     private void UpdateAbilityNameText()
     {
         if (abilityNameText == null) return;
-
         switch (currentSelection)
         {
             case SelectedHab.Gravity:
-                abilityNameText.text = gravityName; // "Zer0 Bootz" por defecto
+                abilityNameText.text = gravityName;
                 break;
             case SelectedHab.Shooting:
-                abilityNameText.text = shootingName; // "Gun" por defecto
+                abilityNameText.text = shootingName;
                 break;
             case SelectedHab.Dismember:
-                abilityNameText.text = dismemberName; // "Head Space" por defecto
+                abilityNameText.text = dismemberName;
                 break;
         }
     }
