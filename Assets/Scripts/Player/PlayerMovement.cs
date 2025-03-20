@@ -167,12 +167,13 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void PlayJumpSound()
+{
+    if (jumpSound != null && audioSource != null)
     {
-        if (jumpSound != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(jumpSound);
-        }
+        audioSource.pitch = 1.5f; // Forzar el pitch a 1.5
+        audioSource.PlayOneShot(jumpSound);
     }
+}
 
     private void UpdateHabSelectorUI()
     {
