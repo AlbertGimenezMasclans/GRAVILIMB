@@ -8,6 +8,7 @@ TagManager:
   - Crate
   - Bullet
   - KredToken
+  - KredBag
   layers:
   - Default
   - TransparentFX
