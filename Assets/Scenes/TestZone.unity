@@ -1806,7 +1806,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[3]
-      value: Prueba a disparar a la pared roja que hay atras.
+      value: Prueba a disparar a la caja que hay mas adelante, con suerte habra cosas
+        en su interior.
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: newPrefabPositionInverted.y
@@ -5067,7 +5068,7 @@ GameObject:
   - component: {fileID: 1385670872}
   - component: {fileID: 1385670873}
   - component: {fileID: 1385670875}
-  - component: {fileID: 1385670874}
+  - component: {fileID: 1385670876}
   m_Layer: 0
   m_Name: KredsCrate
   m_TagString: Crate
@@ -5142,7 +5143,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &1385670874
+--- !u!114 &1385670875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1385670871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5836f8ce4f7aa3f40be0ecaed79de0c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kredTokenPrefab: {fileID: 3399729327432490076, guid: 803aaf01a1ead6d43b0a3db7e82ac299, type: 3}
+  spawnForce: 5
+  spawnRadius: 0.5
+--- !u!61 &1385670876
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5187,20 +5203,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &1385670875
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1385670871}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5836f8ce4f7aa3f40be0ecaed79de0c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  kredTokenPrefab: {fileID: 3399729327432490076, guid: 803aaf01a1ead6d43b0a3db7e82ac299, type: 3}
-  spawnForce: 5
 --- !u!1 &1449516894
 GameObject:
   m_ObjectHideFlags: 0
@@ -6409,7 +6411,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[0]
@@ -6428,7 +6430,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[3]
-      value: Prueba a disparar a la pared roja que hay atras.
+      value: Ya que estas, prueba hablar con Prototype siendo solo la cabeza.
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: newPrefabPositionInverted.y
@@ -6436,7 +6438,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: alternativeTextBoxPosition.x
-      value: -600
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: alternativeTextBoxPosition.y

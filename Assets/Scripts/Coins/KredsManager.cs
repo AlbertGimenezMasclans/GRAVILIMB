@@ -8,8 +8,8 @@ public class KredsManager : MonoBehaviour
     [SerializeField] private TMP_Text coinCountText;         // Referencia al texto del HUD
     [SerializeField] private RectTransform coinIcon;         // Referencia al ícono en la UI
     [SerializeField] private RectTransform uiContainer;      // Contenedor de la UI (texto + ícono)
-    private int totalTokens = 1000;                          // Valor inicial (1000)
-    private int displayedTokens = 000001000;                 // Valor mostrado en pantalla
+    private int totalTokens = 0;                          // Valor inicial (1000)
+    private int displayedTokens = 000000000;                 // Valor mostrado en pantalla
     private Vector2 originalUIPosition;                      // Posición inicial visible de la UI
     private Vector2 hiddenUIPosition;                        // Posición fuera de la cámara
     private Vector2 originalIconPosition;                    // Posición original del ícono relativa al contenedor
@@ -134,10 +134,10 @@ public class KredsManager : MonoBehaviour
             }
         }
 
-        // Animar el aumento de tokens y rebotes
+        // Animar el aumento de tokens y rebotes (más rápido)
         int startValue = displayedTokens;
         int targetValue = totalTokens;
-        float baseDurationPerCoin = 0.5f;
+        float baseDurationPerCoin = 0.25f; // Reducido de 0.5f a 0.25f para mayor velocidad
         float totalDuration = baseDurationPerCoin * consecutiveCoins;
         elapsedTime = 0f;
         int baseBounceCount = 3;

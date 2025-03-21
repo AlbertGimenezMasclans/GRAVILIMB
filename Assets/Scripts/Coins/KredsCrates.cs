@@ -4,6 +4,7 @@ public class KredsCrates : MonoBehaviour
 {
     [SerializeField] private GameObject kredTokenPrefab; // Prefab del KredToken
     [SerializeField] private float spawnForce = 2f;      // Fuerza inicial para dispersar los tokens
+    [SerializeField] private float spawnRadius = 0.5f;   // Radio para dispersión inicial de posición
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -32,14 +33,14 @@ public class KredsCrates : MonoBehaviour
         }
 
         int tokenCount = GetWeightedRandomTokenCount();
-        GameObject[] spawnedTokens = new GameObject[tokenCount]; // Almacenar los tokens generados
-
-        // Instanciar todos los tokens
+        
         for (int i = 0; i < tokenCount; i++)
         {
-            GameObject token = Instantiate(kredTokenPrefab, transform.position, Quaternion.identity);
-            spawnedTokens[i] = token;
+            // Generar una posición aleatoria dentro de un círculo alrededor de la caja
+            Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
+            Vector3 spawnPosition = transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
 
+            GameObject token = Instantiate(kredTokenPrefab, spawnPosition, Quaternion.identity);
             Rigidbody2D rb = token.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -51,23 +52,6 @@ public class KredsCrates : MonoBehaviour
             else
             {
                 Debug.LogWarning("El KredToken instanciado no tiene Rigidbody2D.");
-            }
-        }
-
-        // Ignorar colisiones entre los tokens generados
-        for (int i = 0; i < spawnedTokens.Length; i++)
-        {
-            Collider2D colliderA = spawnedTokens[i].GetComponent<Collider2D>();
-            if (colliderA != null)
-            {
-                for (int j = i + 1; j < spawnedTokens.Length; j++)
-                {
-                    Collider2D colliderB = spawnedTokens[j].GetComponent<Collider2D>();
-                    if (colliderB != null)
-                    {
-                        Physics2D.IgnoreCollision(colliderA, colliderB);
-                    }
-                }
             }
         }
     }

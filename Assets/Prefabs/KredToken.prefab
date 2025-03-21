@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4029732594852108919}
   - component: {fileID: 8446897167996510197}
   - component: {fileID: 8486796126827068154}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: KredToken
   m_TagString: KredToken
   m_Icon: {fileID: 0}
