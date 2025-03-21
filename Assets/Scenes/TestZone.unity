@@ -1799,10 +1799,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[2]
-      value: 'Pulsa Z para disparar, pudiendo interactuar con cosas mas lejanas!
+      value: 'Pulsa Z para disparar, puedes romper objetos e interactuar con cosas
+        mas lejanas!
 
-        Manten
-        pulsado X para abrir el menu de <color=#7bf688>habilidades</color>.'
+        Manten pulsado X para abrir el menu de <color=#7bf688>habilidades</color>.'
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[3]
@@ -4778,7 +4778,7 @@ GameObject:
   - component: {fileID: 1348434416}
   - component: {fileID: 1348434417}
   - component: {fileID: 1348434418}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
