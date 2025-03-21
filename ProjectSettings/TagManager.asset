@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Crate
+  - Bullet
+  - KredToken
   layers:
   - Default
   - TransparentFX

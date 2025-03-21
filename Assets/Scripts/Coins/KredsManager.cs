@@ -15,7 +15,7 @@ public class KredsManager : MonoBehaviour
     private Vector2 originalIconPosition;                    // Posición original del ícono relativa al contenedor
     private int consecutiveCoins = 0;                        // Contador de monedas consecutivas
     private float timeSinceLastCoin = 0f;                    // Tiempo desde la última moneda
-    private float resetDelay = 0.5f;                         // Tiempo para considerar "consecutivas"
+    private float resetDelay = 1f;                           // Margen de 1s para monedas consecutivas
     private bool isAnimating = false;                        // Evitar múltiples animaciones simultáneas
     private Coroutine currentAnimation;                      // Referencia a la corrutina actual
 
@@ -71,17 +71,16 @@ public class KredsManager : MonoBehaviour
 
     public void AddTokens(int amount)
     {
-        consecutiveCoins++;
-        totalTokens += amount;
+        totalTokens += amount; // Sumar el valor exacto recibido
+        consecutiveCoins++;    // Incrementar por cada moneda recogida
         timeSinceLastCoin = 0f;
-        if (!isAnimating)
+
+        // Reiniciar la animación siempre para reflejar los nuevos valores
+        if (currentAnimation != null)
         {
-            if (currentAnimation != null)
-            {
-                StopCoroutine(currentAnimation);
-            }
-            currentAnimation = StartCoroutine(AnimateUIAndTokens(amount));
+            StopCoroutine(currentAnimation);
         }
+        currentAnimation = StartCoroutine(AnimateUIAndTokens(amount));
     }
 
     private void UpdateHUD()
@@ -96,22 +95,44 @@ public class KredsManager : MonoBehaviour
     {
         isAnimating = true;
 
-        // Esperar retraso inicial de 0.3 segundos
-        yield return new WaitForSecondsRealtime(0.3f);
+        float elapsedTime; // Declarar fuera de los bucles
+        Vector2 startPosition; // Declarar fuera de los bucles
 
-        // Bajar la UI a la posición inicial con suavizado
-        float moveDownDuration = 0.2f; // Duración del movimiento hacia abajo
-        float elapsedTime = 0f;
-        Vector2 startPosition = uiContainer.anchoredPosition;
-        while (elapsedTime < moveDownDuration)
+        // Si la UI no está en posición visible, moverla rápidamente o con retraso según el caso
+        if (uiContainer.anchoredPosition != originalUIPosition)
         {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / moveDownDuration;
-            float smoothT = t * t * (3f - 2f * t); // SmoothStep para suavizado
-            uiContainer.anchoredPosition = Vector2.Lerp(startPosition, originalUIPosition, smoothT);
-            yield return null;
+            // Si estaba subiendo o fuera de pantalla, mover rápidamente
+            if (uiContainer.anchoredPosition.y > originalUIPosition.y)
+            {
+                float quickMoveDuration = 0.1f;
+                elapsedTime = 0f;
+                startPosition = uiContainer.anchoredPosition;
+                while (elapsedTime < quickMoveDuration)
+                {
+                    elapsedTime += Time.deltaTime;
+                    float t = elapsedTime / quickMoveDuration;
+                    uiContainer.anchoredPosition = Vector2.Lerp(startPosition, originalUIPosition, t);
+                    yield return null;
+                }
+                uiContainer.anchoredPosition = originalUIPosition;
+            }
+            // Si estaba arriba del todo, bajar con retraso normal
+            else
+            {
+                yield return new WaitForSecondsRealtime(0.1f);
+                float moveDownDuration = 0.2f;
+                elapsedTime = 0f;
+                startPosition = uiContainer.anchoredPosition;
+                while (elapsedTime < moveDownDuration)
+                {
+                    elapsedTime += Time.deltaTime;
+                    float t = elapsedTime / moveDownDuration;
+                    uiContainer.anchoredPosition = Vector2.Lerp(startPosition, originalUIPosition, t);
+                    yield return null;
+                }
+                uiContainer.anchoredPosition = originalUIPosition;
+            }
         }
-        uiContainer.anchoredPosition = originalUIPosition;
 
         // Animar el aumento de tokens y rebotes
         int startValue = displayedTokens;
@@ -127,7 +148,6 @@ public class KredsManager : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / totalDuration;
-
             displayedTokens = (int)Mathf.Lerp(startValue, targetValue, t);
 
             int currentBounce = Mathf.FloorToInt(elapsedTime / bounceDuration);
@@ -137,7 +157,7 @@ public class KredsManager : MonoBehaviour
             {
                 float bounceHeight = 6f;
                 Vector2 startBouncePosition = originalIconPosition - Vector2.up * bounceHeight * 0.4f;
-                Vector2 peakPosition = originalIconPosition + Vector2.up * bounceHeight * 0.5f;
+                Vector2 peakPosition = originalIconPosition + Vector2.up * bounceHeight * 0.6f;
 
                 if (bounceProgress < 0.4f)
                 {
@@ -162,50 +182,23 @@ public class KredsManager : MonoBehaviour
         }
         UpdateHUD();
 
-        // Esperar el doble del retraso (0.6 segundos)
+        // Esperar antes de subir
         yield return new WaitForSecondsRealtime(0.6f);
 
-        // Subir la UI fuera de la pantalla con suavizado
-        float moveUpDuration = 0.2f; // Duración del movimiento hacia arriba
+        // Subir la UI
+        float moveUpDuration = 0.2f;
         elapsedTime = 0f;
         startPosition = uiContainer.anchoredPosition;
         while (elapsedTime < moveUpDuration)
         {
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / moveUpDuration;
-            float smoothT = t * t * (3f - 2f * t); // SmoothStep para suavizado
-            uiContainer.anchoredPosition = Vector2.Lerp(startPosition, hiddenUIPosition, smoothT);
+            uiContainer.anchoredPosition = Vector2.Lerp(startPosition, hiddenUIPosition, t);
             yield return null;
         }
         uiContainer.anchoredPosition = hiddenUIPosition;
 
         isAnimating = false;
         currentAnimation = null;
-    }
-
-    private IEnumerator QuickReturnToVisible()
-    {
-        // Detener la animación anterior
-        if (currentAnimation != null)
-        {
-            StopCoroutine(currentAnimation);
-        }
-
-        // Volver rápidamente a la posición visible con menos suavizado
-        float quickMoveDuration = 0.1f; // Duración más rápida
-        float elapsedTime = 0f;
-        Vector2 startPosition = uiContainer.anchoredPosition;
-        while (elapsedTime < quickMoveDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / quickMoveDuration;
-            float smoothT = t; // Interpolación lineal para menos suavizado
-            uiContainer.anchoredPosition = Vector2.Lerp(startPosition, originalUIPosition, smoothT);
-            yield return null;
-        }
-        uiContainer.anchoredPosition = originalUIPosition;
-
-        // Continuar con la animación normal
-        currentAnimation = StartCoroutine(AnimateUIAndTokens(0)); // 0 porque ya se añadió el amount en AddTokens
     }
 }
