@@ -8,7 +8,7 @@ public class KredsManager : MonoBehaviour
     [SerializeField] private TMP_Text coinCountText;         // Referencia al texto del HUD
     [SerializeField] private RectTransform coinIcon;         // Referencia al ícono en la UI
     [SerializeField] private RectTransform uiContainer;      // Contenedor de la UI (texto + ícono)
-    private int totalTokens = 0;                          // Valor inicial (0)
+    private int totalTokens = 0;                          // Valor inicial (1000)
     private int displayedTokens = 000000000;                 // Valor mostrado en pantalla
     private Vector2 originalUIPosition;                      // Posición inicial visible de la UI
     private Vector2 hiddenUIPosition;                        // Posición fuera de la cámara
@@ -69,24 +69,18 @@ public class KredsManager : MonoBehaviour
         }
     }
 
-    // Método original para KredTokens normales
     public void AddTokens(int amount)
     {
-        AddTokens(amount, -1f); // -1f indica usar la duración por defecto basada en consecutiveCoins
-    }
-
-    // Método sobrecargado para permitir duración personalizada
-    public void AddTokens(int amount, float duration = -1f)
-    {
         totalTokens += amount; // Sumar el valor exacto recibido
-        consecutiveCoins++;    // Incrementar por cada item recogido
+        consecutiveCoins++;    // Incrementar por cada moneda recogida
         timeSinceLastCoin = 0f;
 
+        // Reiniciar la animación siempre para reflejar los nuevos valores
         if (currentAnimation != null)
         {
             StopCoroutine(currentAnimation);
         }
-        currentAnimation = StartCoroutine(AnimateUIAndTokens(amount, duration));
+        currentAnimation = StartCoroutine(AnimateUIAndTokens(amount));
     }
 
     private void UpdateHUD()
@@ -97,15 +91,17 @@ public class KredsManager : MonoBehaviour
         }
     }
 
-    private IEnumerator AnimateUIAndTokens(int amount, float customDuration)
+    private IEnumerator AnimateUIAndTokens(int amount)
     {
         isAnimating = true;
 
-        float elapsedTime;
-        Vector2 startPosition;
+        float elapsedTime; // Declarar fuera de los bucles
+        Vector2 startPosition; // Declarar fuera de los bucles
 
+        // Si la UI no está en posición visible, moverla rápidamente o con retraso según el caso
         if (uiContainer.anchoredPosition != originalUIPosition)
         {
+            // Si estaba subiendo o fuera de pantalla, mover rápidamente
             if (uiContainer.anchoredPosition.y > originalUIPosition.y)
             {
                 float quickMoveDuration = 0.1f;
@@ -120,6 +116,7 @@ public class KredsManager : MonoBehaviour
                 }
                 uiContainer.anchoredPosition = originalUIPosition;
             }
+            // Si estaba arriba del todo, bajar con retraso normal
             else
             {
                 yield return new WaitForSecondsRealtime(0.1f);
@@ -137,10 +134,11 @@ public class KredsManager : MonoBehaviour
             }
         }
 
+        // Animar el aumento de tokens y rebotes (más rápido)
         int startValue = displayedTokens;
         int targetValue = totalTokens;
-        float baseDurationPerCoin = 0.25f; // Duración por moneda para KredTokens normales
-        float totalDuration = (customDuration >= 0f) ? customDuration : baseDurationPerCoin * consecutiveCoins; // Usar duración personalizada si se proporciona
+        float baseDurationPerCoin = 0.25f; // Reducido de 0.5f a 0.25f para mayor velocidad
+        float totalDuration = baseDurationPerCoin * consecutiveCoins;
         elapsedTime = 0f;
         int baseBounceCount = 3;
         int totalBounceCount = baseBounceCount * consecutiveCoins;
@@ -184,8 +182,10 @@ public class KredsManager : MonoBehaviour
         }
         UpdateHUD();
 
+        // Esperar antes de subir
         yield return new WaitForSecondsRealtime(0.6f);
 
+        // Subir la UI
         float moveUpDuration = 0.2f;
         elapsedTime = 0f;
         startPosition = uiContainer.anchoredPosition;
