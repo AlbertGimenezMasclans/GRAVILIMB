@@ -7099,9 +7099,33 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1185182678248990361, guid: 84287bf26de0e1643b497f80f11c624a, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: d994d8f851b01b942beca0bcaed80f06, type: 3}
+    - target: {fileID: 4010176619821061228, guid: 84287bf26de0e1643b497f80f11c624a, type: 3}
+      propertyPath: m_Size.x
+      value: 0.11376969
+      objectReference: {fileID: 0}
+    - target: {fileID: 4010176619821061228, guid: 84287bf26de0e1643b497f80f11c624a, type: 3}
+      propertyPath: m_Size.y
+      value: 0.19796386
+      objectReference: {fileID: 0}
+    - target: {fileID: 4010176619821061228, guid: 84287bf26de0e1643b497f80f11c624a, type: 3}
+      propertyPath: m_Offset.x
+      value: -0.0023114644
+      objectReference: {fileID: 0}
+    - target: {fileID: 4010176619821061228, guid: 84287bf26de0e1643b497f80f11c624a, type: 3}
+      propertyPath: m_Offset.y
+      value: 0.0014446974
+      objectReference: {fileID: 0}
+    - target: {fileID: 4010176619821061228, guid: 84287bf26de0e1643b497f80f11c624a, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 0.16
+      objectReference: {fileID: 0}
     - target: {fileID: 5989531094781209513, guid: 84287bf26de0e1643b497f80f11c624a, type: 3}
       propertyPath: m_Name
-      value: KredTokensBag
+      value: KredTokensContainer
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
