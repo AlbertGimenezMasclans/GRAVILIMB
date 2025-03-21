@@ -32,14 +32,12 @@ public class KredsCrates : MonoBehaviour
             return;
         }
 
+        // Soltar SOLO KredTokens normales
         int tokenCount = GetWeightedRandomTokenCount();
-        
         for (int i = 0; i < tokenCount; i++)
         {
-            // Generar una posición aleatoria dentro de un círculo alrededor de la caja
             Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
             Vector3 spawnPosition = transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
-
             GameObject token = Instantiate(kredTokenPrefab, spawnPosition, Quaternion.identity);
             Rigidbody2D rb = token.GetComponent<Rigidbody2D>();
             if (rb != null)
@@ -48,10 +46,6 @@ public class KredsCrates : MonoBehaviour
                 rb.gravityScale = 1f;
                 Vector2 randomDirection = Random.insideUnitCircle.normalized;
                 rb.velocity = randomDirection * spawnForce;
-            }
-            else
-            {
-                Debug.LogWarning("El KredToken instanciado no tiene Rigidbody2D.");
             }
         }
     }
