@@ -5159,7 +5159,7 @@ GameObject:
   - component: {fileID: 1457095850}
   - component: {fileID: 1457095852}
   - component: {fileID: 1457095851}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: WallEnd
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5590,7 +5590,7 @@ GameObject:
   - component: {fileID: 1579841076}
   - component: {fileID: 1579841078}
   - component: {fileID: 1579841077}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: WallStart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5719,7 +5719,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 324783869238861195, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: m_Name
-      value: Zer-0 Bootz
+      value: Zer0 Bootz
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: textBox
