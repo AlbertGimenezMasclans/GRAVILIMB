@@ -2145,6 +2145,7 @@ MonoBehaviour:
   dialogueAdvanceSound: {fileID: 8300000, guid: 6be0bd76ddbeb044cb375ea7ba0397bc, type: 3}
   dialogueEndSound: {fileID: 8300000, guid: 37782a1da832ff84aa8608f5c1d0f5cb, type: 3}
   typingSound: {fileID: 8300000, guid: 9eab6aafffe280240ac5a85d84d42889, type: 3}
+  objectToMakeInvisible: {fileID: 726786054}
 --- !u!61 &726786057
 BoxCollider2D:
   m_ObjectHideFlags: 0

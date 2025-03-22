@@ -13,6 +13,9 @@ public class SimpleDialogueItem : MonoBehaviour
     [SerializeField] private AudioClip dialogueAdvanceSound;  // Sonido al avanzar
     [SerializeField] private AudioClip dialogueEndSound;      // Sonido al terminar
     [SerializeField] private AudioClip typingSound;           // Sonido de escritura
+    [SerializeField, Tooltip("GameObject to make invisible after pickup and dialogue end")] 
+    private GameObject objectToMakeInvisible;                 // Objeto a hacer invisible desde el Inspector
+    private SpriteRenderer objectRenderer;                    // SpriteRenderer del objeto a hacer invisible
 
     private float typingTime = 0.05f;                         // Velocidad de escritura
     private float commaPauseTime = 0.25f;                     // Pausa en comas
@@ -25,7 +28,6 @@ public class SimpleDialogueItem : MonoBehaviour
     private bool hasCollided;                                 // Evitar colisiones múltiples
     private float originalPitch;                              // Pitch original del audio
     private KredsManager kredsManager;                        // Referencia al gestor de monedas
-    private SpriteRenderer spriteRenderer;                    // Para desactivar/activar el objeto
     private bool isWaitingForGround;                          // Esperar a que el jugador caiga
 
     private const int KREDS_TO_ADD = 5000;                    // Cantidad de Kreds a sumar (fija en código)
@@ -39,8 +41,19 @@ public class SimpleDialogueItem : MonoBehaviour
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         originalPitch = audioSource.pitch;
 
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer == null) Debug.LogError("SpriteRenderer no encontrado en este objeto.");
+        // Obtener el SpriteRenderer del objeto a hacer invisible
+        if (objectToMakeInvisible != null)
+        {
+            objectRenderer = objectToMakeInvisible.GetComponent<SpriteRenderer>();
+            if (objectRenderer == null)
+            {
+                Debug.LogWarning("El objeto asignado para hacer invisible no tiene un SpriteRenderer.", this);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No se ha asignado un objeto para hacer invisible en SimpleDialogueItem.", this);
+        }
 
         // Cargar sonidos por defecto si no están asignados
         if (dialogueAdvanceSound == null) dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
@@ -89,8 +102,11 @@ public class SimpleDialogueItem : MonoBehaviour
         {
             hasCollided = true;
 
-            // Desactivar el objeto
-            if (spriteRenderer != null) spriteRenderer.enabled = false;
+            // Hacer invisible el objeto al colisionar ("tras recogerlo")
+            if (objectRenderer != null)
+            {
+                objectRenderer.enabled = false;
+            }
 
             playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
             playerAnimator = collision.gameObject.GetComponent<Animator>();
@@ -109,12 +125,15 @@ public class SimpleDialogueItem : MonoBehaviour
 
     private IEnumerator PlayFanfareAndAnimation()
     {
-        // Activar el objeto en una nueva posición relativa al jugador
-        if (spriteRenderer != null && playerMovement != null)
+        // Reposicionar el objeto relativo al jugador y hacerlo visible para la animación
+        if (playerMovement != null)
         {
             Vector2 newPosition = new Vector2(playerMovement.transform.position.x, playerMovement.transform.position.y + Y_OFFSET);
             transform.position = newPosition;
-            spriteRenderer.enabled = true;
+            if (objectRenderer != null)
+            {
+                objectRenderer.enabled = true; // Hacer visible durante la fanfare
+            }
         }
 
         if (playerAnimator != null)
@@ -170,6 +189,12 @@ public class SimpleDialogueItem : MonoBehaviour
             textBox.SetActive(false);
             textField.gameObject.SetActive(false);
             Time.timeScale = 1f;
+
+            // Hacer invisible el objeto al terminar el diálogo
+            if (objectRenderer != null)
+            {
+                objectRenderer.enabled = false;
+            }
 
             // Restablecer la animación del jugador a la normalidad
             if (playerAnimator != null)
