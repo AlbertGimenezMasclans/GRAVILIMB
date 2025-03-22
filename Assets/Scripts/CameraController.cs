@@ -14,6 +14,7 @@ public class CameraController : MonoBehaviour
 
     private float lookAheadOffset = 0f; // Offset dinámico del look-ahead
     private PlayerMovement playerMovement; // Referencia al script del jugador
+    private PlayerDeath playerDeath; // Referencia al script de muerte
 
     void Start()
     {
@@ -29,12 +30,18 @@ public class CameraController : MonoBehaviour
             Debug.LogError("El target no tiene el componente PlayerMovement.");
         }
 
+        playerDeath = target.GetComponent<PlayerDeath>();
+        if (playerDeath == null)
+        {
+            Debug.LogError("El target no tiene el componente PlayerDeath.");
+        }
+
         offset = transform.position - target.position;
     }
 
     void LateUpdate()
     {
-        if (target == null) return;
+        if (target == null || (playerDeath != null && playerDeath.IsDead())) return;
 
         // Determinar qué seguir: jugador o cabeza
         Transform currentTarget = target;

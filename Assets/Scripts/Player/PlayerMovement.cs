@@ -113,6 +113,9 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        PlayerDeath deathScript = GetComponent<PlayerDeath>();
+        if (deathScript != null && deathScript.IsDead()) return; // Salir si está muerto
+
         if (activeDialogueSystem != null)
         {
             if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive) return;

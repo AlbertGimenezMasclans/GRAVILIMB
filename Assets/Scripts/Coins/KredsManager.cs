@@ -5,7 +5,7 @@ using System.Collections;
 public class KredsManager : MonoBehaviour
 {
     public static KredsManager Instance { get; private set; } // Singleton
-    [SerializeField] private TMP_Text coinCountText;         // Referencia al texto del HUD
+    [SerializeField] public TMP_Text coinCountText;         // Referencia al texto del HUD
     [SerializeField] public RectTransform coinIcon;         // Referencia al ícono en la UI
     [SerializeField] public RectTransform uiContainer;      // Contenedor de la UI (texto + ícono)
     public int totalTokens = 0;                             // Valor inicial (0)
