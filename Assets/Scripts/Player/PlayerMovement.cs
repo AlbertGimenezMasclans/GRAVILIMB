@@ -10,7 +10,9 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce = 5f;
     [Tooltip("Layer mask for ground detection")]
     public LayerMask groundLayer;
-
+    [Tooltip("Distancia del Raycast para detectar el suelo")]
+    public float groundCheckDistance = 0.6f; // Aumentado para mayor alcance
+                                             // Nota: Eliminamos groundCheckOffset porque ahora usamos el tamaño del colliderF
     [Header("Ability Selection")]
     [Tooltip("UI object for ability selection")]
     public GameObject habSelector;
@@ -46,7 +48,7 @@ public class PlayerMovement : MonoBehaviour
     private float lastGravityChange;
     private float gravityChangeDelay = 0.5f;
     private bool hasTouchedGround = false;
-    private bool canChangeGravityInAir = false; // Permitir cambio de gravedad en el aire una vez
+    private bool canChangeGravityInAir = false;
     private bool isShooting = false;
     private float facingDirection = 1f;
     [Tooltip("Is the player in ability selection mode?")]
@@ -167,17 +169,15 @@ public class PlayerMovement : MonoBehaviour
                 PlayJumpSound();
             }
 
-            // Cambio de gravedad (en el suelo o en el aire una vez)
             if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode && canChangeGravity && Time.time >= lastGravityChange + gravityChangeDelay)
             {
                 if (isGrounded || canChangeGravityInAir)
                 {
                     ChangeGravity();
-                    if (!isGrounded) canChangeGravityInAir = false; // Desactivar si se usa en el aire
+                    if (!isGrounded) canChangeGravityInAir = false;
                 }
             }
 
-            // Disparar si está en modo shooting
             if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode && isShooting && canShoot)
             {
                 FireProjectile();
@@ -185,28 +185,29 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    void FixedUpdate()
     {
-        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
-        {
-            Vector2 normal = collision.contacts[0].normal;
-            float dot = Vector2.Dot(normal, isGravityNormal ? Vector2.up : Vector2.down);
-            if (dot > 0.5f)
-            {
-                isGrounded = true;
-                hasTouchedGround = true;
-                canChangeGravityInAir = true; // Resetear al tocar el suelo
-                Debug.Log($"OnCollisionEnter2D: isGrounded={isGrounded}, VerticalSpeed={animator.GetFloat("VerticalSpeed")}, Speed={animator.GetFloat("Speed")}, Time.timeScale={Time.timeScale}");
-            }
-        }
-    }
+        // Calcular el origen del Raycast en los "pies" según el tamaño del BoxCollider2D
+        Vector2 colliderSize = boxCollider.size * transform.localScale; // Escalar según el tamaño del jugador
+        float halfHeight = colliderSize.y / 2f;
+        Vector2 rayOrigin = (Vector2)transform.position + (isGravityNormal ? new Vector2(0f, -halfHeight) : new Vector2(0f, halfHeight));
 
-    void OnCollisionExit2D(Collision2D collision)
-    {
-        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
+        // Dirección del Raycast según la gravedad
+        Vector2 rayDirection = isGravityNormal ? Vector2.down : Vector2.up;
+
+        // Lanzar el Raycast con una distancia mayor
+        RaycastHit2D hit = Physics2D.Raycast(rayOrigin, rayDirection, groundCheckDistance, groundLayer);
+        isGrounded = hit.collider != null;
+
+        // Resetear habilidad de cambio de gravedad en el aire si está en el suelo
+        if (isGrounded)
         {
-            isGrounded = false;
+            hasTouchedGround = true;
+            canChangeGravityInAir = true;
         }
+
+        // Debug visual para el Raycast (visible en el Scene View)
+        Debug.DrawRay(rayOrigin, rayDirection * groundCheckDistance, isGrounded ? Color.green : Color.red);
     }
 
     private void PlayJumpSound()
@@ -254,7 +255,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("IsGrounded", true);
             animator.SetFloat("VerticalSpeed", 0f);
         }
-        lastGravityChange = Time.time; // Actualizar el tiempo del cambio
+        lastGravityChange = Time.time;
     }
 
     void FireProjectile()
