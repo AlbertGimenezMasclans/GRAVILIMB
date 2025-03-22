@@ -6,17 +6,17 @@ public class KredsManager : MonoBehaviour
 {
     public static KredsManager Instance { get; private set; } // Singleton
     [SerializeField] private TMP_Text coinCountText;         // Referencia al texto del HUD
-    [SerializeField] private RectTransform coinIcon;         // Referencia al ícono en la UI
-    [SerializeField] private RectTransform uiContainer;      // Contenedor de la UI (texto + ícono)
-    private int totalTokens = 0;                             // Valor inicial (0)
-    private int displayedTokens = 000000000;                 // Valor mostrado en pantalla
-    private Vector2 originalUIPosition;                      // Posición inicial visible de la UI
-    private Vector2 hiddenUIPosition;                        // Posición fuera de la cámara
+    [SerializeField] public RectTransform coinIcon;         // Referencia al ícono en la UI
+    [SerializeField] public RectTransform uiContainer;      // Contenedor de la UI (texto + ícono)
+    public int totalTokens = 0;                             // Valor inicial (0)
+    public int displayedTokens = 000000000;                 // Valor mostrado en pantalla
+    public Vector2 originalUIPosition;                      // Posición inicial visible de la UI
+    public Vector2 hiddenUIPosition;                        // Posición fuera de la cámara
     private Vector2 originalIconPosition;                    // Posición original del ícono relativa al contenedor
     private int consecutiveCoins = 0;                        // Contador de monedas consecutivas
     private float timeSinceLastCoin = 0f;                    // Tiempo desde la última moneda
     private float resetDelay = 1f;                           // Margen de 1s para monedas consecutivas
-    private bool isAnimating = false;                        // Evitar múltiples animaciones simultáneas
+    public bool isAnimating = false;                        // Evitar múltiples animaciones simultáneas
     private Coroutine currentAnimation;                      // Referencia a la corrutina actual
 
     void Awake()
@@ -99,7 +99,7 @@ public class KredsManager : MonoBehaviour
         currentAnimation = StartCoroutine(AnimateUIAndTokens(amount, duration));
     }
 
-    private void UpdateHUD()
+    public void UpdateHUD()
     {
         if (coinCountText != null)
         {

@@ -28,7 +28,7 @@ public class HabSelector : MonoBehaviour
 
     [Header("Text References")]
     [SerializeField, Tooltip("Text component for displaying the ability name (title)")] private TextMeshProUGUI abilityNameText;
-    [SerializeField, Tooltip("Additional text component to show/hide with the selector")] private TextMeshProUGUI ZText;
+    [SerializeField, Tooltip("Additional text component to show/hide with the selector")] private TextMeshProUGUI InputText;
     
     [Header("References")]
     [SerializeField, Tooltip("Reference to the PlayerMovement script")] private PlayerMovement playerMovement;
@@ -66,7 +66,7 @@ public class HabSelector : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
-        if (ZText == null)
+        if (InputText == null)
         {
             Debug.LogWarning("Additional Text no asignado en HabSelector. No se mostrará ningún texto adicional.");
         }
@@ -74,7 +74,7 @@ public class HabSelector : MonoBehaviour
         UpdateUI(playerMovement.canChangeGravity, playerMovement.canShoot, playerMovement.canDismember);
         UpdateCursorPosition();
         abilityNameText.gameObject.SetActive(false);
-        if (ZText != null) ZText.gameObject.SetActive(false);
+        if (InputText != null) InputText.gameObject.SetActive(false);
         cursorRenderer.sprite = originalCursorSprite;
     }
 
@@ -85,7 +85,7 @@ public class HabSelector : MonoBehaviour
             if (!abilityNameText.gameObject.activeSelf)
             {
                 abilityNameText.gameObject.SetActive(true);
-                if (ZText != null) ZText.gameObject.SetActive(true);
+                if (InputText != null) InputText.gameObject.SetActive(true);
                 UpdateAbilityNameText();
                 UpdateUI(playerMovement.canChangeGravity, playerMovement.canShoot, playerMovement.canDismember);
             }
@@ -131,7 +131,7 @@ public class HabSelector : MonoBehaviour
 
             // Resetear estados
             abilityNameText.gameObject.SetActive(false);
-            if (ZText != null) ZText.gameObject.SetActive(false);
+            if (InputText != null) InputText.gameObject.SetActive(false);
             isInCooldown = false;
             isAlternating = false;
             cursorRenderer.sprite = originalCursorSprite;
