@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class PlayerDeath : MonoBehaviour
 {
@@ -35,6 +36,8 @@ public class PlayerDeath : MonoBehaviour
     public Image deathUICoinIcon; // Ícono en la Death UI
     [Tooltip("Coin Count Text in Death UI")]
     public TMP_Text deathUICoinCount; // Contador de monedas en la Death UI
+    [Tooltip("Lost Coins Text in Death UI")]
+    public TMP_Text deathUILostCoins; // Texto para mostrar la cantidad perdida
     [Tooltip("Time for death UI fade in and out")]
     public float deathUIFadeTime = 3f;
     [Tooltip("Amount of coins to subtract during death")]
@@ -123,15 +126,29 @@ public class PlayerDeath : MonoBehaviour
             }
         }
 
+        if (deathUILostCoins == null)
+        {
+            TMP_Text[] texts = deathUI.GetComponentsInChildren<TMP_Text>();
+            if (texts.Length > 1)
+            {
+                deathUILostCoins = texts[1]; // Asumir que el segundo TMP_Text es el de monedas perdidas
+            }
+            if (deathUILostCoins == null)
+            {
+                Debug.LogError("DeathUILostCoins no encontrado en DeathUI");
+                return;
+            }
+        }
+
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
         rb = GetComponent<Rigidbody2D>();
-
+        
         // Almacenar posiciones iniciales
         initialPosition = transform.position;
         initialCameraPosition = mainCamera.transform.position;
         fadePanel.color = new Color(0, 0, 0, 0); // Asegurarse que el panel empiece transparente
-
+        
         // Asegurarse que la deathUI esté inicialmente oculta
         SetDeathUIAlpha(0f);
         deathUI.SetActive(false);
@@ -148,13 +165,13 @@ public class PlayerDeath : MonoBehaviour
     private System.Collections.IEnumerator RespawnCoroutine()
     {
         isDead = true;
-
+        
         // Desactivar componentes del jugador
         spriteRenderer.enabled = false;
         if (boxCollider != null) boxCollider.enabled = false;
         rb.velocity = Vector2.zero;
         rb.simulated = false;
-
+        
         if (playerMovement.isDismembered)
         {
             playerMovement.headObject.SetActive(false);
@@ -190,6 +207,7 @@ public class PlayerDeath : MonoBehaviour
             // Actualizar el contador de monedas en DeathUI con el valor de KredsManager
             int startCoinValue = kredsManager.displayedTokens;
             deathUICoinCount.text = startCoinValue.ToString("D9");
+            deathUILostCoins.text = ""; // Inicialmente vacío
             deathUI.SetActive(true); // Activar la UI
 
             elapsedTime = 0f;
@@ -205,9 +223,10 @@ public class PlayerDeath : MonoBehaviour
             // Esperar 0.4 segundos después del fade in
             yield return new WaitForSeconds(0.4f);
 
-            // Animación de resta de monedas
+            // Animación de resta de monedas con texto de pérdida
             elapsedTime = 0f;
             int targetCoinValue = Mathf.Max(0, startCoinValue - coinsToSubtract); // No bajar de 0
+            deathUILostCoins.text = "-" + coinsToSubtract; // Mostrar la cantidad perdida sin ceros
             while (elapsedTime < coinSubtractionDuration)
             {
                 elapsedTime += Time.deltaTime;
@@ -236,8 +255,14 @@ public class PlayerDeath : MonoBehaviour
             SetDeathUIAlpha(0f); // Asegurar que esté completamente transparente
             deathUI.SetActive(false); // Desactivar la UI
 
-            // Esperar 1 segundo después del fade out de la Death UI
-            yield return new WaitForSeconds(1f);
+            // Comprobar si las monedas llegaron a 0
+            if (targetCoinValue == 0)
+            {
+                // Esperar 2 segundos y cambiar a la escena GameOver
+                yield return new WaitForSeconds(2f);
+                SceneManager.LoadScene("GameOver");
+                yield break; // Terminar la corrutina aquí
+            }
         }
 
         // Restaurar la UI de monedas a su posición original con alpha completo
@@ -255,7 +280,7 @@ public class PlayerDeath : MonoBehaviour
         // Mover la cámara a la posición inicial almacenada antes del fade out
         mainCamera.transform.position = initialCameraPosition;
 
-        // Fade Out (pantalla se desvanece)
+        // Fade Out (pantalla se desvanece) - Solo si no es Game Over
         elapsedTime = 0f;
         while (elapsedTime < fadeOutTime)
         {
@@ -274,7 +299,7 @@ public class PlayerDeath : MonoBehaviour
         spriteRenderer.enabled = true;
         if (boxCollider != null) boxCollider.enabled = true;
         rb.simulated = true;
-
+        
         if (playerMovement.isDismembered)
         {
             playerMovement.RecomposePlayer();
@@ -285,13 +310,13 @@ public class PlayerDeath : MonoBehaviour
         {
             cameraController.enabled = true;
         }
-
+        
         isDead = false;
     }
 
     private void SetDeathUIAlpha(float alpha)
     {
-        // Ajustar el alpha del ícono y el texto en deathUI
+        // Ajustar el alpha del ícono, el contador y el texto de pérdida en deathUI
         if (deathUICoinIcon != null)
         {
             Color iconColor = deathUICoinIcon.color;
@@ -303,6 +328,12 @@ public class PlayerDeath : MonoBehaviour
             Color textColor = deathUICoinCount.color;
             textColor.a = alpha;
             deathUICoinCount.color = textColor;
+        }
+        if (deathUILostCoins != null)
+        {
+            Color lostColor = deathUILostCoins.color;
+            lostColor.a = alpha;
+            deathUILostCoins.color = lostColor;
         }
     }
 
