@@ -8,7 +8,7 @@ public class KredsManager : MonoBehaviour
     [SerializeField] private TMP_Text coinCountText;         // Referencia al texto del HUD
     [SerializeField] private RectTransform coinIcon;         // Referencia al ícono en la UI
     [SerializeField] private RectTransform uiContainer;      // Contenedor de la UI (texto + ícono)
-    private int totalTokens = 0;                          // Valor inicial (0)
+    private int totalTokens = 0;                             // Valor inicial (0)
     private int displayedTokens = 000000000;                 // Valor mostrado en pantalla
     private Vector2 originalUIPosition;                      // Posición inicial visible de la UI
     private Vector2 hiddenUIPosition;                        // Posición fuera de la cámara
@@ -58,6 +58,16 @@ public class KredsManager : MonoBehaviour
 
     void Update()
     {
+        // Controlar la UI con la tecla X (sin animación)
+        if (Input.GetKey(KeyCode.X))
+        {
+            uiContainer.anchoredPosition = originalUIPosition; // Mostrar instantáneamente
+        }
+        else if (!isAnimating && uiContainer.anchoredPosition != hiddenUIPosition)
+        {
+            uiContainer.anchoredPosition = hiddenUIPosition; // Ocultar instantáneamente si no hay animación
+        }
+
         if (consecutiveCoins > 0)
         {
             timeSinceLastCoin += Time.deltaTime;
@@ -104,7 +114,8 @@ public class KredsManager : MonoBehaviour
         float elapsedTime;
         Vector2 startPosition;
 
-        if (uiContainer.anchoredPosition != originalUIPosition)
+        // Animación de entrada normal (solo si no está pulsando X)
+        if (uiContainer.anchoredPosition != originalUIPosition && !Input.GetKey(KeyCode.X))
         {
             if (uiContainer.anchoredPosition.y > originalUIPosition.y)
             {
@@ -137,10 +148,11 @@ public class KredsManager : MonoBehaviour
             }
         }
 
+        // Conteo de monedas
         int startValue = displayedTokens;
         int targetValue = totalTokens;
-        float baseDurationPerCoin = 0.25f; // Duración por moneda para KredTokens normales
-        float totalDuration = (customDuration >= 0f) ? customDuration : baseDurationPerCoin * consecutiveCoins; // Usar duración personalizada si se proporciona
+        float baseDurationPerCoin = 0.25f;
+        float totalDuration = (customDuration >= 0f) ? customDuration : baseDurationPerCoin * consecutiveCoins;
         elapsedTime = 0f;
         int baseBounceCount = 3;
         int totalBounceCount = baseBounceCount * consecutiveCoins;
@@ -186,17 +198,21 @@ public class KredsManager : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(0.6f);
 
-        float moveUpDuration = 0.2f;
-        elapsedTime = 0f;
-        startPosition = uiContainer.anchoredPosition;
-        while (elapsedTime < moveUpDuration)
+        // Animación de salida normal (solo si no está pulsando X)
+        if (!Input.GetKey(KeyCode.X))
         {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / moveUpDuration;
-            uiContainer.anchoredPosition = Vector2.Lerp(startPosition, hiddenUIPosition, t);
-            yield return null;
+            float moveUpDuration = 0.2f;
+            elapsedTime = 0f;
+            startPosition = uiContainer.anchoredPosition;
+            while (elapsedTime < moveUpDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float t = elapsedTime / moveUpDuration;
+                uiContainer.anchoredPosition = Vector2.Lerp(startPosition, hiddenUIPosition, t);
+                yield return null;
+            }
+            uiContainer.anchoredPosition = hiddenUIPosition;
         }
-        uiContainer.anchoredPosition = hiddenUIPosition;
 
         isAnimating = false;
         currentAnimation = null;
