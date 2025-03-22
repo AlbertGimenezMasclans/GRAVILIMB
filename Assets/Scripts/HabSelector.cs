@@ -7,7 +7,7 @@ public class HabSelector : MonoBehaviour
     [SerializeField, Tooltip("GameObject representing the Gravity ability icon")] private GameObject gravityObject;
     [SerializeField, Tooltip("GameObject representing the Dismember ability icon")] private GameObject dismemberObject;
     [SerializeField, Tooltip("GameObject representing the Shooting ability icon")] private GameObject shootingObject;
-    
+
     [Header("Cursor Settings")]
     [SerializeField, Tooltip("GameObject representing the cursor")] private GameObject cursor;
     [SerializeField, Tooltip("Sprite for the cursor in its default state")] private Sprite originalCursorSprite;
@@ -29,10 +29,10 @@ public class HabSelector : MonoBehaviour
     [Header("Text References")]
     [SerializeField, Tooltip("Text component for displaying the ability name (title)")] private TextMeshProUGUI abilityNameText;
     [SerializeField, Tooltip("Additional text component to show/hide with the selector")] private TextMeshProUGUI InputText;
-    
+
     [Header("References")]
     [SerializeField, Tooltip("Reference to the PlayerMovement script")] private PlayerMovement playerMovement;
-    
+
     [Header("Audio")]
     [SerializeField, Tooltip("Sound played when moving the cursor")] private AudioClip moveSound;
 
@@ -124,12 +124,10 @@ public class HabSelector : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.DownArrow)) MoveCursorDown();
             }
         }
-        else if (isAlternating) // Cuando se suelta X
+        else if (isAlternating)
         {
-            // Seleccionar la habilidad al soltar X
             SelectCurrentAbility();
 
-            // Resetear estados
             abilityNameText.gameObject.SetActive(false);
             if (InputText != null) InputText.gameObject.SetActive(false);
             isInCooldown = false;
@@ -296,21 +294,24 @@ public class HabSelector : MonoBehaviour
             case SelectedHab.Gravity:
                 if (playerMovement.canChangeGravity)
                 {
-                    playerMovement.SetShootingMode(false);
+                    playerMovement.SetDismemberMode(false); // Desactivar modo Desmembramiento
+                    playerMovement.SetShootingMode(false);  // Desactivar modo disparo
                     playerMovement.ExitSelectingMode();
                 }
                 break;
             case SelectedHab.Shooting:
                 if (playerMovement.canShoot)
                 {
-                    playerMovement.SetShootingMode(true);
+                    playerMovement.SetDismemberMode(false); // Desactivar modo Desmembramiento
+                    playerMovement.SetShootingMode(true);   // Activar modo disparo
                     playerMovement.ExitSelectingMode();
                 }
                 break;
             case SelectedHab.Dismember:
-                if (playerMovement.canDismember && playerMovement.IsGrounded())
+                if (playerMovement.canDismember)
                 {
-                    playerMovement.DismemberHead();
+                    playerMovement.SetDismemberMode(true);  // Activar modo Desmembramiento
+                    playerMovement.SetShootingMode(false);  // Desactivar modo disparo
                     playerMovement.ExitSelectingMode();
                 }
                 break;

@@ -11,8 +11,8 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Layer mask for ground detection")]
     public LayerMask groundLayer;
     [Tooltip("Distancia del Raycast para detectar el suelo")]
-    public float groundCheckDistance = 0.6f; // Aumentado para mayor alcance
-                                             // Nota: Eliminamos groundCheckOffset porque ahora usamos el tamaño del colliderF
+    public float groundCheckDistance = 0.6f;
+
     [Header("Ability Selection")]
     [Tooltip("UI object for ability selection")]
     public GameObject habSelector;
@@ -30,6 +30,8 @@ public class PlayerMovement : MonoBehaviour
     public GameObject bodyObject;
     [Tooltip("Is the player currently dismembered?")]
     public bool isDismembered = false;
+    private bool isRecomposing = false;
+    private bool isDismemberMode = false;
 
     [Header("Components")]
     [Tooltip("Player's Rigidbody2D component")]
@@ -104,6 +106,9 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.LogError("CoinControllerUI no está asignado en PlayerMovement.");
         }
+
+        isRecomposing = false;
+        isDismemberMode = false;
     }
 
     void Update()
@@ -121,6 +126,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetFloat("Speed", 0f);
             if (isDismembered && Input.GetKeyDown(KeyCode.Z))
             {
+                isRecomposing = true;
                 ReturnToNormal();
             }
             return;
@@ -169,44 +175,53 @@ public class PlayerMovement : MonoBehaviour
                 PlayJumpSound();
             }
 
-            if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode && canChangeGravity && Time.time >= lastGravityChange + gravityChangeDelay)
+            if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
             {
-                if (isGrounded || canChangeGravityInAir)
+                // Prioridad 1: Desmembrar si se acaba de recomponer
+                if (isRecomposing && canDismember && isGrounded)
+                {
+                    DismemberHead();
+                }
+                // Prioridad 2: Desmembrar si está en modo Desmembramiento
+                else if (isDismemberMode && canDismember && isGrounded)
+                {
+                    DismemberHead();
+                }
+                // Prioridad 3: Disparar si está en modo disparo
+                else if (isShooting && canShoot)
+                {
+                    FireProjectile();
+                }
+                // Prioridad 4: Cambiar gravedad si no está en modo Desmembramiento ni disparo
+                else if (canChangeGravity && Time.time >= lastGravityChange + gravityChangeDelay && (isGrounded || canChangeGravityInAir))
                 {
                     ChangeGravity();
                     if (!isGrounded) canChangeGravityInAir = false;
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode && isShooting && canShoot)
+            if (isRecomposing && !Input.GetKey(KeyCode.Z))
             {
-                FireProjectile();
+                isRecomposing = false;
             }
         }
     }
 
     void FixedUpdate()
     {
-        // Calcular el origen del Raycast en los "pies" según el tamaño del BoxCollider2D
-        Vector2 colliderSize = boxCollider.size * transform.localScale; // Escalar según el tamaño del jugador
+        Vector2 colliderSize = boxCollider.size * transform.localScale;
         float halfHeight = colliderSize.y / 2f;
         Vector2 rayOrigin = (Vector2)transform.position + (isGravityNormal ? new Vector2(0f, -halfHeight) : new Vector2(0f, halfHeight));
-
-        // Dirección del Raycast según la gravedad
         Vector2 rayDirection = isGravityNormal ? Vector2.down : Vector2.up;
-
-        // Lanzar el Raycast con una distancia mayor
         RaycastHit2D hit = Physics2D.Raycast(rayOrigin, rayDirection, groundCheckDistance, groundLayer);
         isGrounded = hit.collider != null;
 
-        // Resetear habilidad de cambio de gravedad en el aire si está en el suelo
         if (isGrounded)
         {
             hasTouchedGround = true;
             canChangeGravityInAir = true;
         }
 
-        // Debug visual para el Raycast (visible en el Scene View)
         Debug.DrawRay(rayOrigin, rayDirection * groundCheckDistance, isGrounded ? Color.green : Color.red);
     }
 
@@ -350,6 +365,15 @@ public class PlayerMovement : MonoBehaviour
             animator.SetFloat("VerticalSpeed", 0f);
             animator.SetFloat("Speed", 0f);
             Debug.Log("Dialogue Ended: Forcing Animator to Idle state");
+        }
+    }
+
+    public void SetDismemberMode(bool dismemberMode)
+    {
+        isDismemberMode = dismemberMode;
+        if (dismemberMode)
+        {
+            isShooting = false;
         }
     }
 
