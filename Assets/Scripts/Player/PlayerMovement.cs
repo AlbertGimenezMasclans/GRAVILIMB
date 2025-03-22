@@ -46,6 +46,7 @@ public class PlayerMovement : MonoBehaviour
     private float lastGravityChange;
     private float gravityChangeDelay = 0.5f;
     private bool hasTouchedGround = false;
+    private bool canChangeGravityInAir = false; // Permitir cambio de gravedad en el aire una vez
     private bool isShooting = false;
     private float facingDirection = 1f;
     [Tooltip("Is the player in ability selection mode?")]
@@ -104,97 +105,101 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void Update()
-{
-    if (activeDialogueSystem != null)
     {
-        if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive) return;
-        else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive) return;
-        activeDialogueSystem = null;
-    }
-
-    if (isMovementLocked || isDismembered)
-    {
-        rb.velocity = new Vector2(0f, rb.velocity.y);
-        animator.SetFloat("Speed", 0f);
-        if (isDismembered && Input.GetKeyDown(KeyCode.Z))
+        if (activeDialogueSystem != null)
         {
-            ReturnToNormal();
-        }
-        return;
-    }
-
-    animator.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
-    animator.SetBool("IsGrounded", isGrounded);
-    float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
-    animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
-
-    bool hasAnyAbility = canChangeGravity || canShoot || canDismember;
-    if (Input.GetKey(KeyCode.X) && hasAnyAbility && !justExitedSelection)
-    {
-        if (!isSelectingMode)
-        {
-            if (habSelector != null) habSelector.SetActive(true);
-            Time.timeScale = 0f;
-            isSelectingMode = true;
-            UpdateHabSelectorUI();
-        }
-    }
-    else
-    {
-        if (habSelector != null && !isSelectingMode) habSelector.SetActive(false);
-        Time.timeScale = 1f;
-        isSelectingMode = false;
-        hasSelectedWithX = false;
-
-        if (!Input.GetKey(KeyCode.X)) justExitedSelection = false;
-
-        float moveInput = 0f;
-        if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
-        else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
-        rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
-
-        if (moveInput != 0)
-        {
-            facingDirection = Mathf.Sign(moveInput);
-            transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
+            if (activeDialogueSystem is DialogueSystem dialogue && dialogue.IsDialogueActive) return;
+            else if (activeDialogueSystem is ItemMessage itemMessage && itemMessage.IsDialogueActive) return;
+            activeDialogueSystem = null;
         }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+        if (isMovementLocked || isDismembered)
         {
-            float jumpDirection = isGravityNormal ? 1f : -1f;
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
-            PlayJumpSound();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode)
-        {
-            if (!isShooting && isGrounded && Time.time >= lastGravityChange + gravityChangeDelay && canChangeGravity) // Cambiar gravedad solo en el suelo
+            rb.velocity = new Vector2(0f, rb.velocity.y);
+            animator.SetFloat("Speed", 0f);
+            if (isDismembered && Input.GetKeyDown(KeyCode.Z))
             {
-                ChangeGravity();
-                lastGravityChange = Time.time; // Actualizar el tiempo del último cambio
+                ReturnToNormal();
             }
-            else if (isShooting && canShoot)
+            return;
+        }
+
+        animator.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
+        animator.SetBool("IsGrounded", isGrounded);
+        float adjustedVerticalSpeed = isGravityNormal ? rb.velocity.y : -rb.velocity.y;
+        animator.SetFloat("VerticalSpeed", adjustedVerticalSpeed);
+
+        bool hasAnyAbility = canChangeGravity || canShoot || canDismember;
+        if (Input.GetKey(KeyCode.X) && hasAnyAbility && !justExitedSelection)
+        {
+            if (!isSelectingMode)
+            {
+                if (habSelector != null) habSelector.SetActive(true);
+                Time.timeScale = 0f;
+                isSelectingMode = true;
+                UpdateHabSelectorUI();
+            }
+        }
+        else
+        {
+            if (habSelector != null && !isSelectingMode) habSelector.SetActive(false);
+            Time.timeScale = 1f;
+            isSelectingMode = false;
+            hasSelectedWithX = false;
+
+            if (!Input.GetKey(KeyCode.X)) justExitedSelection = false;
+
+            float moveInput = 0f;
+            if (Input.GetKey(KeyCode.RightArrow)) moveInput = 1f;
+            else if (Input.GetKey(KeyCode.LeftArrow)) moveInput = -1f;
+            rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+
+            if (moveInput != 0)
+            {
+                facingDirection = Mathf.Sign(moveInput);
+                transform.localScale = new Vector3(facingDirection * Mathf.Abs(transform.localScale.x), transform.localScale.y, 1f);
+            }
+
+            if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+            {
+                float jumpDirection = isGravityNormal ? 1f : -1f;
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);
+                PlayJumpSound();
+            }
+
+            // Cambio de gravedad (en el suelo o en el aire una vez)
+            if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode && canChangeGravity && Time.time >= lastGravityChange + gravityChangeDelay)
+            {
+                if (isGrounded || canChangeGravityInAir)
+                {
+                    ChangeGravity();
+                    if (!isGrounded) canChangeGravityInAir = false; // Desactivar si se usa en el aire
+                }
+            }
+
+            // Disparar si está en modo shooting
+            if (Input.GetKeyDown(KeyCode.Z) && !isSelectingMode && isShooting && canShoot)
             {
                 FireProjectile();
             }
         }
     }
-}
 
     void OnCollisionEnter2D(Collision2D collision)
-{
-    if (((1 << collision.gameObject.layer) & groundLayer) != 0)
     {
-        Vector2 normal = collision.contacts[0].normal;
-        float dot = Vector2.Dot(normal, isGravityNormal ? Vector2.up : Vector2.down);
-        if (dot > 0.5f)
+        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
         {
-            isGrounded = true;
-            hasTouchedGround = true;
-            Debug.Log($"OnCollisionEnter2D: isGrounded={isGrounded}, VerticalSpeed={animator.GetFloat("VerticalSpeed")}, Speed={animator.GetFloat("Speed")}, Time.timeScale={Time.timeScale}");
+            Vector2 normal = collision.contacts[0].normal;
+            float dot = Vector2.Dot(normal, isGravityNormal ? Vector2.up : Vector2.down);
+            if (dot > 0.5f)
+            {
+                isGrounded = true;
+                hasTouchedGround = true;
+                canChangeGravityInAir = true; // Resetear al tocar el suelo
+                Debug.Log($"OnCollisionEnter2D: isGrounded={isGrounded}, VerticalSpeed={animator.GetFloat("VerticalSpeed")}, Speed={animator.GetFloat("Speed")}, Time.timeScale={Time.timeScale}");
+            }
         }
     }
-}
 
     void OnCollisionExit2D(Collision2D collision)
     {
@@ -236,21 +241,21 @@ public class PlayerMovement : MonoBehaviour
     }
 
     public void ChangeGravity()
-{
-    rb.gravityScale = -rb.gravityScale;
-    isGravityNormal = !isGravityNormal;
-    Vector3 center = boxCollider.bounds.center;
-    transform.RotateAround(center, Vector3.forward, 180f);
-    transform.RotateAround(center, Vector3.up, 180f);
-    rb.velocity = new Vector2(rb.velocity.x, 0f);
-
-    if (isGrounded && Mathf.Abs(rb.velocity.x) < 0.1f)
     {
-        animator.SetBool("IsGrounded", true);
-        animator.SetFloat("VerticalSpeed", 0f);
+        rb.gravityScale = -rb.gravityScale;
+        isGravityNormal = !isGravityNormal;
+        Vector3 center = boxCollider.bounds.center;
+        transform.RotateAround(center, Vector3.forward, 180f);
+        transform.RotateAround(center, Vector3.up, 180f);
+        rb.velocity = new Vector2(rb.velocity.x, 0f);
+
+        if (isGrounded && Mathf.Abs(rb.velocity.x) < 0.1f)
+        {
+            animator.SetBool("IsGrounded", true);
+            animator.SetFloat("VerticalSpeed", 0f);
+        }
+        lastGravityChange = Time.time; // Actualizar el tiempo del cambio
     }
-    lastGravityChange = Time.time; // Actualizar el tiempo del cambio
-}
 
     void FireProjectile()
     {
@@ -277,7 +282,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void DismemberHead()
     {
-        if (!isGrounded || !canDismember) return; // Solo permitir desmembramiento si está en el suelo y tiene la habilidad
+        if (!isGrounded || !canDismember) return;
 
         headObject.tag = "Player";
         if (headObject != null && bodyObject != null)
@@ -336,16 +341,16 @@ public class PlayerMovement : MonoBehaviour
     }
 
     public void SetDialogueActive(object dialogue)
-{
-    activeDialogueSystem = dialogue;
-    if (dialogue == null && animator != null) // Cuando el diálogo termina
     {
-        animator.SetBool("IsGrounded", isGrounded);
-        animator.SetFloat("VerticalSpeed", 0f);
-        animator.SetFloat("Speed", 0f);
-        Debug.Log("Dialogue Ended: Forcing Animator to Idle state");
+        activeDialogueSystem = dialogue;
+        if (dialogue == null && animator != null)
+        {
+            animator.SetBool("IsGrounded", isGrounded);
+            animator.SetFloat("VerticalSpeed", 0f);
+            animator.SetFloat("Speed", 0f);
+            Debug.Log("Dialogue Ended: Forcing Animator to Idle state");
+        }
     }
-}
 
     public bool IsGrounded() => isGrounded;
     public bool IsGravityNormal() => isGravityNormal;

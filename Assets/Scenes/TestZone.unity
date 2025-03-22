@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 24690399}
   - component: {fileID: 24690401}
   - component: {fileID: 24690400}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall2 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1392,7 +1392,7 @@ GameObject:
   - component: {fileID: 465737950}
   - component: {fileID: 465737952}
   - component: {fileID: 465737951}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1885,7 +1885,7 @@ GameObject:
   - component: {fileID: 582467978}
   - component: {fileID: 582467980}
   - component: {fileID: 582467979}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall2 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5424,7 +5424,7 @@ GameObject:
   - component: {fileID: 1457095850}
   - component: {fileID: 1457095852}
   - component: {fileID: 1457095851}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: WallEnd
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5855,7 +5855,7 @@ GameObject:
   - component: {fileID: 1579841076}
   - component: {fileID: 1579841078}
   - component: {fileID: 1579841077}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: WallStart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6518,7 +6518,7 @@ GameObject:
   - component: {fileID: 1930217997}
   - component: {fileID: 1930217999}
   - component: {fileID: 1930217998}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall2 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7720,6 +7720,10 @@ PrefabInstance:
       propertyPath: dialogueText
       value: 
       objectReference: {fileID: 993444660}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: isPlayerRange
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprite
       value: 
