@@ -123,43 +123,13 @@ public class HabSelector : MonoBehaviour
                 else if (Input.GetKeyDown(KeyCode.UpArrow)) MoveCursorUp();
                 else if (Input.GetKeyDown(KeyCode.DownArrow)) MoveCursorDown();
             }
-
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                switch (currentSelection)
-                {
-                    case SelectedHab.Gravity:
-                        if (playerMovement.canChangeGravity)
-                        {
-                            playerMovement.SetShootingMode(false);
-                            playerMovement.ExitSelectingMode();
-                            abilityNameText.gameObject.SetActive(false);
-                            if (ZText != null) ZText.gameObject.SetActive(false);
-                        }
-                        break;
-                    case SelectedHab.Shooting:
-                        if (playerMovement.canShoot)
-                        {
-                            playerMovement.SetShootingMode(true);
-                            playerMovement.ExitSelectingMode();
-                            abilityNameText.gameObject.SetActive(false);
-                            if (ZText != null) ZText.gameObject.SetActive(false);
-                        }
-                        break;
-                    case SelectedHab.Dismember:
-                        if (playerMovement.canDismember && playerMovement.IsGrounded())
-                        {
-                            playerMovement.DismemberHead();
-                            playerMovement.ExitSelectingMode();
-                            abilityNameText.gameObject.SetActive(false);
-                            if (ZText != null) ZText.gameObject.SetActive(false);
-                        }
-                        break;
-                }
-            }
         }
-        else
+        else if (isAlternating) // Cuando se suelta X
         {
+            // Seleccionar la habilidad al soltar X
+            SelectCurrentAbility();
+
+            // Resetear estados
             abilityNameText.gameObject.SetActive(false);
             if (ZText != null) ZText.gameObject.SetActive(false);
             isInCooldown = false;
@@ -315,6 +285,34 @@ public class HabSelector : MonoBehaviour
                 break;
             case SelectedHab.Dismember:
                 abilityNameText.text = dismemberName;
+                break;
+        }
+    }
+
+    private void SelectCurrentAbility()
+    {
+        switch (currentSelection)
+        {
+            case SelectedHab.Gravity:
+                if (playerMovement.canChangeGravity)
+                {
+                    playerMovement.SetShootingMode(false);
+                    playerMovement.ExitSelectingMode();
+                }
+                break;
+            case SelectedHab.Shooting:
+                if (playerMovement.canShoot)
+                {
+                    playerMovement.SetShootingMode(true);
+                    playerMovement.ExitSelectingMode();
+                }
+                break;
+            case SelectedHab.Dismember:
+                if (playerMovement.canDismember && playerMovement.IsGrounded())
+                {
+                    playerMovement.DismemberHead();
+                    playerMovement.ExitSelectingMode();
+                }
                 break;
         }
     }
