@@ -47,7 +47,7 @@ public class PlayerDeath : MonoBehaviour
     public float coinSubtractionDuration = 1f;
 
     [Header("Bounce Effect Settings")]
-    [Tooltip("Total duration of the bounce animation for the coin count text")]
+    [Tooltip("Total duration of the bounce animation for the coin count text (never collected coins)")]
     public float bounceDuration = 0.5f;
     [Tooltip("X position of the left bounce endpoint (in UI units)")]
     public float leftBounceX = -5f;
@@ -55,6 +55,16 @@ public class PlayerDeath : MonoBehaviour
     public float rightBounceX = 5f;
     [Tooltip("Number of bounces (one bounce = left to right and back)")]
     public int bounceCount = 3;
+
+    [Header("Loss Bounce Settings")]
+    [Tooltip("Total duration of the vertical bounce animation when losing coins")]
+    public float lossBounceDuration = 0.5f;
+    [Tooltip("Y position of the top bounce endpoint (in UI units)")]
+    public float topBounceY = 5f;
+    [Tooltip("Y position of the bottom bounce endpoint (in UI units)")]
+    public float bottomBounceY = -5f;
+    [Tooltip("Number of vertical bounces when losing coins")]
+    public int lossBounceCount = 3;
 
     [Header("Animation Settings")]
     [Tooltip("Reference to the Animator component")]
@@ -178,7 +188,6 @@ public class PlayerDeath : MonoBehaviour
             hasEverCollectedCoins = true;
         }
 
-        // Forzar Idle al inicio
         if (animator != null)
         {
             animator.Play("Protagonist_Idle");
@@ -189,7 +198,6 @@ public class PlayerDeath : MonoBehaviour
     {
         if (!isDead && playerMovement != null)
         {
-            // Sincronizar los parámetros del Animator con PlayerMovement
             animator.SetBool("IsGrounded", playerMovement.IsGrounded());
             float horizontalSpeed = Mathf.Abs(rb.velocity.x);
             animator.SetFloat("Speed", horizontalSpeed);
@@ -222,7 +230,7 @@ public class PlayerDeath : MonoBehaviour
 
         if (boxCollider != null) boxCollider.enabled = false;
         rb.velocity = Vector2.zero;
-        rb.simulated = false; // Física desactivada durante la muerte
+        rb.simulated = false;
         
         if (playerMovement.isDismembered)
         {
@@ -269,11 +277,12 @@ public class PlayerDeath : MonoBehaviour
             yield return new WaitForSeconds(0.4f);
 
             bool neverCollectedCoins = !hasEverCollectedCoins && startCoinValue == 0;
-            int coinsLost = neverCollectedCoins ? 0 : coinsToSubtract;
+            int coinsLost = neverCollectedCoins ? 0 : (startCoinValue < coinsToSubtract ? startCoinValue : coinsToSubtract);
             int targetCoinValue = Mathf.Max(0, startCoinValue - coinsLost);
 
-            elapsedTime = 0f;
             deathUILostCoins.text = "-" + coinsLost;
+
+            elapsedTime = 0f;
             while (elapsedTime < coinSubtractionDuration)
             {
                 elapsedTime += Time.deltaTime;
@@ -283,13 +292,20 @@ public class PlayerDeath : MonoBehaviour
                 yield return null;
             }
             deathUICoinCount.text = targetCoinValue.ToString("D9");
+
+            // Rebote vertical en deathUICoinCount si se pierden monedas
+            if (coinsLost > 0)
+            {
+                yield return StartCoroutine(LossBounceEffect());
+            }
+
             kredsManager.displayedTokens = targetCoinValue;
             kredsManager.totalTokens = targetCoinValue;
             kredsManager.UpdateHUD();
 
             if (neverCollectedCoins)
             {
-                StartCoroutine(BounceEffect());
+                yield return StartCoroutine(BounceEffect());
             }
 
             yield return new WaitForSeconds(0.8f);
@@ -338,11 +354,10 @@ public class PlayerDeath : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        // Restaurar al jugador, pero mantenerlo quieto durante "Protagonist_Appear"
         transform.position = initialPosition;
         spriteRenderer.enabled = true;
         if (boxCollider != null) boxCollider.enabled = true;
-        rb.simulated = false; // Física desactivada durante la animación de aparición
+        rb.simulated = false;
         
         if (playerMovement.isDismembered)
         {
@@ -352,16 +367,10 @@ public class PlayerDeath : MonoBehaviour
         if (animator != null)
         {
             animator.Play("Protagonist_Appear");
-
-            // Esperar a que termine "Protagonist_Appear"
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
             float animationLength = stateInfo.length;
             yield return new WaitForSeconds(animationLength);
-
-            // Restaurar la física y dejar que PlayerMovement controle las animaciones
             rb.simulated = true;
-
-            // Asegurarse de que los parámetros iniciales estén sincronizados
             animator.SetBool("IsGrounded", playerMovement.IsGrounded());
             animator.SetFloat("Speed", 0f);
             animator.SetFloat("VerticalSpeed", rb.velocity.y);
@@ -382,17 +391,33 @@ public class PlayerDeath : MonoBehaviour
         RectTransform textTransform = deathUICoinCount.GetComponent<RectTransform>();
         Vector2 originalPosition = textTransform.anchoredPosition;
 
-        float elapsedTime = 0f;
         float timePerBounce = bounceDuration / (bounceCount * 2);
 
         for (int i = 0; i < bounceCount * 2; i++)
         {
             float targetX = (i % 2 == 0) ? rightBounceX : leftBounceX;
             Vector2 targetPosition = new Vector2(targetX, originalPosition.y);
-
             textTransform.anchoredPosition = targetPosition;
+            yield return new WaitForSeconds(timePerBounce);
+        }
 
-            elapsedTime += timePerBounce;
+        textTransform.anchoredPosition = originalPosition;
+    }
+
+    private IEnumerator LossBounceEffect()
+    {
+        if (deathUICoinCount == null) yield break;
+
+        RectTransform textTransform = deathUICoinCount.GetComponent<RectTransform>();
+        Vector2 originalPosition = textTransform.anchoredPosition;
+
+        float timePerBounce = lossBounceDuration / (lossBounceCount * 2);
+
+        for (int i = 0; i < lossBounceCount * 2; i++)
+        {
+            float targetY = (i % 2 == 0) ? topBounceY : bottomBounceY;
+            Vector2 targetPosition = new Vector2(originalPosition.x, targetY);
+            textTransform.anchoredPosition = targetPosition;
             yield return new WaitForSeconds(timePerBounce);
         }
 

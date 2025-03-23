@@ -20,6 +20,16 @@ public class KredsManager : MonoBehaviour
     private Coroutine currentAnimation;                     // Referencia a la corrutina actual
     private PlayerDeath playerDeath;                        // Referencia a PlayerDeath
 
+    [Header("Bounce Effect Settings")]
+    [Tooltip("Total duration of the bounce animation when losing coins")]
+    public float lossBounceDuration = 0.5f;
+    [Tooltip("Y position of the top bounce endpoint (in UI units)")]
+    public float topBounceY = 5f;
+    [Tooltip("Y position of the bottom bounce endpoint (in UI units)")]
+    public float bottomBounceY = -5f;
+    [Tooltip("Number of bounces (one bounce = bottom to top and back)")]
+    public int lossBounceCount = 3;
+
     void Awake()
     {
         if (Instance == null)
@@ -112,6 +122,57 @@ public class KredsManager : MonoBehaviour
             StopCoroutine(currentAnimation);
         }
         currentAnimation = StartCoroutine(AnimateUIAndTokens(amount, duration));
+    }
+
+    // Nuevo método para restar monedas con rebote vertical
+    public IEnumerator AnimateLoss(int amountLost)
+    {
+        if (coinCountText == null || uiContainer == null) yield break;
+
+        isAnimating = true;
+
+        // Mostrar la UI en la posición original
+        uiContainer.anchoredPosition = originalUIPosition;
+
+        // Actualizar el texto inmediatamente con el valor perdido
+        totalTokens = Mathf.Max(0, totalTokens - amountLost);
+        displayedTokens = totalTokens;
+        UpdateHUD();
+
+        // Rebote vertical sin fluidez
+        RectTransform textTransform = coinCountText.GetComponent<RectTransform>();
+        Vector2 originalPosition = textTransform.anchoredPosition;
+
+        float timePerBounce = lossBounceDuration / (lossBounceCount * 2);
+        for (int i = 0; i < lossBounceCount * 2; i++)
+        {
+            float targetY = (i % 2 == 0) ? topBounceY : bottomBounceY;
+            Vector2 targetPosition = new Vector2(originalPosition.x, targetY);
+            textTransform.anchoredPosition = targetPosition;
+            yield return new WaitForSeconds(timePerBounce);
+        }
+
+        textTransform.anchoredPosition = originalPosition;
+
+        yield return new WaitForSeconds(0.8f);
+
+        // Ocultar la UI si no se está pulsando X
+        if (!Input.GetKey(KeyCode.X))
+        {
+            float moveUpDuration = 0.2f;
+            float elapsedTime = 0f;
+            Vector2 startPosition = uiContainer.anchoredPosition;
+            while (elapsedTime < moveUpDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float t = elapsedTime / moveUpDuration;
+                uiContainer.anchoredPosition = Vector2.Lerp(startPosition, hiddenUIPosition, t);
+                yield return null;
+            }
+            uiContainer.anchoredPosition = hiddenUIPosition;
+        }
+
+        isAnimating = false;
     }
 
     public void UpdateHUD()

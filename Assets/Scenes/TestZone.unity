@@ -3683,6 +3683,10 @@ MonoBehaviour:
   originalUIPosition: {x: 0, y: 0}
   hiddenUIPosition: {x: 0, y: 0}
   isAnimating: 0
+  lossBounceDuration: 0.5
+  topBounceY: 5
+  bottomBounceY: -5
+  lossBounceCount: 3
 --- !u!1 &902213475 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5521566355243332115, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
@@ -5702,6 +5706,10 @@ MonoBehaviour:
   leftBounceX: 49
   rightBounceX: 62
   bounceCount: 3
+  lossBounceDuration: 0.5
+  topBounceY: -48
+  bottomBounceY: -61.6
+  lossBounceCount: 3
   animator: {fileID: 1176550086}
 --- !u!1001 &1192465995
 PrefabInstance:
