@@ -189,7 +189,7 @@ public class PlayerDeath : MonoBehaviour
     {
         if (!isDead && playerMovement != null)
         {
-            // Usar el Raycast de PlayerMovement para actualizar el Animator
+            // Sincronizar los parámetros del Animator con PlayerMovement
             animator.SetBool("IsGrounded", playerMovement.IsGrounded());
             float horizontalSpeed = Mathf.Abs(rb.velocity.x);
             animator.SetFloat("Speed", horizontalSpeed);
@@ -360,6 +360,11 @@ public class PlayerDeath : MonoBehaviour
 
             // Restaurar la física y dejar que PlayerMovement controle las animaciones
             rb.simulated = true;
+
+            // Asegurarse de que los parámetros iniciales estén sincronizados
+            animator.SetBool("IsGrounded", playerMovement.IsGrounded());
+            animator.SetFloat("Speed", 0f);
+            animator.SetFloat("VerticalSpeed", rb.velocity.y);
         }
 
         if (cameraController != null)
