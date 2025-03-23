@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class PlayerDeath : MonoBehaviour
 {
@@ -45,12 +46,23 @@ public class PlayerDeath : MonoBehaviour
     [Tooltip("Duration of coin subtraction animation")]
     public float coinSubtractionDuration = 1f; // Duración de la animación de resta
 
+    [Header("Bounce Effect Settings")]
+    [Tooltip("Total duration of the bounce animation for the coin count text")]
+    public float bounceDuration = 0.5f;
+    [Tooltip("X position of the left bounce endpoint (in UI units)")]
+    public float leftBounceX = -5f; // Posición X del extremo izquierdo
+    [Tooltip("X position of the right bounce endpoint (in UI units)")]
+    public float rightBounceX = 5f; // Posición X del extremo derecho
+    [Tooltip("Number of bounces (one bounce = left to right and back)")]
+    public int bounceCount = 3; // Número de rebotes completos
+
     private Vector3 initialPosition;         // Posición inicial del jugador
     private Vector3 initialCameraPosition;   // Posición inicial de la cámara almacenada
     private bool isDead = false;
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
     private Rigidbody2D rb;
+    private bool hasEverCollectedCoins = false; // Para rastrear si alguna vez ha recolectado monedas
 
     void Start()
     {
@@ -152,6 +164,17 @@ public class PlayerDeath : MonoBehaviour
         // Asegurarse que la deathUI esté inicialmente oculta
         SetDeathUIAlpha(0f);
         deathUI.SetActive(false);
+
+        // Verificar si el jugador alguna vez ha recolectado monedas
+        if (kredsManager != null && kredsManager.totalTokens > 0)
+        {
+            hasEverCollectedCoins = true;
+        }
+    }
+
+    public void OnCoinCollected()
+    {
+        hasEverCollectedCoins = true;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -223,10 +246,16 @@ public class PlayerDeath : MonoBehaviour
             // Esperar 0.4 segundos después del fade in
             yield return new WaitForSeconds(0.4f);
 
+            // Determinar si el jugador alguna vez ha recolectado monedas
+            bool neverCollectedCoins = !hasEverCollectedCoins && startCoinValue == 0;
+
+            // Calcular las monedas perdidas
+            int coinsLost = neverCollectedCoins ? 0 : coinsToSubtract; // Si nunca ha recolectado, perderá 0
+            int targetCoinValue = Mathf.Max(0, startCoinValue - coinsLost); // No bajar de 0
+
             // Animación de resta de monedas con texto de pérdida
             elapsedTime = 0f;
-            int targetCoinValue = Mathf.Max(0, startCoinValue - coinsToSubtract); // No bajar de 0
-            deathUILostCoins.text = "-" + coinsToSubtract; // Mostrar la cantidad perdida sin ceros
+            deathUILostCoins.text = "-" + coinsLost; // Mostrar la cantidad perdida
             while (elapsedTime < coinSubtractionDuration)
             {
                 elapsedTime += Time.deltaTime;
@@ -239,6 +268,12 @@ public class PlayerDeath : MonoBehaviour
             kredsManager.displayedTokens = targetCoinValue; // Actualizar el valor en KredsManager
             kredsManager.totalTokens = targetCoinValue; // Sincronizar también totalTokens
             kredsManager.UpdateHUD(); // Actualizar la UI de KredsManager
+
+            // Si nunca ha recolectado monedas, aplicar el efecto de rebote al contador de monedas
+            if (neverCollectedCoins)
+            {
+                StartCoroutine(BounceEffect());
+            }
 
             // Esperar 0.8 segundos después de la resta
             yield return new WaitForSeconds(0.8f);
@@ -314,9 +349,37 @@ public class PlayerDeath : MonoBehaviour
         isDead = false;
     }
 
+    private IEnumerator BounceEffect()
+    {
+        if (deathUICoinCount == null) yield break;
+
+        // Usar RectTransform para mover el texto en UI space
+        RectTransform textTransform = deathUICoinCount.GetComponent<RectTransform>();
+        Vector2 originalPosition = textTransform.anchoredPosition;
+
+        float elapsedTime = 0f;
+        float timePerBounce = bounceDuration / (bounceCount * 2); // Cada rebote tiene 2 movimientos (izquierda y derecha)
+
+        for (int i = 0; i < bounceCount * 2; i++)
+        {
+            // Determinar la posición objetivo (izquierda o derecha) usando las posiciones absolutas
+            float targetX = (i % 2 == 0) ? rightBounceX : leftBounceX;
+            Vector2 targetPosition = new Vector2(targetX, originalPosition.y);
+
+            // Mover de golpe (sin suavizado)
+            textTransform.anchoredPosition = targetPosition;
+
+            // Esperar el tiempo de cada movimiento
+            elapsedTime += timePerBounce;
+            yield return new WaitForSeconds(timePerBounce);
+        }
+
+        // Restaurar la posición original de golpe
+        textTransform.anchoredPosition = originalPosition;
+    }
+
     private void SetDeathUIAlpha(float alpha)
     {
-        // Ajustar el alpha del ícono, el contador y el texto de pérdida en deathUI
         if (deathUICoinIcon != null)
         {
             Color iconColor = deathUICoinIcon.color;

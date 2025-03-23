@@ -5349,6 +5349,10 @@ MonoBehaviour:
   deathUIFadeTime: 0.5
   coinsToSubtract: 500
   coinSubtractionDuration: 0.3
+  bounceDuration: 0.5
+  leftBounceX: 49
+  rightBounceX: 62
+  bounceCount: 3
 --- !u!1 &1195527638
 GameObject:
   m_ObjectHideFlags: 0

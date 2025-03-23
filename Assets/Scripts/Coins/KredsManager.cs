@@ -12,12 +12,13 @@ public class KredsManager : MonoBehaviour
     public int displayedTokens = 000000000;                 // Valor mostrado en pantalla
     public Vector2 originalUIPosition;                      // Posición inicial visible de la UI
     public Vector2 hiddenUIPosition;                        // Posición fuera de la cámara
-    private Vector2 originalIconPosition;                    // Posición original del ícono relativa al contenedor
-    private int consecutiveCoins = 0;                        // Contador de monedas consecutivas
-    private float timeSinceLastCoin = 0f;                    // Tiempo desde la última moneda
-    private float resetDelay = 1f;                           // Margen de 1s para monedas consecutivas
+    private Vector2 originalIconPosition;                   // Posición original del ícono relativa al contenedor
+    private int consecutiveCoins = 0;                       // Contador de monedas consecutivas
+    private float timeSinceLastCoin = 0f;                   // Tiempo desde la última moneda
+    private float resetDelay = 1f;                          // Margen de 1s para monedas consecutivas
     public bool isAnimating = false;                        // Evitar múltiples animaciones simultáneas
-    private Coroutine currentAnimation;                      // Referencia a la corrutina actual
+    private Coroutine currentAnimation;                     // Referencia a la corrutina actual
+    private PlayerDeath playerDeath;                        // Referencia a PlayerDeath
 
     void Awake()
     {
@@ -53,6 +54,14 @@ public class KredsManager : MonoBehaviour
             uiContainer.anchoredPosition = hiddenUIPosition;
             originalIconPosition = coinIcon.anchoredPosition;
         }
+
+        // Obtener referencia a PlayerDeath
+        playerDeath = FindObjectOfType<PlayerDeath>();
+        if (playerDeath == null)
+        {
+            Debug.LogError("PlayerDeath no encontrado en la escena.");
+        }
+
         UpdateHUD();
     }
 
@@ -91,6 +100,12 @@ public class KredsManager : MonoBehaviour
         totalTokens += amount; // Sumar el valor exacto recibido
         consecutiveCoins++;    // Incrementar por cada item recogido
         timeSinceLastCoin = 0f;
+
+        // Notificar a PlayerDeath que se ha recolectado una moneda
+        if (playerDeath != null)
+        {
+            playerDeath.OnCoinCollected();
+        }
 
         if (currentAnimation != null)
         {
