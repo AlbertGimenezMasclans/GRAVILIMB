@@ -44,45 +44,45 @@ public class ItemMessage : MonoBehaviour
     public bool IsDialogueActive => didDialogueStart;
 
     void Start()
-{
-    audioSource = gameObject.GetComponent<AudioSource>();
-    if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
-
-    originalPitch = audioSource.pitch;
-    spriteRenderer = GetComponent<SpriteRenderer>();
-
-    dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
-    dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
-    typingSound = Resources.Load<AudioClip>("SFX/Dialogue2");
-
-    coinControllerUI = FindObjectOfType<CoinControllerUI>();
-    if (coinControllerUI == null) Debug.LogError("CoinControllerUI no encontrado en la escena.");
-
-    if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
-    RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
-    originalTextBoxPosition = textBoxRect.anchoredPosition;
-
-    dialogueText = textField1 != null ? textField1 : textField2;
-    if (textField2 != null && dialogueText == textField1) textField2.gameObject.SetActive(false);
-    if (dialogueText != null && !didDialogueStart) dialogueText.gameObject.SetActive(false);
-
-    // Verificar que el Sprite Asset esté asignado
-    if (dialogueText != null)
     {
-        if (dialogueText.spriteAsset == null)
+        audioSource = gameObject.GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+
+        originalPitch = audioSource.pitch;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
+        dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
+        typingSound = Resources.Load<AudioClip>("SFX/Dialogue2");
+
+        coinControllerUI = FindObjectOfType<CoinControllerUI>();
+        if (coinControllerUI == null) Debug.LogError("CoinControllerUI no encontrado en la escena.");
+
+        if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
+        RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
+        originalTextBoxPosition = textBoxRect.anchoredPosition;
+
+        dialogueText = textField1 != null ? textField1 : textField2;
+        if (textField2 != null && dialogueText == textField1) textField2.gameObject.SetActive(false);
+        if (dialogueText != null && !didDialogueStart) dialogueText.gameObject.SetActive(false);
+
+        // Verificar que el Sprite Asset esté asignado
+        if (dialogueText != null)
         {
-            Debug.LogWarning("No hay un Sprite Asset asignado al TMP_Text en " + gameObject.name + ". Los sprites en el texto no se mostrarán.");
+            if (dialogueText.spriteAsset == null)
+            {
+                Debug.LogWarning("No hay un Sprite Asset asignado al TMP_Text en " + gameObject.name + ". Los sprites en el texto no se mostrarán.");
+            }
         }
+
+        if (Input_TB != null) Input_TB.gameObject.SetActive(false);
+
+        sceneAnimators = new List<Animator>();
+        originalUpdateModes = new List<AnimatorUpdateMode>();
+
+        // Por ahora, la posición invertida será igual a la normal hasta que la especifiques en el Inspector
+        if (newPrefabPositionInverted == Vector3.zero) newPrefabPositionInverted = newPrefabPosition;
     }
-
-    if (Input_TB != null) Input_TB.gameObject.SetActive(false);
-
-    sceneAnimators = new List<Animator>();
-    originalUpdateModes = new List<AnimatorUpdateMode>();
-
-    // Por ahora, la posición invertida será igual a la normal hasta que la especifiques en el Inspector
-    if (newPrefabPositionInverted == Vector3.zero) newPrefabPositionInverted = newPrefabPosition;
-}
 
     void Update()
     {
@@ -272,17 +272,39 @@ public class ItemMessage : MonoBehaviour
     {
         int visibleCount = 0;
         bool inTag = false;
+        int i = 0;
 
-        for (int i = 0; i < line.Length; i++)
+        while (i < line.Length)
         {
             char c = line[i];
-            if (c == '<') inTag = true;
+
+            if (c == '<')
+            {
+                inTag = true;
+
+                // Verificar si es una etiqueta <sprite>
+                if (i + 7 < line.Length && line.Substring(i, 7).Equals("<sprite"))
+                {
+                    // Avanzar hasta el final de la etiqueta
+                    while (i < line.Length && line[i] != '>') i++;
+                    if (i < line.Length && line[i] == '>')
+                    {
+                        inTag = false;
+                        if (visibleCount == visibleIndex) return '◆'; // Carácter especial para sprites
+                        visibleCount++;
+                        i++;
+                        continue;
+                    }
+                }
+            }
             else if (c == '>') inTag = false;
             else if (!inTag)
             {
                 if (visibleCount == visibleIndex) return c;
                 visibleCount++;
             }
+
+            i++;
         }
         return '\0';
     }
@@ -291,13 +313,37 @@ public class ItemMessage : MonoBehaviour
     {
         int count = 0;
         bool inTag = false;
+        int i = 0;
 
-        foreach (char c in line)
+        while (i < line.Length)
         {
-            if (c == '<') inTag = true;
+            char c = line[i];
+
+            if (c == '<')
+            {
+                inTag = true;
+
+                // Verificar si es una etiqueta <sprite>
+                if (i + 7 < line.Length && line.Substring(i, 7).Equals("<sprite"))
+                {
+                    // Avanzar hasta el final de la etiqueta
+                    while (i < line.Length && line[i] != '>') i++;
+                    if (i < line.Length && line[i] == '>')
+                    {
+                        inTag = false;
+                        i++;
+                        count++; // Contar el sprite como 1 carácter visible
+                        continue;
+                    }
+                }
+            }
             else if (c == '>') inTag = false;
             else if (!inTag) count++;
+
+            i++;
         }
+
+        Debug.Log($"Visible characters in line '{line}': {count}");
         return count;
     }
 

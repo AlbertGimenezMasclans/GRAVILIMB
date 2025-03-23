@@ -2250,10 +2250,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[2]
-      value: 'Pulsa Z para disparar, puedes romper objetos e interactuar con cosas
-        mas lejanas!
+      value: 'Pulsa <sprite name="Zinput"> para disparar, puedes romper objetos e
+        interactuar con cosas mas lejanas!
 
-        Manten pulsado X para abrir el menu de <color=#7bf688>habilidades</color>.'
+        Manten pulsado <sprite name="Xinput">
+        para abrir el menu de <color=#7bf688>habilidades</color>.'
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[3]
@@ -7240,10 +7241,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[2]
-      value: 'Pulsa la Z en el suelo o en el aire tras saltar.
+      value: 'Pulsa la <sprite name="Zinput"> en el suelo o en el aire tras saltar.
 
-        Manten pulsado
-        X para abrir el menu de <color=#7bf688>habilidades</color>.'
+        Manten
+        pulsado <sprite name="Xinput"> para abrir el menu de <color=#7bf688>habilidades</color>.'
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[3]
@@ -8295,10 +8296,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[1]
-      value: 'Ahora puedes quitarte la cabeza, pudiendo pasar por caminos mas estrechos.
+      value: 'Pulsa <sprite name="Zinput"> para quitarte la cabeza, ahora puedes
+        pasar por caminos mas estrechos.
 
-        Manten
-        pulsado X para abrir el menu de <color=#7bf688>habilidades</color>.'
+        Manten pulsado <sprite name="Xinput">
+        para abrir el menu de <color=#7bf688>habilidades</color>.'
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[2]
