@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class KredToken : MonoBehaviour
 {
-    private int tokenValue = 1000; // Valor de cada KredToken
+    [SerializeField] private int tokenValue = 1000; // Valor de cada KredToken
     [SerializeField] private GameObject collectionEffectPrefab; // Efecto de recolección
 
     private void OnTriggerEnter2D(Collider2D collision)
