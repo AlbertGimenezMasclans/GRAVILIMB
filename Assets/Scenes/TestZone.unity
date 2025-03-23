@@ -2432,7 +2432,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textBox: {fileID: 427908726}
   dialogueLines:
-  - Alo presidente, aqui tienes un poco de dinerito.
+  - Has encontrado el <color=#57bce3>Contenedor de Kreds</color>!
+  - Aqui puedes almacenar todas las fichas <color=yellow>Kred</color> que encuentres!
+  - Son muy importantes, asi que trata de agarrar todas las que puedas!
+  - Su forma... recuerdan a alguien, pero quien sera?
   textField: {fileID: 847149824}
   Input_TB: {fileID: 1449516896}
   fanfareSong: {fileID: 8300000, guid: 20c0ce2715ce9c04fb2c4437c9681307, type: 3}
@@ -2994,7 +2997,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: 3df174dc2c003b6419362d806f1f8d8e, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -3020,7 +3023,7 @@ MonoBehaviour:
   m_charWidthMaxAdj: 0
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
+  m_overflowMode: 1
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
@@ -4012,7 +4015,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: 3df174dc2c003b6419362d806f1f8d8e, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -7237,10 +7240,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[2]
-      value: 'Para usarlo, usa la Z en el suelo o en el aire tras saltar.
+      value: 'Pulsa la Z en el suelo o en el aire tras saltar.
 
-        Manten
-        pulsado X para abrir el menu de <color=#7bf688>habilidades</color>.'
+        Manten pulsado
+        X para abrir el menu de <color=#7bf688>habilidades</color>.'
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[3]
@@ -7251,7 +7254,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5669827584585362950, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: dialogueLines.Array.data[4]
-      value: 
+      value: 'Selecciona la habilidad para usarla.
+
+        Prueba hablar con alguien
+        que este del reves, haber que te dice!'
       objectReference: {fileID: 0}
     - target: {fileID: 6071182378240184559, guid: e1d6756a422cc93468deda2dbd0168df, type: 3}
       propertyPath: m_Size.x

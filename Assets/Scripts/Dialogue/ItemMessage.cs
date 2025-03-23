@@ -44,36 +44,45 @@ public class ItemMessage : MonoBehaviour
     public bool IsDialogueActive => didDialogueStart;
 
     void Start()
+{
+    audioSource = gameObject.GetComponent<AudioSource>();
+    if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+
+    originalPitch = audioSource.pitch;
+    spriteRenderer = GetComponent<SpriteRenderer>();
+
+    dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
+    dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
+    typingSound = Resources.Load<AudioClip>("SFX/Dialogue2");
+
+    coinControllerUI = FindObjectOfType<CoinControllerUI>();
+    if (coinControllerUI == null) Debug.LogError("CoinControllerUI no encontrado en la escena.");
+
+    if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
+    RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
+    originalTextBoxPosition = textBoxRect.anchoredPosition;
+
+    dialogueText = textField1 != null ? textField1 : textField2;
+    if (textField2 != null && dialogueText == textField1) textField2.gameObject.SetActive(false);
+    if (dialogueText != null && !didDialogueStart) dialogueText.gameObject.SetActive(false);
+
+    // Verificar que el Sprite Asset esté asignado
+    if (dialogueText != null)
     {
-        audioSource = gameObject.GetComponent<AudioSource>();
-        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
-
-        originalPitch = audioSource.pitch;
-        spriteRenderer = GetComponent<SpriteRenderer>();
-
-        dialogueAdvanceSound = Resources.Load<AudioClip>("SFX/DialogueNEXT");
-        dialogueEndSound = Resources.Load<AudioClip>("SFX/DialogueEND");
-        typingSound = Resources.Load<AudioClip>("SFX/Dialogue2");
-
-        coinControllerUI = FindObjectOfType<CoinControllerUI>();
-        if (coinControllerUI == null) Debug.LogError("CoinControllerUI no encontrado en la escena.");
-
-        if (textBox == null) { Debug.LogError("TextBox no está asignado."); return; }
-        RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
-        originalTextBoxPosition = textBoxRect.anchoredPosition;
-
-        dialogueText = textField1 != null ? textField1 : textField2;
-        if (textField2 != null && dialogueText == textField1) textField2.gameObject.SetActive(false);
-        if (dialogueText != null && !didDialogueStart) dialogueText.gameObject.SetActive(false);
-
-        if (Input_TB != null) Input_TB.gameObject.SetActive(false);
-
-        sceneAnimators = new List<Animator>();
-        originalUpdateModes = new List<AnimatorUpdateMode>();
-
-        // Por ahora, la posición invertida será igual a la normal hasta que la especifiques en el Inspector
-        if (newPrefabPositionInverted == Vector3.zero) newPrefabPositionInverted = newPrefabPosition;
+        if (dialogueText.spriteAsset == null)
+        {
+            Debug.LogWarning("No hay un Sprite Asset asignado al TMP_Text en " + gameObject.name + ". Los sprites en el texto no se mostrarán.");
+        }
     }
+
+    if (Input_TB != null) Input_TB.gameObject.SetActive(false);
+
+    sceneAnimators = new List<Animator>();
+    originalUpdateModes = new List<AnimatorUpdateMode>();
+
+    // Por ahora, la posición invertida será igual a la normal hasta que la especifiques en el Inspector
+    if (newPrefabPositionInverted == Vector3.zero) newPrefabPositionInverted = newPrefabPosition;
+}
 
     void Update()
     {
