@@ -83,6 +83,7 @@ public class Interact : MonoBehaviour
     {
         if (isPlayerRange && Input.GetKeyDown(KeyCode.C))
         {
+            Debug.Log("C pressed, starting or advancing dialogue");
             if (!didDialogueStart)
             {
                 StartDialogue();
@@ -109,7 +110,7 @@ public class Interact : MonoBehaviour
         if (dialogueMark != null) dialogueMark.SetActive(false);
         dialogueText.gameObject.SetActive(true);
         lineIndex = 0;
-        Time.timeScale = 0f;
+        // Time.timeScale = 0f; // Descomenta esta línea si quieres pausar el juego
 
         ConfigureAnimatorsForDialogue(true);
 
@@ -164,7 +165,7 @@ public class Interact : MonoBehaviour
             textBox.SetActive(false);
             if (dialogueMark != null) dialogueMark.SetActive(true);
             dialogueText.gameObject.SetActive(false);
-            Time.timeScale = 1f;
+            // Time.timeScale = 1f; // Descomenta esta línea si usaste la pausa en StartDialogue
 
             ConfigureAnimatorsForDialogue(false);
 
