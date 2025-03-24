@@ -77,6 +77,7 @@ public class PlayerDeath : MonoBehaviour
     private BoxCollider2D boxCollider;
     private Rigidbody2D rb;
     private bool hasEverCollectedCoins = false;
+    private PlayerHealth playerHealth; // Referencia al script PlayerHealth
 
     void Start()
     {
@@ -176,6 +177,13 @@ public class PlayerDeath : MonoBehaviour
             Debug.LogError("Animator no encontrado en " + gameObject.name);
         }
 
+        // Obtener referencia al script PlayerHealth
+        playerHealth = GetComponent<PlayerHealth>();
+        if (playerHealth == null)
+        {
+            Debug.LogError("PlayerHealth no encontrado en " + gameObject.name);
+        }
+
         initialPosition = transform.position;
         initialCameraPosition = mainCamera.transform.position;
         fadePanel.color = new Color(0, 0, 0, 0);
@@ -211,15 +219,7 @@ public class PlayerDeath : MonoBehaviour
         hasEverCollectedCoins = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("DeathZone") && !isDead)
-        {
-            StartCoroutine(RespawnCoroutine());
-        }
-    }
-
-    private IEnumerator RespawnCoroutine()
+    public IEnumerator RespawnCoroutine()
     {
         isDead = true;
         
@@ -245,6 +245,7 @@ public class PlayerDeath : MonoBehaviour
 
         yield return new WaitForSeconds(fadeInDelay);
 
+        // Fade-in: la pantalla se pone negra
         float elapsedTime = 0f;
         while (elapsedTime < fadeInTime)
         {
@@ -254,6 +255,12 @@ public class PlayerDeath : MonoBehaviour
             yield return null;
         }
         fadePanel.color = new Color(0, 0, 0, 1f);
+
+        // Hacer los objetos invisibles cuando la pantalla se pone negra
+        if (playerHealth != null)
+        {
+            playerHealth.ForceHideObjects();
+        }
 
         yield return new WaitForSeconds(1f);
 
@@ -380,7 +387,19 @@ public class PlayerDeath : MonoBehaviour
         {
             cameraController.enabled = true;
         }
-        
+
+        // Restablecer la vida del jugador al máximo (sin hacer los objetos visibles)
+        if (playerHealth != null)
+        {
+            playerHealth.currentHealth = playerHealth.maxHealth;
+            HealthBar healthBar = GetComponentInChildren<HealthBar>();
+            if (healthBar != null)
+            {
+                healthBar.UpdateHealth(playerHealth.currentHealth);
+            }
+            // No llamamos a ShowObjects aquí para que los objetos permanezcan invisibles al reaparecer
+        }
+
         isDead = false;
     }
 
