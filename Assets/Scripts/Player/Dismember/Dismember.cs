@@ -30,11 +30,11 @@ public class Dismember : MonoBehaviour
     {
         // Movimiento a saltos como la rana
         float moveInput = 0f;
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
         {
             moveInput = 1f;
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
         {
             moveInput = -1f;
         }
@@ -51,7 +51,7 @@ public class Dismember : MonoBehaviour
         }
 
         // Salto vertical independiente
-        if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.UpArrow) && isGrounded || Input.GetKey(KeyCode.W) && isGrounded)
         {
             float jumpDirection = isGravityNormal ? 1f : -1f;
             rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpDirection);

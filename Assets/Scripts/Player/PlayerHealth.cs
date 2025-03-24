@@ -32,6 +32,7 @@ public class PlayerHealth : MonoBehaviour
 
     private HealthBar healthBar; // Referencia al script HealthBar
     private PlayerDeath playerDeath; // Referencia al script PlayerDeath
+    private PlayerMovement playerMovement; // Referencia al script PlayerMovement
     private Coroutine hideHealthBarCoroutine; // Corutina para ocultar los objetos
     private SpriteRenderer[] spriteRenderers; // Array de SpriteRenderers de los objetos
     private TMP_Text[] textRenderers; // Array de TMP_Text para los contadores de texto
@@ -60,6 +61,13 @@ public class PlayerHealth : MonoBehaviour
         if (playerRigidbody == null)
         {
             UnityEngine.Debug.LogError("Rigidbody2D no encontrado en el jugador. Asegúrate de que el jugador tenga un Rigidbody2D.", this);
+        }
+
+        // Obtener el script PlayerMovement para detectar la gravedad
+        playerMovement = GetComponent<PlayerMovement>();
+        if (playerMovement == null)
+        {
+            UnityEngine.Debug.LogError("PlayerMovement no encontrado en el jugador. Asegúrate de que el jugador tenga el script PlayerMovement.", this);
         }
 
         // Inicializar los arrays para SpriteRenderers, TMP_Text y Transforms
@@ -147,10 +155,14 @@ public class PlayerHealth : MonoBehaviour
             return;
         }
 
-        // Detectar si la gravedad está invertida
-        if (playerRigidbody != null)
+        // Detectar si la gravedad está invertida usando PlayerMovement
+        if (playerMovement != null)
         {
-            isGravityInverted = playerRigidbody.gravityScale < 0; // Gravedad invertida si gravityScale es negativa
+            isGravityInverted = !playerMovement.IsGravityNormal();
+        }
+        else if (playerRigidbody != null)
+        {
+            isGravityInverted = playerRigidbody.gravityScale < 0; // Fallback si PlayerMovement no está disponible
         }
 
         // Seleccionar los offsets según el estado de la gravedad
@@ -179,6 +191,9 @@ public class PlayerHealth : MonoBehaviour
                         );
                         // Asegurarse de que la escala del HealthCounter sea constante
                         healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
+                        // No rotar el HealthCounter, mantenerlo siempre en su rotación original
+                        healthCounterTransform.rotation = Quaternion.identity;
+                        Debug.Log($"HealthCounter posición: {healthCounterTransform.position}, isGravityInverted: {isGravityInverted}");
                     }
                     else
                     {
@@ -194,8 +209,9 @@ public class PlayerHealth : MonoBehaviour
                     objTransform.position.z // Mantener la Z original del objeto
                 );
 
-                // Fijar la rotación en el espacio global
-                objTransform.rotation = Quaternion.identity; // Rotación fija a (0, 0, 0)
+                // Ajustar la rotación según la gravedad para los otros objetos (HealthBar y HealthBar_Fill)
+                objTransform.rotation = isGravityInverted ? Quaternion.Euler(0f, 0f, 180f) : Quaternion.identity;
+                Debug.Log($"{objTransform.name} rotación: {objTransform.rotation.eulerAngles.z} (isGravityInverted: {isGravityInverted})");
             }
         }
     }

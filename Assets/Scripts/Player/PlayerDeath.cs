@@ -71,6 +71,7 @@ public class PlayerDeath : MonoBehaviour
     public Animator animator;
 
     private Vector3 initialPosition;
+    private Quaternion initialRotation; // Almacenar la rotación inicial del jugador
     private Vector3 initialCameraPosition;
     private bool isDead = false;
     private SpriteRenderer spriteRenderer;
@@ -78,6 +79,7 @@ public class PlayerDeath : MonoBehaviour
     private Rigidbody2D rb;
     private bool hasEverCollectedCoins = false;
     private PlayerHealth playerHealth; // Referencia al script PlayerHealth
+    private float originalGravityScale; // Almacenar el valor original de gravityScale
 
     void Start()
     {
@@ -170,7 +172,7 @@ public class PlayerDeath : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
         rb = GetComponent<Rigidbody2D>();
-        
+
         animator = GetComponent<Animator>();
         if (animator == null)
         {
@@ -184,10 +186,19 @@ public class PlayerDeath : MonoBehaviour
             Debug.LogError("PlayerHealth no encontrado en " + gameObject.name);
         }
 
+        // Almacenar el valor original de gravityScale
+        if (rb != null)
+        {
+            originalGravityScale = rb.gravityScale; // Guardar el valor inicial (positivo)
+            Debug.Log($"Valor original de gravityScale almacenado: {originalGravityScale}");
+        }
+
+        // Almacenar la posición y rotación inicial del jugador
         initialPosition = transform.position;
+        initialRotation = transform.rotation; // Guardar la rotación inicial
         initialCameraPosition = mainCamera.transform.position;
         fadePanel.color = new Color(0, 0, 0, 0);
-        
+
         SetDeathUIAlpha(0f);
         deathUI.SetActive(false);
 
@@ -200,6 +211,8 @@ public class PlayerDeath : MonoBehaviour
         {
             animator.Play("Protagonist_Idle");
         }
+
+        Debug.Log($"Rotación inicial almacenada: {initialRotation.eulerAngles}");
     }
 
     void Update()
@@ -222,7 +235,7 @@ public class PlayerDeath : MonoBehaviour
     public IEnumerator RespawnCoroutine()
     {
         isDead = true;
-        
+
         if (animator != null)
         {
             animator.Play("Protagonist_Die");
@@ -231,7 +244,7 @@ public class PlayerDeath : MonoBehaviour
         if (boxCollider != null) boxCollider.enabled = false;
         rb.velocity = Vector2.zero;
         rb.simulated = false;
-        
+
         if (playerMovement.isDismembered)
         {
             playerMovement.headObject.SetActive(false);
@@ -282,6 +295,13 @@ public class PlayerDeath : MonoBehaviour
             SetDeathUIAlpha(1f);
 
             yield return new WaitForSeconds(0.4f);
+
+            // Hacer al jugador invisible justo antes de que comience el conteo de monedas
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.enabled = false;
+                Debug.Log("Jugador hecho invisible al inicio del conteo de monedas.");
+            }
 
             bool neverCollectedCoins = !hasEverCollectedCoins && startCoinValue == 0;
             int coinsLost = neverCollectedCoins ? 0 : (startCoinValue < coinsToSubtract ? startCoinValue : coinsToSubtract);
@@ -361,21 +381,26 @@ public class PlayerDeath : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
+        // Restablecer la posición y rotación inicial del jugador
         transform.position = initialPosition;
+        transform.rotation = initialRotation; // Aplicar la rotación inicial
         spriteRenderer.enabled = true;
         if (boxCollider != null) boxCollider.enabled = true;
         rb.simulated = false;
-        
+
         if (playerMovement.isDismembered)
         {
             playerMovement.RecomposePlayer();
         }
 
         // Restablecer la gravedad a normal (hacia abajo)
-        if (rb != null)
+        if (rb != null && playerMovement != null)
         {
-            rb.gravityScale = 1f; // Gravedad normal (ajusta este valor según tu configuración)
-            Debug.Log("Gravedad restablecida a normal (gravityScale = 1) al revivir.");
+            // Restablecer gravityScale al valor original (positivo) y isGravityNormal
+            rb.gravityScale = originalGravityScale; // Usar el valor original almacenado
+            playerMovement.isGravityNormal = true; // Asegurar que isGravityNormal sea true
+
+            Debug.Log($"Gravedad restablecida a normal al revivir. gravityScale: {rb.gravityScale}, isGravityNormal: {playerMovement.isGravityNormal}, Rotación del jugador: {transform.rotation.eulerAngles}");
         }
 
         if (animator != null)
