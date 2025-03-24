@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
@@ -10,19 +11,30 @@ public class PlayerHealth : MonoBehaviour
     public float currentHealth;
 
     [Header("Visibility Settings")]
-    [Tooltip("GameObjects whose SpriteRenderers will be made visible/invisible and whose rotation will be fixed")]
+    [Tooltip("GameObjects whose SpriteRenderers or TMP_Text will be made visible/invisible and whose rotation will be fixed")]
     public GameObject[] objectsToHide; // Array de GameObjects a hacer visibles/invisibles y fijar rotación
 
     [Header("Position Offset")]
     [Tooltip("Offset from the player's position where the objects should be positioned")]
-    public Vector2 positionOffset = new Vector2(0f, 2f); // Subimos la barra de vida a 2 unidades por encima del jugador
+    public Vector2 positionOffset = new Vector2(0f, 2f); // Offset para posicionar los objetos respecto al jugador
+
+    [Header("Health Counter Settings")]
+    [Tooltip("Vertical offset for the HealthCounter relative to the base position offset")]
+    public float healthCounterVerticalOffset = 0.3f; // Offset vertical para el HealthCounter
+    [Tooltip("Horizontal offset for the HealthCounter relative to the base position offset")]
+    public float healthCounterHorizontalOffset = 0f; // Offset horizontal para el HealthCounter
+    [Tooltip("Scale of the HealthCounter (affects the size of the text)")]
+    public float healthCounterScale = 0.05f; // Escala del HealthCounter (ajusta para cambiar el tamaño del texto)
 
     private HealthBar healthBar; // Referencia al script HealthBar
     private PlayerDeath playerDeath; // Referencia al script PlayerDeath
     private Coroutine hideHealthBarCoroutine; // Corutina para ocultar los objetos
     private SpriteRenderer[] spriteRenderers; // Array de SpriteRenderers de los objetos
+    private TMP_Text[] textRenderers; // Array de TMP_Text para los contadores de texto
     private Transform[] objectTransforms; // Array de Transforms de los objetos para fijar rotación y posición
     private Transform playerTransform; // Transform del jugador
+    private TMP_Text healthCounterText; // Referencia al componente TextMeshPro del contador
+    private Transform healthCounterTransform; // Referencia al Transform del HealthCounter
 
     void Start()
     {
@@ -31,25 +43,53 @@ public class PlayerHealth : MonoBehaviour
 
         // Obtener el Transform del jugador
         playerTransform = transform;
+        if (playerTransform == null)
+        {
+            UnityEngine.Debug.LogError("playerTransform es null. Asegúrate de que el script esté adjunto a un GameObject.", this);
+            return;
+        }
 
-        // Obtener los SpriteRenderers y Transforms de los objetos a ocultar
+        // Inicializar los arrays para SpriteRenderers, TMP_Text y Transforms
         spriteRenderers = new SpriteRenderer[objectsToHide.Length];
+        textRenderers = new TMP_Text[objectsToHide.Length];
         objectTransforms = new Transform[objectsToHide.Length];
+
         for (int i = 0; i < objectsToHide.Length; i++)
         {
             if (objectsToHide[i] != null)
             {
+                // Obtener el SpriteRenderer (si existe)
                 spriteRenderers[i] = objectsToHide[i].GetComponent<SpriteRenderer>();
-                if (spriteRenderers[i] == null)
-                {
-                    Debug.LogError($"SpriteRenderer no encontrado en {objectsToHide[i].name}.", this);
-                }
+                // Obtener el TMP_Text (si existe)
+                textRenderers[i] = objectsToHide[i].GetComponent<TMP_Text>();
+                // Obtener el Transform
                 objectTransforms[i] = objectsToHide[i].transform;
 
                 // Asegurarse de que el objeto no sea hijo del jugador
                 if (objectTransforms[i].parent == playerTransform)
                 {
                     objectTransforms[i].SetParent(null);
+                }
+
+                // Buscar el HealthCounter
+                if (objectsToHide[i].name == "HealthCounter")
+                {
+                    healthCounterText = objectsToHide[i].GetComponent<TMP_Text>();
+                    healthCounterTransform = objectsToHide[i].transform;
+                    if (healthCounterText == null)
+                    {
+                        UnityEngine.Debug.LogError($"TMP_Text no encontrado en {objectsToHide[i].name}.", this);
+                    }
+                    if (healthCounterTransform == null)
+                    {
+                        UnityEngine.Debug.LogError($"Transform no encontrado en {objectsToHide[i].name}.", this);
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.Log($"HealthCounter detectado: {healthCounterTransform.name}");
+                        // Asegurarse de que la escala del HealthCounter sea la especificada
+                        healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
+                    }
                 }
             }
         }
@@ -58,13 +98,15 @@ public class PlayerHealth : MonoBehaviour
         healthBar = FindObjectOfType<HealthBar>();
         if (healthBar == null)
         {
-            Debug.LogError("HealthBar no encontrado en la escena.", this);
+            UnityEngine.Debug.LogError("HealthBar no encontrado en la escena.", this);
         }
         else
         {
             // Inicializar la barra de vida
             healthBar.SetMaxHealth(maxHealth);
             healthBar.UpdateHealth(currentHealth);
+            // Actualizar el texto del contador
+            UpdateHealthCounterText();
             // Hacer los objetos invisibles al inicio
             HideObjects();
         }
@@ -73,7 +115,7 @@ public class PlayerHealth : MonoBehaviour
         playerDeath = GetComponent<PlayerDeath>();
         if (playerDeath == null)
         {
-            Debug.LogError("PlayerDeath no encontrado en el jugador.", this);
+            UnityEngine.Debug.LogError("PlayerDeath no encontrado en el jugador.", this);
         }
     }
 
@@ -85,13 +127,44 @@ public class PlayerHealth : MonoBehaviour
             TakeDamage(5f); // Puedes ajustar la cantidad de daño
         }
 
-        // Actualizar la posición y rotación de todos los objetos en objectsToHide
-        foreach (Transform objTransform in objectTransforms)
+        // Asegurarse de que playerTransform no sea null
+        if (playerTransform == null)
         {
+            UnityEngine.Debug.LogError("playerTransform es null en Update().", this);
+            return;
+        }
+
+        // Obtener la posición del jugador una sola vez
+        Vector3 playerPosition = playerTransform.position;
+
+        // Actualizar la posición y rotación de todos los objetos en objectsToHide
+        for (int i = 0; i < objectTransforms.Length; i++)
+        {
+            Transform objTransform = objectTransforms[i];
             if (objTransform != null)
             {
-                // Actualizar la posición para que siga al jugador con el offset
-                Vector3 playerPosition = playerTransform.position;
+                // Posicionar el HealthCounter respecto al jugador con su propio offset
+                if (objectsToHide[i].name == "HealthCounter")
+                {
+                    if (healthCounterTransform != null)
+                    {
+                        // Posicionar el HealthCounter respecto al jugador
+                        healthCounterTransform.position = new Vector3(
+                            playerPosition.x + positionOffset.x + healthCounterHorizontalOffset,
+                            playerPosition.y + positionOffset.y + healthCounterVerticalOffset,
+                            healthCounterTransform.position.z // Mantener la Z original
+                        );
+                        // Asegurarse de que la escala del HealthCounter sea constante
+                        healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogWarning("healthCounterTransform es null. Asegúrate de que HealthCounter esté en objectsToHide y que su nombre sea exactamente 'HealthCounter'.");
+                    }
+                    continue;
+                }
+
+                // Actualizar la posición para los otros objetos (como HealthBar y HealthBar_Fill)
                 objTransform.position = new Vector3(
                     playerPosition.x + positionOffset.x,
                     playerPosition.y + positionOffset.y,
@@ -113,6 +186,8 @@ public class PlayerHealth : MonoBehaviour
             if (healthBar != null)
             {
                 healthBar.UpdateHealth(currentHealth);
+                // Actualizar el texto del contador
+                UpdateHealthCounterText();
                 // Hacer los objetos visibles al colisionar con DeathZone
                 ShowObjects();
             }
@@ -130,6 +205,8 @@ public class PlayerHealth : MonoBehaviour
         if (healthBar != null)
         {
             healthBar.UpdateHealth(currentHealth);
+            // Actualizar el texto del contador
+            UpdateHealthCounterText();
             ShowObjects();
         }
 
@@ -150,10 +227,6 @@ public class PlayerHealth : MonoBehaviour
         {
             StartCoroutine(playerDeath.RespawnCoroutine());
         }
-        else
-        {
-            Debug.Log("¡El jugador ha muerto! (PlayerDeath no encontrado)");
-        }
     }
 
     private IEnumerator HideObjectsAfterDelay()
@@ -170,11 +243,20 @@ public class PlayerHealth : MonoBehaviour
     // Método público para hacer los objetos visibles (usado al perder vida)
     public void ShowObjects()
     {
+        // Habilitar los SpriteRenderers
         foreach (SpriteRenderer renderer in spriteRenderers)
         {
             if (renderer != null)
             {
                 renderer.enabled = true;
+            }
+        }
+        // Habilitar los TMP_Text
+        foreach (TMP_Text text in textRenderers)
+        {
+            if (text != null)
+            {
+                text.enabled = true;
             }
         }
         // Reiniciar la corutina para ocultar los objetos
@@ -188,11 +270,20 @@ public class PlayerHealth : MonoBehaviour
     // Método privado para hacer los objetos invisibles
     private void HideObjects()
     {
+        // Deshabilitar los SpriteRenderers
         foreach (SpriteRenderer renderer in spriteRenderers)
         {
             if (renderer != null)
             {
                 renderer.enabled = false;
+            }
+        }
+        // Deshabilitar los TMP_Text
+        foreach (TMP_Text text in textRenderers)
+        {
+            if (text != null)
+            {
+                text.enabled = false;
             }
         }
     }
@@ -207,5 +298,14 @@ public class PlayerHealth : MonoBehaviour
         }
         // Hacer los objetos invisibles inmediatamente
         HideObjects();
+    }
+
+    // Método para actualizar el texto del contador de vida
+    private void UpdateHealthCounterText()
+    {
+        if (healthCounterText != null)
+        {
+            healthCounterText.text = $"{(int)currentHealth} / {(int)maxHealth}";
+        }
     }
 }

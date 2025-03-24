@@ -392,11 +392,13 @@ public class PlayerDeath : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.currentHealth = playerHealth.maxHealth;
-            HealthBar healthBar = FindObjectOfType<HealthBar>(); // Cambiado a FindObjectOfType
+            HealthBar healthBar = FindObjectOfType<HealthBar>();
             if (healthBar != null)
             {
                 healthBar.UpdateHealth(playerHealth.currentHealth);
             }
+            // Actualizar el texto del contador después de restablecer la vida
+            playerHealth.GetType().GetMethod("UpdateHealthCounterText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(playerHealth, null);
             // No llamamos a ShowObjects aquí para que los objetos permanezcan invisibles al reaparecer
         }
 
