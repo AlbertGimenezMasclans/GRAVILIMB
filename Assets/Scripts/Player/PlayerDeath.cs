@@ -193,7 +193,7 @@ public class PlayerDeath : MonoBehaviour
             Debug.Log($"Valor original de gravityScale almacenado: {originalGravityScale}");
         }
 
-        // Almacenar la posición y rotación inicial del jugador
+        // Almacenar la posición y rotación inicial del jugador y la cámara
         initialPosition = transform.position;
         initialRotation = transform.rotation; // Guardar la rotación inicial
         initialCameraPosition = mainCamera.transform.position;
@@ -230,6 +230,42 @@ public class PlayerDeath : MonoBehaviour
     public void OnCoinCollected()
     {
         hasEverCollectedCoins = true;
+    }
+
+    public void SetNewSpawnPosition(Vector3 newPosition)
+    {
+        // Actualizar la posición inicial para reaparecer
+        initialPosition = newPosition;
+        Debug.Log($"Posición inicial actualizada por el checkpoint: {initialPosition}");
+    }
+
+    public void SetNewSpawnPositionAndCamera(Vector3 newPlayerPosition, float checkpointX)
+    {
+        // Actualizar la posición inicial del jugador
+        initialPosition = newPlayerPosition;
+        Debug.Log($"Posición inicial del jugador actualizada por el checkpoint: {initialPosition}");
+
+        // Actualizar la posición inicial de la cámara (solo en el eje X)
+        Vector3 newCameraPosition = new Vector3(checkpointX, initialCameraPosition.y, initialCameraPosition.z);
+
+        // Ajustar la posición de la cámara según los límites de CameraController
+        if (cameraController != null)
+        {
+            float minX = cameraController.minX;
+            float maxX = cameraController.maxX;
+
+            // Asegurarse de que la posición X de la cámara esté dentro de los límites
+            newCameraPosition.x = Mathf.Clamp(newCameraPosition.x, minX, maxX);
+            Debug.Log($"Posición X de la cámara ajustada según límites: {newCameraPosition.x} (minX: {minX}, maxX: {maxX})");
+        }
+        else
+        {
+            Debug.LogWarning("CameraController no encontrado. La posición de la cámara no se ajustará según límites.");
+        }
+
+        // Actualizar la posición inicial de la cámara
+        initialCameraPosition = newCameraPosition;
+        Debug.Log($"Posición inicial de la cámara actualizada por el checkpoint: {initialCameraPosition}");
     }
 
     public IEnumerator RespawnCoroutine()
@@ -386,7 +422,7 @@ public class PlayerDeath : MonoBehaviour
         transform.rotation = initialRotation; // Aplicar la rotación inicial
         spriteRenderer.enabled = true;
         if (boxCollider != null) boxCollider.enabled = true;
-        rb.simulated = false;
+        rb.simulated = false; // Mantener el Rigidbody2D desactivado durante la animación
 
         if (playerMovement.isDismembered)
         {
@@ -408,8 +444,8 @@ public class PlayerDeath : MonoBehaviour
             animator.Play("Protagonist_Appear");
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
             float animationLength = stateInfo.length;
-            yield return new WaitForSeconds(animationLength);
-            rb.simulated = true;
+            yield return new WaitForSeconds(animationLength); // Esperar a que termine la animación
+            rb.simulated = true; // Activar el Rigidbody2D después de la animación
             animator.SetBool("IsGrounded", playerMovement.IsGrounded());
             animator.SetFloat("Speed", 0f);
             animator.SetFloat("VerticalSpeed", rb.velocity.y);

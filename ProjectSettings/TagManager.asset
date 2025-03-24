@@ -10,6 +10,7 @@ TagManager:
   - KredToken
   - KredBag
   - DeathZone
+  - Checkpoint
   layers:
   - Default
   - TransparentFX

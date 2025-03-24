@@ -29,6 +29,10 @@ public class PlayerHealth : MonoBehaviour
     public float healthCounterHorizontalOffset = 0f; // Offset horizontal para el HealthCounter
     [Tooltip("Scale of the HealthCounter (affects the size of the text)")]
     public float healthCounterScale = 0.05f; // Escala del HealthCounter (ajusta para cambiar el tamaño del texto)
+    [Tooltip("Sorting Order for the HealthCounter to ensure it renders on top of everything")]
+    public int healthCounterSortingOrder = 100; // Sorting Order alto para el HealthCounter
+    [Tooltip("Z position for the HealthCounter to ensure it is closer to the camera")]
+    public float healthCounterZPosition = -5f; // Posición Z para acercar el HealthCounter a la cámara
 
     private HealthBar healthBar; // Referencia al script HealthBar
     private PlayerDeath playerDeath; // Referencia al script PlayerDeath
@@ -40,6 +44,7 @@ public class PlayerHealth : MonoBehaviour
     private Transform playerTransform; // Transform del jugador
     private TMP_Text healthCounterText; // Referencia al componente TextMeshPro del contador
     private Transform healthCounterTransform; // Referencia al Transform del HealthCounter
+    private Canvas healthCounterCanvas; // Referencia al Canvas del HealthCounter
     private Rigidbody2D playerRigidbody; // Referencia al Rigidbody2D del jugador para detectar la gravedad
     private bool isGravityInverted; // Estado de la gravedad
 
@@ -97,6 +102,7 @@ public class PlayerHealth : MonoBehaviour
                 {
                     healthCounterText = objectsToHide[i].GetComponent<TMP_Text>();
                     healthCounterTransform = objectsToHide[i].transform;
+                    healthCounterCanvas = objectsToHide[i].GetComponent<Canvas>(); // Obtener el Canvas del HealthCounter
                     if (healthCounterText == null)
                     {
                         UnityEngine.Debug.LogError($"TMP_Text no encontrado en {objectsToHide[i].name}.", this);
@@ -105,9 +111,20 @@ public class PlayerHealth : MonoBehaviour
                     {
                         UnityEngine.Debug.LogError($"Transform no encontrado en {objectsToHide[i].name}.", this);
                     }
+                    if (healthCounterCanvas == null)
+                    {
+                        UnityEngine.Debug.LogError($"Canvas no encontrado en {objectsToHide[i].name}. Asegúrate de que el HealthCounter sea un objeto TextMeshPro en el espacio del mundo.", this);
+                    }
                     else
                     {
-                        UnityEngine.Debug.Log($"HealthCounter detectado: {healthCounterTransform.name}");
+                        // Establecer el Sorting Layer a uno superior (por ejemplo, "UI")
+                        healthCounterCanvas.sortingLayerName = "UI"; // Asegúrate de que este Sorting Layer exista
+                        // Establecer el Sorting Order del Canvas para que el HealthCounter se dibuje por encima de todo
+                        healthCounterCanvas.sortingOrder = healthCounterSortingOrder;
+                        // Ajustar la posición Z para que esté más cerca de la cámara
+                        Vector3 currentPosition = healthCounterTransform.position;
+                        healthCounterTransform.position = new Vector3(currentPosition.x, currentPosition.y, healthCounterZPosition);
+                        UnityEngine.Debug.Log($"HealthCounter detectado: {healthCounterTransform.name}, Sorting Layer: {healthCounterCanvas.sortingLayerName}, Sorting Order: {healthCounterCanvas.sortingOrder}, Z Position: {healthCounterTransform.position.z}");
                         // Asegurarse de que la escala del HealthCounter sea la especificada
                         healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
                     }
@@ -187,7 +204,7 @@ public class PlayerHealth : MonoBehaviour
                         healthCounterTransform.position = new Vector3(
                             playerPosition.x + currentPositionOffset.x + healthCounterHorizontalOffset,
                             playerPosition.y + currentPositionOffset.y + currentHealthCounterVerticalOffset,
-                            healthCounterTransform.position.z // Mantener la Z original
+                            healthCounterZPosition // Usar la Z especificada
                         );
                         // Asegurarse de que la escala del HealthCounter sea constante
                         healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
