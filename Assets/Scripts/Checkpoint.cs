@@ -1,51 +1,84 @@
 using UnityEngine;
+using System.Collections;
 
 public class Checkpoint : MonoBehaviour
 {
-    private SpriteRenderer spriteRenderer; // Referencia al SpriteRenderer del checkpoint
+    private Animator animator; // Referencia al Animator del checkpoint
     private bool isActivated = false; // Indica si el checkpoint ya ha sido activado
 
     void Start()
     {
-        // Obtener el SpriteRenderer del checkpoint
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer == null)
+        // Obtener el Animator del checkpoint
+        animator = GetComponent<Animator>();
+        if (animator == null)
         {
-            Debug.LogError("SpriteRenderer no encontrado en el Checkpoint. Asegúrate de que el GameObject tenga un SpriteRenderer.", this);
+            Debug.LogError("Animator no encontrado en el Checkpoint. Asegúrate de que el GameObject tenga un Animator asignado.", this);
+        }
+        else
+        {
+            Debug.Log("Checkpoint inicializado: en estado 'Checkpoint_Idle'.");
         }
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // Comprobar si el objeto que colisiona es el jugador
+        // Comprobar si el objeto que colisiona es el jugador y si el checkpoint no está activado
         if (collision.CompareTag("Player") && !isActivated)
         {
-            // Cambiar el color del sprite del checkpoint a verde
-            if (spriteRenderer != null)
+            Debug.Log("Colisión detectada con el jugador.");
+
+            // Activar la animación al colisionar
+            if (animator != null)
             {
-                spriteRenderer.color = Color.green;
-                Debug.Log("Checkpoint activado: sprite cambiado a verde.");
-            }
+                animator.SetBool("Active", true); // Establecer el bool para "Checkpoint-Active"
+                Debug.Log("Bool 'Active' establecido a true para reproducir 'Checkpoint-Active'.");
 
-            // Marcar el checkpoint como activado para evitar que se active de nuevo
-            isActivated = true;
-
-            // Obtener el script PlayerDeath del jugador
-            PlayerDeath playerDeath = collision.GetComponent<PlayerDeath>();
-            if (playerDeath != null)
-            {
-                // Calcular la nueva posición inicial del jugador (posición del checkpoint + 0.75 en Y)
-                Vector3 checkpointPosition = transform.position;
-                Vector3 newSpawnPosition = new Vector3(checkpointPosition.x, checkpointPosition.y + 0.75f, checkpointPosition.z);
-
-                // Notificar a PlayerDeath para que actualice la posición inicial del jugador y la cámara
-                playerDeath.SetNewSpawnPositionAndCamera(newSpawnPosition, checkpointPosition.x);
-                Debug.Log($"Nueva posición inicial del jugador: {newSpawnPosition}, Nueva posición X de la cámara: {checkpointPosition.x}");
+                // Iniciar la corrutina para forzar "Checkpoint-C"
+                StartCoroutine(TransitionToCheckpointC());
             }
             else
             {
-                Debug.LogError("PlayerDeath no encontrado en el jugador. Asegúrate de que el jugador tenga el script PlayerDeath.", this);
+                Debug.LogError("Animator es null. No se puede establecer el bool.");
+            }
+
+            // Marcar el checkpoint como activado
+            isActivated = true;
+
+            // Actualizar la posición inicial del jugador
+            PlayerDeath playerDeath = collision.GetComponent<PlayerDeath>();
+            if (playerDeath != null)
+            {
+                Vector3 checkpointPosition = transform.position;
+                Vector3 newSpawnPosition = new Vector3(checkpointPosition.x, checkpointPosition.y + 0.50f, checkpointPosition.z);
+                playerDeath.SetNewSpawnPositionAndCamera(newSpawnPosition, checkpointPosition.x);
+                Debug.Log($"Nueva posición inicial del jugador: {newSpawnPosition}");
+            }
+            else
+            {
+                Debug.LogError("PlayerDeath no encontrado en el jugador.");
             }
         }
+        else
+        {
+            Debug.Log("Colisión ignorada: ya activado o no es el jugador.");
+        }
+    }
+
+    private IEnumerator TransitionToCheckpointC()
+    {
+        // Esperar hasta que "Checkpoint-Active" comience
+        yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("Checkpoint-Active"));
+        Debug.Log("Estado 'Checkpoint-Active' detectado.");
+
+        // Obtener la duración de "Checkpoint-Active"
+        float animationLength = animator.GetCurrentAnimatorStateInfo(0).length;
+        Debug.Log($"Duración de 'Checkpoint-Active': {animationLength} segundos.");
+
+        // Esperar hasta que termine
+        yield return new WaitForSeconds(animationLength);
+
+        // Forzar la transición a "Checkpoint-C"
+        animator.SetBool("IsCheckpointC", true);
+        Debug.Log("Bool 'IsCheckpointC' establecido a true. Transicionando a 'Checkpoint-C'.");
     }
 }
