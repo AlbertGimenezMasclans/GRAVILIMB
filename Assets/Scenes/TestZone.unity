@@ -10884,11 +10884,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.size
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.size
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: dialogueLines.Array.data[0]
@@ -10907,6 +10907,14 @@ PrefabInstance:
       value: Mola eh?
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueLines.Array.data[4]
+      value: Alo presidente, aqui salamalecomsala.
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: dialogueLines.Array.data[5]
+      value: Ignora... eso que acabo de decir.
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: portraitSprites.Array.data[0]
       value: 
       objectReference: {fileID: -479710967, guid: e669082add788c849b22e72acc48f0c8, type: 3}
@@ -10923,8 +10931,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -479710967, guid: e669082add788c849b22e72acc48f0c8, type: 3}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[4]
+      value: 
+      objectReference: {fileID: 1577157625, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: portraitSprites.Array.data[5]
+      value: 
+      objectReference: {fileID: 1397046272, guid: e669082add788c849b22e72acc48f0c8, type: 3}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: headlessDialogueLines.Array.size
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: isOtherCharacterNormal.Array.size
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: headlessPortraitSprites.Array.size
@@ -10937,6 +10957,18 @@ PrefabInstance:
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: headlessDialogueLines.Array.data[1]
       value: Y tu cuerpo?
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: isOtherCharacterNormal.Array.data[0]
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: isOtherCharacterNormal.Array.data[4]
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
+      propertyPath: isOtherCharacterNormal.Array.data[5]
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6579526728564863465, guid: fedc56387f80e064e989fccee490f7e7, type: 3}
       propertyPath: headlessPortraitSprites.Array.data[0]
