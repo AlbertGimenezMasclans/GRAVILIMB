@@ -392,7 +392,7 @@ public class PlayerDeath : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.currentHealth = playerHealth.maxHealth;
-            HealthBar healthBar = GetComponentInChildren<HealthBar>();
+            HealthBar healthBar = FindObjectOfType<HealthBar>(); // Cambiado a FindObjectOfType
             if (healthBar != null)
             {
                 healthBar.UpdateHealth(playerHealth.currentHealth);

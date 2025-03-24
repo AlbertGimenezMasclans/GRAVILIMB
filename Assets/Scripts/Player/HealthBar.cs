@@ -16,7 +16,7 @@ public class HealthBar : MonoBehaviour
 
     [Header("Zero Health Position and Size for Bar Fill")]
     [Tooltip("Local position of the Bar Fill when health is at 0 (usually only the X changes to shrink left)")]
-    public Vector2 zeroHealthPosition = new Vector2(-1f, 0f); // Posición de HealthBar_Fill cuando la vida es 0
+    public Vector2 zeroHealthPosition = new Vector2(-2f, 0f); // Posición de HealthBar_Fill cuando la vida es 0
     [Tooltip("Length of the Bar Fill when health is at 0 (usually 0)")]
     public float zeroHealthLength = 0f;
     [Tooltip("Height of the Bar Fill when health is at 0 (usually same as max)")]
@@ -44,16 +44,6 @@ public class HealthBar : MonoBehaviour
             // Establecer la posición y tamaño inicial de HealthBar_Fill
             barFill.localPosition = maxHealthPosition;
             barFill.localScale = new Vector3(maxHealthLength, maxHealthHeight, 1f);
-        }
-    }
-
-    void Update()
-    {
-        // Mantener la rotación de HealthBar_Fill fija en el eje X (horizontal)
-        if (barFill != null)
-        {
-            Vector3 currentRotation = barFill.eulerAngles;
-            barFill.eulerAngles = new Vector3(0f, currentRotation.y, currentRotation.z);
         }
     }
 
