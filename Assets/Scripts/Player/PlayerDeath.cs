@@ -371,6 +371,13 @@ public class PlayerDeath : MonoBehaviour
             playerMovement.RecomposePlayer();
         }
 
+        // Restablecer la gravedad a normal (hacia abajo)
+        if (rb != null)
+        {
+            rb.gravityScale = 1f; // Gravedad normal (ajusta este valor según tu configuración)
+            Debug.Log("Gravedad restablecida a normal (gravityScale = 1) al revivir.");
+        }
+
         if (animator != null)
         {
             animator.Play("Protagonist_Appear");

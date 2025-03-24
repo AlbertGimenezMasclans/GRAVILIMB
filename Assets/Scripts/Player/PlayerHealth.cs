@@ -15,12 +15,16 @@ public class PlayerHealth : MonoBehaviour
     public GameObject[] objectsToHide; // Array de GameObjects a hacer visibles/invisibles y fijar rotación
 
     [Header("Position Offset")]
-    [Tooltip("Offset from the player's position where the objects should be positioned")]
-    public Vector2 positionOffset = new Vector2(0f, 2f); // Offset para posicionar los objetos respecto al jugador
+    [Tooltip("Offset from the player's position where the objects should be positioned when gravity is normal")]
+    public Vector2 positionOffsetNormal = new Vector2(0f, 2f); // Offset cuando la gravedad es normal (arriba del jugador)
+    [Tooltip("Offset from the player's position where the objects should be positioned when gravity is inverted")]
+    public Vector2 positionOffsetInverted = new Vector2(0f, -2f); // Offset cuando la gravedad está invertida (abajo del jugador)
 
     [Header("Health Counter Settings")]
-    [Tooltip("Vertical offset for the HealthCounter relative to the base position offset")]
-    public float healthCounterVerticalOffset = 0.3f; // Offset vertical para el HealthCounter
+    [Tooltip("Vertical offset for the HealthCounter relative to the base position offset when gravity is normal")]
+    public float healthCounterVerticalOffsetNormal = 0.3f; // Offset vertical para el HealthCounter (gravedad normal)
+    [Tooltip("Vertical offset for the HealthCounter relative to the base position offset when gravity is inverted")]
+    public float healthCounterVerticalOffsetInverted = -0.3f; // Offset vertical para el HealthCounter (gravedad invertida)
     [Tooltip("Horizontal offset for the HealthCounter relative to the base position offset")]
     public float healthCounterHorizontalOffset = 0f; // Offset horizontal para el HealthCounter
     [Tooltip("Scale of the HealthCounter (affects the size of the text)")]
@@ -35,6 +39,8 @@ public class PlayerHealth : MonoBehaviour
     private Transform playerTransform; // Transform del jugador
     private TMP_Text healthCounterText; // Referencia al componente TextMeshPro del contador
     private Transform healthCounterTransform; // Referencia al Transform del HealthCounter
+    private Rigidbody2D playerRigidbody; // Referencia al Rigidbody2D del jugador para detectar la gravedad
+    private bool isGravityInverted; // Estado de la gravedad
 
     void Start()
     {
@@ -47,6 +53,13 @@ public class PlayerHealth : MonoBehaviour
         {
             UnityEngine.Debug.LogError("playerTransform es null. Asegúrate de que el script esté adjunto a un GameObject.", this);
             return;
+        }
+
+        // Obtener el Rigidbody2D del jugador para detectar la gravedad
+        playerRigidbody = GetComponent<Rigidbody2D>();
+        if (playerRigidbody == null)
+        {
+            UnityEngine.Debug.LogError("Rigidbody2D no encontrado en el jugador. Asegúrate de que el jugador tenga un Rigidbody2D.", this);
         }
 
         // Inicializar los arrays para SpriteRenderers, TMP_Text y Transforms
@@ -134,6 +147,16 @@ public class PlayerHealth : MonoBehaviour
             return;
         }
 
+        // Detectar si la gravedad está invertida
+        if (playerRigidbody != null)
+        {
+            isGravityInverted = playerRigidbody.gravityScale < 0; // Gravedad invertida si gravityScale es negativa
+        }
+
+        // Seleccionar los offsets según el estado de la gravedad
+        Vector2 currentPositionOffset = isGravityInverted ? positionOffsetInverted : positionOffsetNormal;
+        float currentHealthCounterVerticalOffset = isGravityInverted ? healthCounterVerticalOffsetInverted : healthCounterVerticalOffsetNormal;
+
         // Obtener la posición del jugador una sola vez
         Vector3 playerPosition = playerTransform.position;
 
@@ -150,8 +173,8 @@ public class PlayerHealth : MonoBehaviour
                     {
                         // Posicionar el HealthCounter respecto al jugador
                         healthCounterTransform.position = new Vector3(
-                            playerPosition.x + positionOffset.x + healthCounterHorizontalOffset,
-                            playerPosition.y + positionOffset.y + healthCounterVerticalOffset,
+                            playerPosition.x + currentPositionOffset.x + healthCounterHorizontalOffset,
+                            playerPosition.y + currentPositionOffset.y + currentHealthCounterVerticalOffset,
                             healthCounterTransform.position.z // Mantener la Z original
                         );
                         // Asegurarse de que la escala del HealthCounter sea constante
@@ -166,8 +189,8 @@ public class PlayerHealth : MonoBehaviour
 
                 // Actualizar la posición para los otros objetos (como HealthBar y HealthBar_Fill)
                 objTransform.position = new Vector3(
-                    playerPosition.x + positionOffset.x,
-                    playerPosition.y + positionOffset.y,
+                    playerPosition.x + currentPositionOffset.x,
+                    playerPosition.y + currentPositionOffset.y,
                     objTransform.position.z // Mantener la Z original del objeto
                 );
 
@@ -301,7 +324,7 @@ public class PlayerHealth : MonoBehaviour
     }
 
     // Método para actualizar el texto del contador de vida
-    private void UpdateHealthCounterText()
+    public void UpdateHealthCounterText()
     {
         if (healthCounterText != null)
         {
