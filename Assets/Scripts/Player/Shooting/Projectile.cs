@@ -7,6 +7,10 @@ public class Projectile : MonoBehaviour
     private Rigidbody2D rb; // Referencia al Rigidbody2D para obtener la velocidad
     private SpriteRenderer spriteRenderer; // Referencia al SpriteRenderer para voltear el sprite
 
+    [Header("Damage Settings")]
+    [Tooltip("Daño causado a los enemigos al impactar")]
+    public float damageToEnemy = 5f; // Daño al enemigo, configurable en el Inspector
+
     void Awake()
     {
         // Obtener los componentes necesarios
@@ -49,6 +53,17 @@ public class Projectile : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        // Aplicar daño si colisiona con un enemigo
+        if (collision.gameObject.CompareTag("Enemy")) // Asegúrate de que el enemigo tenga el tag "Enemy"
+        {
+            EnemyShooter enemy = collision.gameObject.GetComponent<EnemyShooter>();
+            if (enemy != null)
+            {
+                // Aquí podrías llamar a un método TakeDamage en EnemyShooter, pero como movimos la lógica, el enemigo necesitará un método público
+                collision.gameObject.SendMessage("TakeDamage", damageToEnemy, SendMessageOptions.DontRequireReceiver);
+            }
+        }
+
         // No devolver al pool si colisiona con "Crate"
         if (!collision.gameObject.CompareTag("Crate"))
         {
