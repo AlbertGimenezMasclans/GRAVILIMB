@@ -14,6 +14,7 @@ public class KredsManager : MonoBehaviour
     public Vector2 originalUIPosition;                      // Posición inicial visible de la UI
     public Vector2 hiddenUIPosition;                        // Posición fuera de la cámara
     private Vector2 originalIconPosition;                   // Posición original del ícono relativa al contenedor
+    private Vector2 originalLostCoinsPosition;              // Posición original del texto de Kreds perdidos
     private int consecutiveCoins = 0;                       // Contador de monedas consecutivas
     private float timeSinceLastCoin = 0f;                   // Tiempo desde la última moneda
     private float resetDelay = 1f;                          // Margen de 1s para monedas consecutivas
@@ -66,6 +67,7 @@ public class KredsManager : MonoBehaviour
             hiddenUIPosition = originalUIPosition + Vector2.up * 240f;
             uiContainer.anchoredPosition = hiddenUIPosition;
             originalIconPosition = coinIcon.anchoredPosition;
+            originalLostCoinsPosition = lostCoinsText.GetComponent<RectTransform>().anchoredPosition;
             // Inicialmente, el texto de Kreds perdidos está invisible
             SetLostCoinsTextAlpha(0f);
         }
