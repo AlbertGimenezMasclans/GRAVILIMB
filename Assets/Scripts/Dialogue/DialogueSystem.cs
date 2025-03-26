@@ -24,17 +24,9 @@ public class DialogueSystem : MonoBehaviour
     [Tooltip("Lines of dialogue when player is dismembered")]
     [SerializeField, TextArea(1, 4)] private string[] headlessDialogueLines;
     [Tooltip("Is this line spoken by another character? (Normal state)")]
-    [SerializeField] private bool[] isOtherCharacterNormal;
+    [SerializeField] private bool[] isOtherCharacterNormal; // Checkbox para diálogo normal
     [Tooltip("Is this line spoken by another character? (Headless state)")]
-    [SerializeField] private bool[] isOtherCharacterHeadless;
-
-    [Header("Cinematic Dialogue Content")]
-    [Tooltip("Lines of dialogue for cinematic sequences")]
-    [SerializeField, TextArea(1, 4)] private string[] cinematicDialogueLines;
-    [Tooltip("Is this line spoken by another character? (Cinematic state)")]
-    [SerializeField] private bool[] isOtherCharacterCinematic;
-    [Tooltip("Sprites for cinematic dialogue portraits")]
-    [SerializeField] private Sprite[] cinematicPortraitSprites;
+    [SerializeField] private bool[] isOtherCharacterHeadless; // Checkbox para diálogo headless
 
     [Header("Portrait Settings")]
     [Tooltip("GameObject containing the portrait image")]
@@ -63,7 +55,7 @@ public class DialogueSystem : MonoBehaviour
     private float typingTime = 0.05f;
     private float commaPauseTime = 0.25f;
     private float periodPauseTime = 0.48f;
-    private const float otherCharacterDelay = 0.25f;
+    private const float otherCharacterDelay = 0.25f; // Retraso de 0.25 segundos para "otro personaje"
     private bool isPlayerRange;
     private bool didDialogueStart;
     private int lineIndex;
@@ -76,10 +68,8 @@ public class DialogueSystem : MonoBehaviour
     private List<AnimatorUpdateMode> originalUpdateModes;
     private string[] activeDialogueLines;
     private Sprite[] activePortraitSprites;
-    private bool[] activeIsOtherCharacter;
+    private bool[] activeIsOtherCharacter; // Array activo para el checkbox
     private TMP_Text dialogueText;
-    private bool isCinematicMode = false;
-    private bool isCinematicDialogue = false;
 
     public bool IsDialogueActive => didDialogueStart;
     private PlayerMovement playerMovement;
@@ -119,6 +109,7 @@ public class DialogueSystem : MonoBehaviour
         sceneAnimators = new List<Animator>();
         originalUpdateModes = new List<AnimatorUpdateMode>();
 
+        // Validar que los arrays de "isOtherCharacter" tengan la longitud correcta
         if (isOtherCharacterNormal == null || isOtherCharacterNormal.Length != dialogueLines.Length)
         {
             Debug.LogWarning($"isOtherCharacterNormal length does not match dialogueLines length. Adjusting...");
@@ -129,29 +120,11 @@ public class DialogueSystem : MonoBehaviour
             Debug.LogWarning($"isOtherCharacterHeadless length does not match headlessDialogueLines length. Adjusting...");
             isOtherCharacterHeadless = new bool[headlessDialogueLines.Length];
         }
-        if (cinematicDialogueLines != null && (isOtherCharacterCinematic == null || isOtherCharacterCinematic.Length != cinematicDialogueLines.Length))
-        {
-            Debug.LogWarning($"isOtherCharacterCinematic length does not match cinematicDialogueLines length. Adjusting...");
-            isOtherCharacterCinematic = new bool[cinematicDialogueLines.Length];
-        }
     }
 
     void Update()
     {
-        if (isCinematicMode && didDialogueStart && Input.GetKeyDown(KeyCode.C))
-        {
-            if (dialogueText != null && dialogueText.maxVisibleCharacters >= GetVisibleCharacterCount(activeDialogueLines[lineIndex]))
-            {
-                NextDialogueLine();
-            }
-            else if (dialogueText != null)
-            {
-                StopAllCoroutines();
-                dialogueText.maxVisibleCharacters = GetVisibleCharacterCount(activeDialogueLines[lineIndex]);
-                if (Input_TB != null) Input_TB.gameObject.SetActive(true);
-            }
-        }
-        else if (!isCinematicMode && isPlayerRange && Input.GetKeyDown(KeyCode.C))
+        if (isPlayerRange && Input.GetKeyDown(KeyCode.C))
         {
             if (!didDialogueStart)
             {
@@ -170,13 +143,7 @@ public class DialogueSystem : MonoBehaviour
         }
     }
 
-    public void StartCinematicDialogue()
-    {
-        isCinematicDialogue = true;
-        StartDialogue();
-    }
-
-    public void StartDialogue()
+    private void StartDialogue()
     {
         if (textBox == null || dialogueText == null || dialogueLines == null || dialogueLines.Length == 0) return;
 
@@ -190,55 +157,48 @@ public class DialogueSystem : MonoBehaviour
         FacePlayer();
         ConfigureAnimatorsForDialogue(true);
 
-        if (isCinematicDialogue && cinematicDialogueLines != null && cinematicDialogueLines.Length > 0)
+        bool isDismembered = false;
+        if (playerMovement != null)
         {
-            activeDialogueLines = cinematicDialogueLines;
-            activeIsOtherCharacter = isOtherCharacterCinematic;
-            activePortraitSprites = cinematicPortraitSprites;
+            isDismembered = playerMovement.isDismembered;
         }
-        else
+        else if (playerObject != null && playerObject.GetComponent<Dismember>() != null)
         {
-            bool isDismembered = false;
-            if (playerMovement != null)
-            {
-                isDismembered = playerMovement.isDismembered;
-            }
-            else if (playerObject != null && playerObject.GetComponent<Dismember>() != null)
-            {
-                isDismembered = true;
-            }
+            isDismembered = true;
+        }
 
-            if (isDismembered && headlessDialogueLines != null && headlessDialogueLines.Length > 0)
+        if (isDismembered && headlessDialogueLines != null && headlessDialogueLines.Length > 0)
+        {
+            // Combinar los diálogos normales y headless
+            activeDialogueLines = new string[dialogueLines.Length + headlessDialogueLines.Length];
+            dialogueLines.CopyTo(activeDialogueLines, 0);
+            headlessDialogueLines.CopyTo(activeDialogueLines, dialogueLines.Length);
+
+            // Combinar los retrasos de "otro personaje"
+            activeIsOtherCharacter = new bool[dialogueLines.Length + headlessDialogueLines.Length];
+            isOtherCharacterNormal.CopyTo(activeIsOtherCharacter, 0);
+            isOtherCharacterHeadless.CopyTo(activeIsOtherCharacter, dialogueLines.Length);
+
+            if (headlessPortraitSprites != null && headlessPortraitSprites.Length > 0)
             {
-                activeDialogueLines = new string[dialogueLines.Length + headlessDialogueLines.Length];
-                dialogueLines.CopyTo(activeDialogueLines, 0);
-                headlessDialogueLines.CopyTo(activeDialogueLines, dialogueLines.Length);
-
-                activeIsOtherCharacter = new bool[dialogueLines.Length + headlessDialogueLines.Length];
-                isOtherCharacterNormal.CopyTo(activeIsOtherCharacter, 0);
-                isOtherCharacterHeadless.CopyTo(activeIsOtherCharacter, dialogueLines.Length);
-
-                if (headlessPortraitSprites != null && headlessPortraitSprites.Length > 0)
-                {
-                    activePortraitSprites = new Sprite[portraitSprites.Length + headlessPortraitSprites.Length];
-                    portraitSprites.CopyTo(activePortraitSprites, 0);
-                    headlessPortraitSprites.CopyTo(activePortraitSprites, portraitSprites.Length);
-                }
-                else
-                {
-                    activePortraitSprites = new Sprite[dialogueLines.Length + headlessDialogueLines.Length];
-                    for (int i = 0; i < activePortraitSprites.Length; i++)
-                    {
-                        activePortraitSprites[i] = portraitSprites[Mathf.Min(i, portraitSprites.Length - 1)];
-                    }
-                }
+                activePortraitSprites = new Sprite[portraitSprites.Length + headlessPortraitSprites.Length];
+                portraitSprites.CopyTo(activePortraitSprites, 0);
+                headlessPortraitSprites.CopyTo(activePortraitSprites, portraitSprites.Length);
             }
             else
             {
-                activeDialogueLines = dialogueLines;
-                activeIsOtherCharacter = isOtherCharacterNormal;
-                activePortraitSprites = portraitSprites;
+                activePortraitSprites = new Sprite[dialogueLines.Length + headlessDialogueLines.Length];
+                for (int i = 0; i < activePortraitSprites.Length; i++)
+                {
+                    activePortraitSprites[i] = portraitSprites[Mathf.Min(i, portraitSprites.Length - 1)];
+                }
             }
+        }
+        else
+        {
+            activeDialogueLines = dialogueLines;
+            activeIsOtherCharacter = isOtherCharacterNormal;
+            activePortraitSprites = portraitSprites;
         }
 
         RectTransform textBoxRect = textBox.GetComponent<RectTransform>();
@@ -259,7 +219,7 @@ public class DialogueSystem : MonoBehaviour
         StartCoroutine(ShowLine());
     }
 
-    public void NextDialogueLine()
+    private void NextDialogueLine()
     {
         lineIndex++;
         if (lineIndex < activeDialogueLines.Length)
@@ -289,29 +249,25 @@ public class DialogueSystem : MonoBehaviour
 
             if (Input_TB != null)
                 Input_TB.gameObject.SetActive(false);
-
-            isCinematicDialogue = false; // Resetear la bandera al terminar el diÃ¡logo
         }
-    }
-
-    public void SetCinematicMode(bool enabled)
-    {
-        isCinematicMode = enabled;
     }
 
     private IEnumerator ShowLine()
     {
         if (dialogueText == null) yield break;
 
+        // Desactivar inicialmente el texto y el retrato
         dialogueText.gameObject.SetActive(false);
         if (textBoxPortrait != null) textBoxPortrait.SetActive(false);
 
+        // Comprobar si esta línea tiene el retraso de "otro personaje"
         bool applyDelay = activeIsOtherCharacter[lineIndex];
         if (applyDelay)
         {
-            yield return new WaitForSecondsRealtime(otherCharacterDelay);
+            yield return new WaitForSecondsRealtime(otherCharacterDelay); // Retraso de 0.70 segundos
         }
 
+        // Activar el texto y el retrato después del retraso (si aplica)
         dialogueText.gameObject.SetActive(true);
         if (textBoxPortrait != null) textBoxPortrait.SetActive(true);
 
@@ -386,6 +342,7 @@ public class DialogueSystem : MonoBehaviour
     {
         if (textBoxPortrait != null)
         {
+            // No activamos aquí, ya que ShowLine se encarga de activar/desactivar
             if (portraitImage != null && activePortraitSprites != null && lineIndex < activePortraitSprites.Length)
                 portraitImage.sprite = activePortraitSprites[lineIndex];
             else if (portraitImage != null)
