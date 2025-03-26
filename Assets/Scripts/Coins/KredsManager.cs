@@ -124,7 +124,29 @@ public class KredsManager : MonoBehaviour
         currentAnimation = StartCoroutine(AnimateUIAndTokens(amount, duration));
     }
 
-    // Nuevo método para restar monedas con rebote vertical
+    // Método para restar Kreds con la misma animación que AddTokens
+    public void LoseTokens(int amount)
+    {
+        totalTokens = Mathf.Max(0, totalTokens - amount); // Restar el valor, asegurándose de no bajar de 0
+        consecutiveCoins++; // Incrementar para que la animación sea consistente con AddTokens
+        timeSinceLastCoin = 0f;
+
+        if (currentAnimation != null)
+        {
+            StopCoroutine(currentAnimation);
+        }
+        currentAnimation = StartCoroutine(AnimateUIAndTokens(-amount)); // Pasar un valor negativo para que el contador disminuya
+    }
+
+    public void UpdateHUD()
+    {
+        if (coinCountText != null)
+        {
+            coinCountText.text = displayedTokens.ToString("D9");
+        }
+    }
+
+    // Ya no necesitamos AnimateLoss, pero lo dejamos por si lo quieres usar en el futuro
     public IEnumerator AnimateLoss(int amountLost)
     {
         if (coinCountText == null || uiContainer == null) yield break;
@@ -175,15 +197,7 @@ public class KredsManager : MonoBehaviour
         isAnimating = false;
     }
 
-    public void UpdateHUD()
-    {
-        if (coinCountText != null)
-        {
-            coinCountText.text = displayedTokens.ToString("D9");
-        }
-    }
-
-    private IEnumerator AnimateUIAndTokens(int amount, float customDuration)
+    private IEnumerator AnimateUIAndTokens(int amount, float customDuration = -1f)
     {
         isAnimating = true;
 
