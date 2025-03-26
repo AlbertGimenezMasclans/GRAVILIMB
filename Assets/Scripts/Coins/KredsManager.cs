@@ -8,6 +8,7 @@ public class KredsManager : MonoBehaviour
     [SerializeField] public TMP_Text coinCountText;         // Referencia al texto del HUD
     [SerializeField] public RectTransform coinIcon;         // Referencia al ícono en la UI
     [SerializeField] public RectTransform uiContainer;      // Contenedor de la UI (texto + ícono)
+    [SerializeField] public TMP_Text lostCoinsText;         // Nuevo texto para mostrar Kreds perdidos
     public int totalTokens = 0;                             // Valor inicial (0)
     public int displayedTokens = 000000000;                 // Valor mostrado en pantalla
     public Vector2 originalUIPosition;                      // Posición inicial visible de la UI
@@ -20,15 +21,13 @@ public class KredsManager : MonoBehaviour
     private Coroutine currentAnimation;                     // Referencia a la corrutina actual
     private PlayerDeath playerDeath;                        // Referencia a PlayerDeath
 
-    [Header("Bounce Effect Settings")]
-    [Tooltip("Total duration of the bounce animation when losing coins")]
-    public float lossBounceDuration = 0.5f;
-    [Tooltip("Y position of the top bounce endpoint (in UI units)")]
-    public float topBounceY = 5f;
-    [Tooltip("Y position of the bottom bounce endpoint (in UI units)")]
-    public float bottomBounceY = -5f;
-    [Tooltip("Number of bounces (one bounce = bottom to top and back)")]
-    public int lossBounceCount = 3;
+    [Header("Lost Coins Text Settings")]
+    [Tooltip("Duration of the fade in animation for the lost coins text")]
+    public float lostCoinsFadeInDuration = 0.3f;
+    [Tooltip("Duration the lost coins text remains fully visible")]
+    public float lostCoinsVisibleDuration = 1f;
+    [Tooltip("Duration of the fade out animation for the lost coins text")]
+    public float lostCoinsFadeOutDuration = 0.5f;
 
     void Awake()
     {
@@ -57,12 +56,18 @@ public class KredsManager : MonoBehaviour
         {
             Debug.LogError("UIContainer no está asignado en el Inspector del KredsManager.");
         }
+        if (lostCoinsText == null)
+        {
+            Debug.LogError("LostCoinsText no está asignado en el Inspector del KredsManager.");
+        }
         else
         {
             originalUIPosition = uiContainer.anchoredPosition;
             hiddenUIPosition = originalUIPosition + Vector2.up * 240f;
             uiContainer.anchoredPosition = hiddenUIPosition;
             originalIconPosition = coinIcon.anchoredPosition;
+            // Inicialmente, el texto de Kreds perdidos está invisible
+            SetLostCoinsTextAlpha(0f);
         }
 
         // Obtener referencia a PlayerDeath
@@ -135,7 +140,7 @@ public class KredsManager : MonoBehaviour
         {
             StopCoroutine(currentAnimation);
         }
-        currentAnimation = StartCoroutine(AnimateUIAndTokens(-amount)); // Pasar un valor negativo para que el contador disminuya
+        currentAnimation = StartCoroutine(AnimateUIAndTokens(-amount, -1f, amount)); // Pasar la cantidad perdida para mostrarla
     }
 
     public void UpdateHUD()
@@ -146,58 +151,7 @@ public class KredsManager : MonoBehaviour
         }
     }
 
-    // Ya no necesitamos AnimateLoss, pero lo dejamos por si lo quieres usar en el futuro
-    public IEnumerator AnimateLoss(int amountLost)
-    {
-        if (coinCountText == null || uiContainer == null) yield break;
-
-        isAnimating = true;
-
-        // Mostrar la UI en la posición original
-        uiContainer.anchoredPosition = originalUIPosition;
-
-        // Actualizar el texto inmediatamente con el valor perdido
-        totalTokens = Mathf.Max(0, totalTokens - amountLost);
-        displayedTokens = totalTokens;
-        UpdateHUD();
-
-        // Rebote vertical sin fluidez
-        RectTransform textTransform = coinCountText.GetComponent<RectTransform>();
-        Vector2 originalPosition = textTransform.anchoredPosition;
-
-        float timePerBounce = lossBounceDuration / (lossBounceCount * 2);
-        for (int i = 0; i < lossBounceCount * 2; i++)
-        {
-            float targetY = (i % 2 == 0) ? topBounceY : bottomBounceY;
-            Vector2 targetPosition = new Vector2(originalPosition.x, targetY);
-            textTransform.anchoredPosition = targetPosition;
-            yield return new WaitForSeconds(timePerBounce);
-        }
-
-        textTransform.anchoredPosition = originalPosition;
-
-        yield return new WaitForSeconds(0.8f);
-
-        // Ocultar la UI si no se está pulsando X
-        if (!Input.GetKey(KeyCode.X))
-        {
-            float moveUpDuration = 0.2f;
-            float elapsedTime = 0f;
-            Vector2 startPosition = uiContainer.anchoredPosition;
-            while (elapsedTime < moveUpDuration)
-            {
-                elapsedTime += Time.deltaTime;
-                float t = elapsedTime / moveUpDuration;
-                uiContainer.anchoredPosition = Vector2.Lerp(startPosition, hiddenUIPosition, t);
-                yield return null;
-            }
-            uiContainer.anchoredPosition = hiddenUIPosition;
-        }
-
-        isAnimating = false;
-    }
-
-    private IEnumerator AnimateUIAndTokens(int amount, float customDuration = -1f)
+    private IEnumerator AnimateUIAndTokens(int amount, float customDuration = -1f, int lostAmount = 0)
     {
         isAnimating = true;
 
@@ -286,6 +240,13 @@ public class KredsManager : MonoBehaviour
         }
         UpdateHUD();
 
+        // Mostrar la cantidad perdida si se perdieron Kreds
+        if (lostAmount > 0 && lostCoinsText != null)
+        {
+            lostCoinsText.text = $"-{lostAmount}";
+            StartCoroutine(AnimateLostCoinsText());
+        }
+
         yield return new WaitForSecondsRealtime(0.6f);
 
         // Animación de salida normal (solo si no está pulsando X)
@@ -306,5 +267,45 @@ public class KredsManager : MonoBehaviour
 
         isAnimating = false;
         currentAnimation = null;
+    }
+
+    private IEnumerator AnimateLostCoinsText()
+    {
+        if (lostCoinsText == null) yield break;
+
+        // Fade in
+        float elapsedTime = 0f;
+        while (elapsedTime < lostCoinsFadeInDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, elapsedTime / lostCoinsFadeInDuration);
+            SetLostCoinsTextAlpha(alpha);
+            yield return null;
+        }
+        SetLostCoinsTextAlpha(1f);
+
+        // Mantener visible
+        yield return new WaitForSeconds(lostCoinsVisibleDuration);
+
+        // Fade out
+        elapsedTime = 0f;
+        while (elapsedTime < lostCoinsFadeOutDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / lostCoinsFadeOutDuration);
+            SetLostCoinsTextAlpha(alpha);
+            yield return null;
+        }
+        SetLostCoinsTextAlpha(0f);
+    }
+
+    private void SetLostCoinsTextAlpha(float alpha)
+    {
+        if (lostCoinsText != null)
+        {
+            Color textColor = lostCoinsText.color;
+            textColor.a = alpha;
+            lostCoinsText.color = textColor;
+        }
     }
 }
