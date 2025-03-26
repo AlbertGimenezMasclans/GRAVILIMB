@@ -132,6 +132,7 @@ public class KredsManager : MonoBehaviour
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Método para restar Kreds con la misma animación que AddTokens
     public void LoseTokens(int amount)
     {
@@ -145,6 +146,8 @@ public class KredsManager : MonoBehaviour
         }
         currentAnimation = StartCoroutine(AnimateUIAndTokens(-amount, -1f, amount)); // Pasar la cantidad perdida para mostrarla
 =======
+=======
+>>>>>>> parent of 577dcac (Enemigo: Ball-Shooter Pt4)
     // Nuevo método para restar monedas con rebote vertical
     public IEnumerator AnimateLoss(int amountLost)
     {
@@ -206,7 +209,11 @@ public class KredsManager : MonoBehaviour
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     private IEnumerator AnimateUIAndTokens(int amount, float customDuration = -1f, int lostAmount = 0)
+=======
+    private IEnumerator AnimateUIAndTokens(int amount, float customDuration)
+>>>>>>> parent of 577dcac (Enemigo: Ball-Shooter Pt4)
 =======
     private IEnumerator AnimateUIAndTokens(int amount, float customDuration)
 >>>>>>> parent of 577dcac (Enemigo: Ball-Shooter Pt4)

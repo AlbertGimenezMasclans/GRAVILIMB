@@ -6574,8 +6574,11 @@ MonoBehaviour:
   healthCounterSortingOrder: 100
   healthCounterZPosition: -5
 <<<<<<< HEAD
+<<<<<<< HEAD
   minKredsToLose: 25
   maxKredsToLose: 150
+=======
+>>>>>>> parent of 577dcac (Enemigo: Ball-Shooter Pt4)
 =======
 >>>>>>> parent of 577dcac (Enemigo: Ball-Shooter Pt4)
 --- !u!1001 &1192465995
