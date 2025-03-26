@@ -32,6 +32,12 @@ public class EnemyShooter : MonoBehaviour
     [Tooltip("Vida máxima del enemigo")]
     public float maxHealth = 10f;
 
+    [Header("Death Effect Settings")]
+    [Tooltip("Prefab for the effect to play when the enemy dies")]
+    public GameObject deathEffectPrefab; // Efecto al morir
+    [Tooltip("Duration of the death effect")]
+    public float deathEffectDuration = 2f; // Duración del efecto (como en KredToken)
+
     private Transform player; // Referencia al transform del jugador
     private SpriteRenderer spriteRenderer; // Para voltear el sprite horizontalmente
     private float nextFireTime; // Control del tiempo para el próximo disparo
@@ -39,6 +45,7 @@ public class EnemyShooter : MonoBehaviour
     private bool isOnCooldown; // Indica si el enemigo está en enfriamiento
     private float currentHealth; // Vida actual del enemigo
     private bool facingRight; // Dirección en la que mira el sprite
+    private bool isDead; // Indica si el enemigo está muerto
 
     void Start()
     {
@@ -64,11 +71,12 @@ public class EnemyShooter : MonoBehaviour
         contactCooldownEnd = Time.time; // Inicializar el enfriamiento
         currentHealth = maxHealth; // Inicializar la vida
         facingRight = !spriteRenderer.flipX; // Dirección inicial basada en el sprite
+        isDead = false;
     }
 
     void Update()
     {
-        if (player == null) return;
+        if (player == null || isDead) return;
 
         // Calcular la distancia al jugador
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
@@ -185,13 +193,40 @@ public class EnemyShooter : MonoBehaviour
         Gizmos.DrawLine(transform.position + leftEdge, transform.position + rightEdge);
     }
 
-    // Añadir este método al final de EnemyShooter.cs
     public void TakeDamage(float damage)
     {
+        if (isDead) return;
+
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
-            Destroy(gameObject); // Destruir al enemigo si su vida llega a 0
+            Die();
         }
+    }
+
+    void Die()
+    {
+        isDead = true;
+        // Desactivar el comportamiento del enemigo
+        enabled = false; // Desactiva el Update y otras funciones del MonoBehaviour
+
+        // Instanciar el efecto de muerte
+        if (deathEffectPrefab != null)
+        {
+            GameObject effect = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+            SpriteRenderer effectRenderer = effect.GetComponent<SpriteRenderer>();
+            if (effectRenderer != null)
+            {
+                effectRenderer.flipX = Random.value > 0.5f; // Voltear aleatoriamente como en KredToken
+            }
+            Destroy(effect, deathEffectDuration); // Destruir el efecto después de su duración
+        }
+        else
+        {
+            Debug.LogWarning("DeathEffectPrefab no está asignado en el Inspector. No se mostrará ningún efecto al morir.");
+        }
+
+        // Destruir el enemigo inmediatamente, como en KredToken
+        Destroy(gameObject);
     }
 }
