@@ -34,11 +34,11 @@ public class PlayerHealth : MonoBehaviour
     [Tooltip("Z position for the HealthCounter to ensure it is closer to the camera")]
     public float healthCounterZPosition = -5f; // Posición Z para acercar el HealthCounter a la cámara
 
-    [Header("Kreds Loss Settings")]
-    [Tooltip("Mínima cantidad de Kreds a perder al alcanzar un umbral de vida")]
-    public int minKredsToLose = 25; // Mínimo 25 Kreds
-    [Tooltip("Máxima cantidad de Kreds a perder al alcanzar un umbral de vida")]
-    public int maxKredsToLose = 200; // Máximo 200 Kreds
+    [Header("Damage Effect Settings")]
+    [Tooltip("Color al recibir daño")]
+    public Color damageColor = Color.red; // Color rojo por defecto
+    [Tooltip("Duración del efecto de color al recibir daño (en segundos)")]
+    public float damageColorDuration = 0.4f; // Duración de 0.4 segundos
 
     private HealthBar healthBar; // Referencia al script HealthBar
     private PlayerDeath playerDeath; // Referencia al script PlayerDeath
@@ -53,18 +53,14 @@ public class PlayerHealth : MonoBehaviour
     private Canvas healthCounterCanvas; // Referencia al Canvas del HealthCounter
     private Rigidbody2D playerRigidbody; // Referencia al Rigidbody2D del jugador para detectar la gravedad
     private bool isGravityInverted; // Estado de la gravedad
-
-    // Variables para rastrear los umbrales de vida
-    private bool hasLostAt75Percent = false; // Indica si ya perdió Kreds al 75%
-    private bool hasLostAt50Percent = false; // Indica si ya perdió Kreds al 50%
-    private bool hasLostAt25Percent = false; // Indica si ya perdió Kreds al 25%
-    private float previousHealth; // Vida anterior para comparar cambios
+    private SpriteRenderer[] playerSpriteRenderers; // Array de SpriteRenderers del jugador y sus hijos
+    private Color[] originalColors; // Colores originales de los SpriteRenderers del jugador
+    private bool isChangingColor; // Para evitar que se solapen los efectos de color
 
     void Start()
     {
         // Inicializar la vida al máximo
         currentHealth = maxHealth;
-        previousHealth = currentHealth; // Inicializar la vida anterior
 
         // Obtener el Transform del jugador
         playerTransform = transform;
@@ -142,6 +138,22 @@ public class PlayerHealth : MonoBehaviour
                         healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
                     }
                 }
+            }
+        }
+
+        // Obtener todos los SpriteRenderers del jugador y sus hijos
+        playerSpriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+        if (playerSpriteRenderers.Length == 0)
+        {
+            UnityEngine.Debug.LogError("No se encontraron SpriteRenderers en el jugador o sus hijos. No se podrá cambiar el color al recibir daño.", this);
+        }
+        else
+        {
+            // Guardar los colores originales de todos los SpriteRenderers
+            originalColors = new Color[playerSpriteRenderers.Length];
+            for (int i = 0; i < playerSpriteRenderers.Length; i++)
+            {
+                originalColors[i] = playerSpriteRenderers[i].color;
             }
         }
 
@@ -266,9 +278,6 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        // Guardar la vida anterior para comparar
-        previousHealth = currentHealth;
-
         // Reducir la vida
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth); // Asegurarse de que no baje de 0 ni exceda el máximo
@@ -282,8 +291,11 @@ public class PlayerHealth : MonoBehaviour
             ShowObjects();
         }
 
-        // Verificar si se cruzaron los umbrales de vida y perder Kreds si es necesario
-        CheckHealthThresholds();
+        // Cambiar el color del jugador a rojo por 0.4 segundos
+        if (playerSpriteRenderers != null && playerSpriteRenderers.Length > 0 && !isChangingColor)
+        {
+            StartCoroutine(ChangeColorOnDamage());
+        }
 
         // Comprobar si el jugador ha muerto
         if (currentHealth <= 0f)
@@ -292,68 +304,32 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    private void CheckHealthThresholds()
+    private IEnumerator ChangeColorOnDamage()
     {
-        // Solo perder Kreds si el jugador no está muerto
-        if (playerDeath != null && playerDeath.IsDead()) return;
+        isChangingColor = true;
 
-        // Calcular los umbrales de vida
-        float healthPercentage = currentHealth / maxHealth;
-        float previousHealthPercentage = previousHealth / maxHealth;
-
-        // Umbral del 75%
-        if (previousHealthPercentage > 0.75f && healthPercentage <= 0.75f && !hasLostAt75Percent)
+        // Cambiar el color de todos los SpriteRenderers del jugador a rojo
+        foreach (SpriteRenderer renderer in playerSpriteRenderers)
         {
-            hasLostAt75Percent = true;
-            LoseKreds();
-            Debug.Log("Perdió Kreds al 75% de vida.");
+            if (renderer != null)
+            {
+                renderer.color = damageColor;
+            }
         }
 
-        // Umbral del 50%
-        if (previousHealthPercentage > 0.50f && healthPercentage <= 0.50f && !hasLostAt50Percent)
+        // Esperar 0.4 segundos
+        yield return new WaitForSeconds(damageColorDuration);
+
+        // Restaurar los colores originales
+        for (int i = 0; i < playerSpriteRenderers.Length; i++)
         {
-            hasLostAt50Percent = true;
-            LoseKreds();
-            Debug.Log("Perdió Kreds al 50% de vida.");
+            if (playerSpriteRenderers[i] != null)
+            {
+                playerSpriteRenderers[i].color = originalColors[i];
+            }
         }
 
-        // Umbral del 25%
-        if (previousHealthPercentage > 0.25f && healthPercentage <= 0.25f && !hasLostAt25Percent)
-        {
-            hasLostAt25Percent = true;
-            LoseKreds();
-            Debug.Log("Perdió Kreds al 25% de vida.");
-        }
-    }
-
-    private void LoseKreds()
-    {
-        // Verificar si hay un KredsManager
-        if (KredsManager.Instance == null)
-        {
-            Debug.LogWarning("KredsManager no encontrado. No se pueden perder Kreds.");
-            return;
-        }
-
-        // Generar una cantidad aleatoria de Kreds a perder (entre 25 y 200, en incrementos de 25)
-        int kredsToLose = Random.Range(minKredsToLose, maxKredsToLose + 1);
-        kredsToLose = (kredsToLose / 25) * 25; // Asegurarse de que sea un múltiplo de 25
-
-        // Ajustar la cantidad de Kreds a perder según los Kreds disponibles
-        int availableTokens = KredsManager.Instance.totalTokens;
-        if (kredsToLose > availableTokens)
-        {
-            kredsToLose = availableTokens; // No perder más de lo que tiene
-        }
-
-        // Si no hay Kreds que perder, no hacer nada
-        if (kredsToLose <= 0)
-        {
-            return;
-        }
-
-        // Restar los Kreds y actualizar la UI
-        KredsManager.Instance.LoseTokens(kredsToLose);
+        isChangingColor = false;
     }
 
     private void Die()
@@ -446,14 +422,5 @@ public class PlayerHealth : MonoBehaviour
         {
             healthCounterText.text = $"{(int)currentHealth} / {(int)maxHealth}";
         }
-    }
-
-    // Método para reiniciar los umbrales (por ejemplo, al respawnear)
-    public void ResetThresholds()
-    {
-        hasLostAt75Percent = false;
-        hasLostAt50Percent = false;
-        hasLostAt25Percent = false;
-        previousHealth = currentHealth;
     }
 }

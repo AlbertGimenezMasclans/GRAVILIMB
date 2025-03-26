@@ -2075,7 +2075,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.002803713, y: 0.036695093}
+  m_Offset: {x: -0.0028036237, y: 0.008410692}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -2086,7 +2086,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.9106427, y: 0.91638964}
+  m_Size: {x: 0.8598207, y: 0.85982084}
   m_EdgeRadius: 0
 --- !u!1 &427908726
 GameObject:
@@ -6573,8 +6573,11 @@ MonoBehaviour:
   healthCounterScale: 0.01
   healthCounterSortingOrder: 100
   healthCounterZPosition: -5
+<<<<<<< HEAD
   minKredsToLose: 25
   maxKredsToLose: 150
+=======
+>>>>>>> parent of 577dcac (Enemigo: Ball-Shooter Pt4)
 --- !u!1001 &1192465995
 PrefabInstance:
   m_ObjectHideFlags: 0
