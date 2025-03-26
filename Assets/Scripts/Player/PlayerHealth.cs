@@ -34,6 +34,12 @@ public class PlayerHealth : MonoBehaviour
     [Tooltip("Z position for the HealthCounter to ensure it is closer to the camera")]
     public float healthCounterZPosition = -5f; // Posición Z para acercar el HealthCounter a la cámara
 
+    [Header("Damage Effect Settings")]
+    [Tooltip("Color al recibir daño")]
+    public Color damageColor = Color.red; // Color rojo por defecto
+    [Tooltip("Duración del efecto de color al recibir daño (en segundos)")]
+    public float damageColorDuration = 0.4f; // Duración de 0.4 segundos
+
     private HealthBar healthBar; // Referencia al script HealthBar
     private PlayerDeath playerDeath; // Referencia al script PlayerDeath
     private PlayerMovement playerMovement; // Referencia al script PlayerMovement
@@ -47,6 +53,9 @@ public class PlayerHealth : MonoBehaviour
     private Canvas healthCounterCanvas; // Referencia al Canvas del HealthCounter
     private Rigidbody2D playerRigidbody; // Referencia al Rigidbody2D del jugador para detectar la gravedad
     private bool isGravityInverted; // Estado de la gravedad
+    private SpriteRenderer[] playerSpriteRenderers; // Array de SpriteRenderers del jugador y sus hijos
+    private Color[] originalColors; // Colores originales de los SpriteRenderers del jugador
+    private bool isChangingColor; // Para evitar que se solapen los efectos de color
 
     void Start()
     {
@@ -129,6 +138,22 @@ public class PlayerHealth : MonoBehaviour
                         healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
                     }
                 }
+            }
+        }
+
+        // Obtener todos los SpriteRenderers del jugador y sus hijos
+        playerSpriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+        if (playerSpriteRenderers.Length == 0)
+        {
+            UnityEngine.Debug.LogError("No se encontraron SpriteRenderers en el jugador o sus hijos. No se podrá cambiar el color al recibir daño.", this);
+        }
+        else
+        {
+            // Guardar los colores originales de todos los SpriteRenderers
+            originalColors = new Color[playerSpriteRenderers.Length];
+            for (int i = 0; i < playerSpriteRenderers.Length; i++)
+            {
+                originalColors[i] = playerSpriteRenderers[i].color;
             }
         }
 
@@ -266,11 +291,45 @@ public class PlayerHealth : MonoBehaviour
             ShowObjects();
         }
 
+        // Cambiar el color del jugador a rojo por 0.4 segundos
+        if (playerSpriteRenderers != null && playerSpriteRenderers.Length > 0 && !isChangingColor)
+        {
+            StartCoroutine(ChangeColorOnDamage());
+        }
+
         // Comprobar si el jugador ha muerto
         if (currentHealth <= 0f)
         {
             Die();
         }
+    }
+
+    private IEnumerator ChangeColorOnDamage()
+    {
+        isChangingColor = true;
+
+        // Cambiar el color de todos los SpriteRenderers del jugador a rojo
+        foreach (SpriteRenderer renderer in playerSpriteRenderers)
+        {
+            if (renderer != null)
+            {
+                renderer.color = damageColor;
+            }
+        }
+
+        // Esperar 0.4 segundos
+        yield return new WaitForSeconds(damageColorDuration);
+
+        // Restaurar los colores originales
+        for (int i = 0; i < playerSpriteRenderers.Length; i++)
+        {
+            if (playerSpriteRenderers[i] != null)
+            {
+                playerSpriteRenderers[i].color = originalColors[i];
+            }
+        }
+
+        isChangingColor = false;
     }
 
     private void Die()
