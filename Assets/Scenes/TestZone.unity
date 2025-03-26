@@ -6574,7 +6574,7 @@ MonoBehaviour:
   healthCounterSortingOrder: 100
   healthCounterZPosition: -5
   minKredsToLose: 25
-  maxKredsToLose: 200
+  maxKredsToLose: 150
 --- !u!1001 &1192465995
 PrefabInstance:
   m_ObjectHideFlags: 0
