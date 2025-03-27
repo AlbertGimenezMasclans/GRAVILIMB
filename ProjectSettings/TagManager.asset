@@ -11,6 +11,8 @@ TagManager:
   - KredBag
   - DeathZone
   - Checkpoint
+  - Enemy
+  - FlyingEnemy
   layers:
   - Default
   - TransparentFX
