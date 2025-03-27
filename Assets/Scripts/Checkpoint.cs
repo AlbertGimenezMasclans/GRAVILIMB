@@ -7,6 +7,12 @@ public class Checkpoint : MonoBehaviour
     [Tooltip("Time (in seconds) the checkpoint remains in cooldown after healing the player")]
     public float healCooldown = 10f; // Cooldown del checkpoint, 10 segundos
 
+    [Header("Camera Limits for this Checkpoint")]
+    [Tooltip("Minimum X limit for the camera in this checkpoint's zone")]
+    public float minXLimit = -10f; // Límite izquierdo
+    [Tooltip("Maximum X limit for the camera in this checkpoint's zone")]
+    public float maxXLimit = 10f;  // Límite derecho
+
     private Animator animator; // Referencia al Animator del checkpoint
     private bool isActivated = false; // Indica si el checkpoint ya ha sido activado (para el cambio de spawn)
     private bool isInCooldown = false; // Indica si el checkpoint está en cooldown para curar
@@ -157,5 +163,18 @@ public class Checkpoint : MonoBehaviour
         // Finalizar el cooldown
         isInCooldown = false;
         Debug.Log($"Cooldown del checkpoint finalizado. Puede curar de nuevo. (Cooldown: {healCooldown} segundos)");
+    }
+
+    // Método para obtener la posición del checkpoint
+    public Vector2 GetPosition()
+    {
+        return transform.position;
+    }
+
+    // Método para obtener los límites de la cámara
+    public void GetCameraLimits(out float minX, out float maxX)
+    {
+        minX = minXLimit;
+        maxX = maxXLimit;
     }
 }

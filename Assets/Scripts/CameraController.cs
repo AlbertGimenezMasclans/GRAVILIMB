@@ -12,6 +12,10 @@ public class CameraController : MonoBehaviour
     public float lookAheadFactor = 2f; // Cuánto mira hacia adelante
     public float lookAheadSpeed = 0.1f; // Velocidad de ajuste del look-ahead
 
+    // Límites iniciales (para restaurar si es necesario)
+    private float initialMinX;
+    private float initialMaxX;
+
     private float lookAheadOffset = 0f; // Offset dinámico del look-ahead
     private PlayerMovement playerMovement; // Referencia al script del jugador
     private PlayerDeath playerDeath; // Referencia al script de muerte
@@ -37,6 +41,10 @@ public class CameraController : MonoBehaviour
         }
 
         offset = transform.position - target.position;
+
+        // Almacenar los límites iniciales
+        initialMinX = minX;
+        initialMaxX = maxX;
     }
 
     void LateUpdate()
@@ -77,5 +85,35 @@ public class CameraController : MonoBehaviour
                 habSelector.position.z // Mantener la Z original del Hab-Selector
             );
         }
+    }
+
+    // Método para teletransportar la cámara a una posición específica
+    public void TeleportCamera(Vector2 newPosition)
+    {
+        Vector3 cameraPosition = new Vector3(newPosition.x, transform.position.y, transform.position.z);
+        transform.position = cameraPosition;
+        Debug.Log($"Cámara teletransportada a: {cameraPosition}");
+    }
+
+    // Método para actualizar los límites de la cámara
+    public void UpdateCameraLimits(float newMinX, float newMaxX)
+    {
+        minX = newMinX;
+        maxX = newMaxX;
+        Debug.Log($"Nuevos límites de la cámara: minX = {minX}, maxX = {maxX}");
+    }
+
+    // Método para verificar si una posición está dentro de los límites actuales
+    public bool IsPositionWithinLimits(Vector2 position)
+    {
+        return position.x >= minX && position.x <= maxX;
+    }
+
+    // Método para restaurar los límites iniciales
+    public void RestoreInitialLimits()
+    {
+        minX = initialMinX;
+        maxX = initialMaxX;
+        Debug.Log($"Límites de la cámara restaurados a los iniciales: minX = {minX}, maxX = {maxX}");
     }
 }
