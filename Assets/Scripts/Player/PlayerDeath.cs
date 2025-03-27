@@ -245,25 +245,8 @@ public class PlayerDeath : MonoBehaviour
         initialPosition = newPlayerPosition;
         Debug.Log($"Posición inicial del jugador actualizada por el checkpoint: {initialPosition}");
 
-        // Actualizar la posición inicial de la cámara (solo en el eje X)
+        // Actualizar la posición inicial de la cámara (solo en el eje X, sin limitar)
         Vector3 newCameraPosition = new Vector3(checkpointX, initialCameraPosition.y, initialCameraPosition.z);
-
-        // Ajustar la posición de la cámara según los límites de CameraController
-        if (cameraController != null)
-        {
-            float minX = cameraController.minX;
-            float maxX = cameraController.maxX;
-
-            // Asegurarse de que la posición X de la cámara esté dentro de los límites
-            newCameraPosition.x = Mathf.Clamp(newCameraPosition.x, minX, maxX);
-            Debug.Log($"Posición X de la cámara ajustada según límites: {newCameraPosition.x} (minX: {minX}, maxX: {maxX})");
-        }
-        else
-        {
-            Debug.LogWarning("CameraController no encontrado. La posición de la cámara no se ajustará según límites.");
-        }
-
-        // Actualizar la posición inicial de la cámara
         initialCameraPosition = newCameraPosition;
         Debug.Log($"Posición inicial de la cámara actualizada por el checkpoint: {initialCameraPosition}");
     }
@@ -422,8 +405,9 @@ public class PlayerDeath : MonoBehaviour
                 }
                 else
                 {
-                    // Si no se encuentra un checkpoint, restaurar los límites iniciales
-                    cameraController.RestoreInitialLimits();
+                    // Si no se encuentra un checkpoint, establecer límites sin restricciones
+                    cameraController.UpdateCameraLimits(float.MinValue, float.MaxValue);
+                    Debug.Log("No se encontró un checkpoint. Estableciendo límites de cámara sin restricciones (infinitos).");
                 }
             }
             else

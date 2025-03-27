@@ -176,5 +176,6 @@ public class Checkpoint : MonoBehaviour
     {
         minX = minXLimit;
         maxX = maxXLimit;
+        Debug.Log($"Checkpoint: Estableciendo límites de cámara: minX = {minX}, maxX = {maxX}");
     }
 }

@@ -7,8 +7,8 @@ public class CameraController : MonoBehaviour
     public Transform habSelector; // Asignar "Hab-Selector" aquí en el Inspector
 
     [SerializeField] private Vector3 offset;
-    public float minX = -10f; // Límite izquierdo
-    public float maxX = 10f;  // Límite derecho
+    public float minX = float.MinValue; // Límite izquierdo (sin restricciones inicialmente)
+    public float maxX = float.MaxValue; // Límite derecho (sin restricciones inicialmente)
     public float lookAheadFactor = 2f; // Cuánto mira hacia adelante
     public float lookAheadSpeed = 0.1f; // Velocidad de ajuste del look-ahead
 
