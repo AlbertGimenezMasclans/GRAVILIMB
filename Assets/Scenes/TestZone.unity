@@ -1721,7 +1721,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 289948577}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e97c5dd7588982642ab62517043132b3, type: 3}
+  m_Script: {fileID: 11500000, guid: 8dd97474cef14d64e899167c6fb73d73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   destinationDoor: {fileID: 1448690437}
@@ -4030,8 +4030,8 @@ GameObject:
   - component: {fileID: 726786055}
   - component: {fileID: 726786058}
   - component: {fileID: 726786057}
-  - component: {fileID: 726786056}
   - component: {fileID: 726786059}
+  - component: {fileID: 726786060}
   m_Layer: 0
   m_Name: Kreds_Container
   m_TagString: Untagged
@@ -4054,28 +4054,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1906634741}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &726786056
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 726786054}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de4c21d01db64084bbc0627292b0a10c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  textBox: {fileID: 427908726}
-  dialogueLines:
-  - AAAAAAAAA.
-  textField: {fileID: 847149824}
-  Input_TB: {fileID: 1449516896}
-  fanfareSong: {fileID: 8300000, guid: 20c0ce2715ce9c04fb2c4437c9681307, type: 3}
-  dialogueAdvanceSound: {fileID: 8300000, guid: 6be0bd76ddbeb044cb375ea7ba0397bc, type: 3}
-  dialogueEndSound: {fileID: 8300000, guid: 37782a1da832ff84aa8608f5c1d0f5cb, type: 3}
-  typingSound: {fileID: 8300000, guid: 9eab6aafffe280240ac5a85d84d42889, type: 3}
-  objectToMakeInvisible: {fileID: 726786054}
 --- !u!61 &726786057
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -4269,6 +4247,18 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &726786060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 726786054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1499de5b97ca0ce4e976dd5d599c78dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &734312379
 GameObject:
   m_ObjectHideFlags: 0
@@ -9137,7 +9127,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1448690437}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e97c5dd7588982642ab62517043132b3, type: 3}
+  m_Script: {fileID: 11500000, guid: 8dd97474cef14d64e899167c6fb73d73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   destinationDoor: {fileID: 289948577}
@@ -12507,6 +12497,14 @@ PrefabInstance:
     - target: {fileID: 3582722600502385860, guid: ed071897198b3864d8a0132f8f43957c, type: 3}
       propertyPath: m_Name
       value: Checkpoint
+      objectReference: {fileID: 0}
+    - target: {fileID: 6499819518300675660, guid: ed071897198b3864d8a0132f8f43957c, type: 3}
+      propertyPath: maxXLimit
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 6499819518300675660, guid: ed071897198b3864d8a0132f8f43957c, type: 3}
+      propertyPath: minXLimit
+      value: -1000
       objectReference: {fileID: 0}
     - target: {fileID: 7329287156314444449, guid: ed071897198b3864d8a0132f8f43957c, type: 3}
       propertyPath: m_LocalPosition.x
