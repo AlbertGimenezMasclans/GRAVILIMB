@@ -3143,10 +3143,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textBox: {fileID: 427908726}
   dialogueLines:
-  - Has encontrado el <color=#57bce3>Contenedor de Kreds</color>!
-  - Aqui puedes almacenar todas las fichas <color=yellow>Kred</color> que encuentres!
-  - Son muy importantes, asi que trata de agarrar todas las que puedas!
-  - Su forma... recuerdan a alguien, pero quien sera?
+  - AAAAAAAAA.
   textField: {fileID: 847149824}
   Input_TB: {fileID: 1449516896}
   fanfareSong: {fileID: 8300000, guid: 20c0ce2715ce9c04fb2c4437c9681307, type: 3}
@@ -6578,6 +6575,8 @@ MonoBehaviour:
   healthCounterScale: 0.01
   healthCounterSortingOrder: 100
   healthCounterZPosition: -5
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageColorDuration: 0.4
 --- !u!1001 &1192465995
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10781,6 +10780,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cbc5c9f58374174d88b07631440e536, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  healCooldown: 10
 --- !u!61 &2104768260
 BoxCollider2D:
   m_ObjectHideFlags: 0
