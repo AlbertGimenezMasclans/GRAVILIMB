@@ -7,6 +7,10 @@ public class Checkpoint : MonoBehaviour
     [Tooltip("Time (in seconds) the checkpoint remains in cooldown after healing the player")]
     public float healCooldown = 10f;
 
+    [Header("Zone Management")]
+    [Tooltip("The visual zone (GameObject) associated with this checkpoint")]
+    public GameObject visualZone; // La zona visual asociada a este checkpoint
+
     private Animator animator;
     private bool isActivated = false;
     private bool isInCooldown = false;
@@ -23,16 +27,22 @@ public class Checkpoint : MonoBehaviour
             Debug.Log("Checkpoint inicializado: en estado 'Checkpoint_Idle'.");
         }
 
-        // Verificar que el checkpoint esté dentro de una zona
+        // Verificar que el checkpoint esté dentro de una zona de cámara
         Vector2 checkpointPosition = transform.position;
         Zone zone = FindZoneAtPosition(checkpointPosition);
         if (zone == null)
         {
-            Debug.LogWarning($"El checkpoint {gameObject.name} en la posición {checkpointPosition} no está dentro de ninguna zona. Asegúrate de que esté cubierto por una zona para que los límites de la cámara se establezcan correctamente al reaparecer.");
+            Debug.LogWarning($"El checkpoint {gameObject.name} en la posición {checkpointPosition} no está dentro de ninguna zona de cámara. Asegúrate de que esté cubierto por una zona para que los límites de la cámara se establezcan correctamente al reaparecer.");
         }
         else
         {
-            Debug.Log($"El checkpoint {gameObject.name} está dentro de la zona {zone.gameObject.name}.");
+            Debug.Log($"El checkpoint {gameObject.name} está dentro de la zona de cámara {zone.gameObject.name}.");
+        }
+
+        // Verificar que la zona visual esté asignada
+        if (visualZone == null)
+        {
+            Debug.LogWarning($"VisualZone no asignado en el checkpoint {gameObject.name}. No se activará ninguna zona visual al reaparecer en este checkpoint.");
         }
     }
 
@@ -166,5 +176,11 @@ public class Checkpoint : MonoBehaviour
             }
         }
         return null;
+    }
+
+    // Método para obtener la zona visual asociada a este checkpoint
+    public GameObject GetVisualZone()
+    {
+        return visualZone;
     }
 }

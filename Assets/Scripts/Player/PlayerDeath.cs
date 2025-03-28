@@ -81,6 +81,7 @@ public class PlayerDeath : MonoBehaviour
     private PlayerHealth playerHealth;
     private float originalGravityScale;
     private bool hasCollectedCheckpoint = false;
+    private Checkpoint activeCheckpoint; // Referencia al checkpoint activo
 
     void Start()
     {
@@ -247,6 +248,7 @@ public class PlayerDeath : MonoBehaviour
 
         if (checkpoint != null)
         {
+            activeCheckpoint = checkpoint; // Almacenar el checkpoint activo
             hasCollectedCheckpoint = true;
             Debug.Log($"Checkpoint activado: {checkpoint.gameObject.name}");
         }
@@ -384,6 +386,25 @@ public class PlayerDeath : MonoBehaviour
         }
 
         mainCamera.transform.position = initialCameraPosition;
+
+        // Activar la zona visual del checkpoint activo
+        if (activeCheckpoint != null)
+        {
+            GameObject visualZoneToActivate = activeCheckpoint.GetVisualZone();
+            if (visualZoneToActivate != null)
+            {
+                visualZoneToActivate.SetActive(true);
+                Debug.Log($"Zona visual activada al reaparecer: {visualZoneToActivate.name}");
+            }
+            else
+            {
+                Debug.LogWarning("No se encontró una zona visual asociada al checkpoint activo. No se activará ninguna zona visual.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No hay un checkpoint activo. No se activará ninguna zona visual al reaparecer.");
+        }
 
         if (cameraController != null)
         {
