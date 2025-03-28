@@ -71,15 +71,16 @@ public class PlayerDeath : MonoBehaviour
     public Animator animator;
 
     private Vector3 initialPosition;
-    private Quaternion initialRotation; // Almacenar la rotación inicial del jugador
+    private Quaternion initialRotation;
     private Vector3 initialCameraPosition;
     private bool isDead = false;
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider;
     private Rigidbody2D rb;
     private bool hasEverCollectedCoins = false;
-    private PlayerHealth playerHealth; // Referencia al script PlayerHealth
-    private float originalGravityScale; // Almacenar el valor original de gravityScale
+    private PlayerHealth playerHealth;
+    private float originalGravityScale;
+    private bool hasCollectedCheckpoint = false;
 
     void Start()
     {
@@ -179,23 +180,20 @@ public class PlayerDeath : MonoBehaviour
             Debug.LogError("Animator no encontrado en " + gameObject.name);
         }
 
-        // Obtener referencia al script PlayerHealth
         playerHealth = GetComponent<PlayerHealth>();
         if (playerHealth == null)
         {
             Debug.LogError("PlayerHealth no encontrado en " + gameObject.name);
         }
 
-        // Almacenar el valor original de gravityScale
         if (rb != null)
         {
-            originalGravityScale = rb.gravityScale; // Guardar el valor inicial (positivo)
+            originalGravityScale = rb.gravityScale;
             Debug.Log($"Valor original de gravityScale almacenado: {originalGravityScale}");
         }
 
-        // Almacenar la posición y rotación inicial del jugador y la cámara
         initialPosition = transform.position;
-        initialRotation = transform.rotation; // Guardar la rotación inicial
+        initialRotation = transform.rotation;
         initialCameraPosition = mainCamera.transform.position;
         fadePanel.color = new Color(0, 0, 0, 0);
 
@@ -234,21 +232,24 @@ public class PlayerDeath : MonoBehaviour
 
     public void SetNewSpawnPosition(Vector3 newPosition)
     {
-        // Actualizar la posición inicial para reaparecer
         initialPosition = newPosition;
         Debug.Log($"Posición inicial actualizada por el checkpoint: {initialPosition}");
     }
 
-    public void SetNewSpawnPositionAndCamera(Vector3 newPlayerPosition, float checkpointX)
+    public void SetNewSpawnPositionAndCamera(Vector3 newPlayerPosition, float checkpointX, Checkpoint checkpoint = null)
     {
-        // Actualizar la posición inicial del jugador
         initialPosition = newPlayerPosition;
         Debug.Log($"Posición inicial del jugador actualizada por el checkpoint: {initialPosition}");
 
-        // Actualizar la posición inicial de la cámara (solo en el eje X, sin limitar)
         Vector3 newCameraPosition = new Vector3(checkpointX, initialCameraPosition.y, initialCameraPosition.z);
         initialCameraPosition = newCameraPosition;
         Debug.Log($"Posición inicial de la cámara actualizada por el checkpoint: {initialCameraPosition}");
+
+        if (checkpoint != null)
+        {
+            hasCollectedCheckpoint = true;
+            Debug.Log($"Checkpoint activado: {checkpoint.gameObject.name}");
+        }
     }
 
     public IEnumerator RespawnCoroutine()
@@ -277,7 +278,6 @@ public class PlayerDeath : MonoBehaviour
 
         yield return new WaitForSeconds(fadeInDelay);
 
-        // Fade-in: la pantalla se pone negra
         float elapsedTime = 0f;
         while (elapsedTime < fadeInTime)
         {
@@ -288,7 +288,6 @@ public class PlayerDeath : MonoBehaviour
         }
         fadePanel.color = new Color(0, 0, 0, 1f);
 
-        // Hacer los objetos invisibles cuando la pantalla se pone negra
         if (playerHealth != null)
         {
             playerHealth.ForceHideObjects();
@@ -315,7 +314,6 @@ public class PlayerDeath : MonoBehaviour
 
             yield return new WaitForSeconds(0.4f);
 
-            // Hacer al jugador invisible justo antes de que comience el conteo de monedas
             if (spriteRenderer != null)
             {
                 spriteRenderer.enabled = false;
@@ -339,7 +337,6 @@ public class PlayerDeath : MonoBehaviour
             }
             deathUICoinCount.text = targetCoinValue.ToString("D9");
 
-            // Rebote vertical en deathUICoinCount si se pierden monedas
             if (coinsLost > 0)
             {
                 yield return StartCoroutine(LossBounceEffect());
@@ -388,31 +385,21 @@ public class PlayerDeath : MonoBehaviour
 
         mainCamera.transform.position = initialCameraPosition;
 
-        // Verificar si el checkpoint está dentro de los límites actuales de la cámara
         if (cameraController != null)
         {
-            Vector2 checkpointPosition = new Vector2(initialPosition.x, initialPosition.y);
-            if (!cameraController.IsPositionWithinLimits(checkpointPosition))
+            Vector2 respawnPosition = new Vector2(initialPosition.x, initialPosition.y);
+            Zone currentZone = FindZoneAtPosition(respawnPosition);
+            if (currentZone != null)
             {
-                // Buscar el checkpoint en la posición de initialPosition
-                Checkpoint checkpoint = FindCheckpointAtPosition(checkpointPosition);
-                if (checkpoint != null)
-                {
-                    // Obtener los límites del checkpoint y actualizar la cámara
-                    float newMinX, newMaxX;
-                    checkpoint.GetCameraLimits(out newMinX, out newMaxX);
-                    cameraController.UpdateCameraLimits(newMinX, newMaxX);
-                }
-                else
-                {
-                    // Si no se encuentra un checkpoint, establecer límites sin restricciones
-                    cameraController.UpdateCameraLimits(float.MinValue, float.MaxValue);
-                    Debug.Log("No se encontró un checkpoint. Estableciendo límites de cámara sin restricciones (infinitos).");
-                }
+                float newMinX, newMaxX;
+                currentZone.GetCameraLimits(out newMinX, out newMaxX);
+                cameraController.UpdateCameraLimits(newMinX, newMaxX);
+                Debug.Log($"Límites de la cámara actualizados al reaparecer según la zona ({currentZone.gameObject.name}): minX = {newMinX}, maxX = {newMaxX}");
             }
             else
             {
-                Debug.Log("El checkpoint está dentro de los límites actuales de la cámara. No se ajustan los límites.");
+                cameraController.RestoreInitialLimits();
+                Debug.Log("No se encontró una zona en la posición de reaparición. Restaurando límites iniciales de la cámara.");
             }
         }
 
@@ -428,25 +415,21 @@ public class PlayerDeath : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        // Restablecer la posición y rotación inicial del jugador
         transform.position = initialPosition;
-        transform.rotation = initialRotation; // Aplicar la rotación inicial
+        transform.rotation = initialRotation;
         spriteRenderer.enabled = true;
         if (boxCollider != null) boxCollider.enabled = true;
-        rb.simulated = false; // Mantener el Rigidbody2D desactivado durante la animación
+        rb.simulated = false;
 
         if (playerMovement.isDismembered)
         {
             playerMovement.RecomposePlayer();
         }
 
-        // Restablecer la gravedad a normal (hacia abajo)
         if (rb != null && playerMovement != null)
         {
-            // Restablecer gravityScale al valor original (positivo) y isGravityNormal
-            rb.gravityScale = originalGravityScale; // Usar el valor original almacenado
-            playerMovement.isGravityNormal = true; // Asegurar que isGravityNormal sea true
-
+            rb.gravityScale = originalGravityScale;
+            playerMovement.isGravityNormal = true;
             Debug.Log($"Gravedad restablecida a normal al revivir. gravityScale: {rb.gravityScale}, isGravityNormal: {playerMovement.isGravityNormal}, Rotación del jugador: {transform.rotation.eulerAngles}");
         }
 
@@ -455,8 +438,8 @@ public class PlayerDeath : MonoBehaviour
             animator.Play("Protagonist_Appear");
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
             float animationLength = stateInfo.length;
-            yield return new WaitForSeconds(animationLength); // Esperar a que termine la animación
-            rb.simulated = true; // Activar el Rigidbody2D después de la animación
+            yield return new WaitForSeconds(animationLength);
+            rb.simulated = true;
             animator.SetBool("IsGrounded", playerMovement.IsGrounded());
             animator.SetFloat("Speed", 0f);
             animator.SetFloat("VerticalSpeed", rb.velocity.y);
@@ -467,7 +450,6 @@ public class PlayerDeath : MonoBehaviour
             cameraController.enabled = true;
         }
 
-        // Restablecer la vida del jugador al máximo (sin hacer los objetos visibles)
         if (playerHealth != null)
         {
             playerHealth.currentHealth = playerHealth.maxHealth;
@@ -476,25 +458,20 @@ public class PlayerDeath : MonoBehaviour
             {
                 healthBar.UpdateHealth(playerHealth.currentHealth);
             }
-            // Actualizar el texto del contador después de restablecer la vida
             playerHealth.GetType().GetMethod("UpdateHealthCounterText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(playerHealth, null);
-            // No llamamos a ShowObjects aquí para que los objetos permanezcan invisibles al reaparecer
         }
 
         isDead = false;
     }
 
-    // Método para buscar un checkpoint en la posición dada
-    private Checkpoint FindCheckpointAtPosition(Vector2 position)
+    private Zone FindZoneAtPosition(Vector2 position)
     {
-        Checkpoint[] checkpoints = FindObjectsOfType<Checkpoint>();
-        foreach (Checkpoint checkpoint in checkpoints)
+        Zone[] zones = FindObjectsOfType<Zone>();
+        foreach (Zone zone in zones)
         {
-            Vector2 checkpointPos = checkpoint.GetPosition();
-            // Consideramos que la posición coincide si está muy cerca (por ejemplo, a 0.5 unidades)
-            if (Vector2.Distance(checkpointPos, position) < 0.5f)
+            if (zone.ContainsPosition(position))
             {
-                return checkpoint;
+                return zone;
             }
         }
         return null;
@@ -565,5 +542,10 @@ public class PlayerDeath : MonoBehaviour
     public bool IsDead()
     {
         return isDead;
+    }
+
+    public bool HasCollectedCheckpoint()
+    {
+        return hasCollectedCheckpoint;
     }
 }

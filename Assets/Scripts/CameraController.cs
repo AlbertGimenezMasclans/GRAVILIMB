@@ -3,22 +3,21 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     public Transform target;
-    public Transform headTarget; // Asignar "PlayerHead" aquí en el Inspector
-    public Transform habSelector; // Asignar "Hab-Selector" aquí en el Inspector
+    public Transform headTarget;
+    public Transform habSelector;
 
     [SerializeField] private Vector3 offset;
-    public float minX = float.MinValue; // Límite izquierdo (sin restricciones inicialmente)
-    public float maxX = float.MaxValue; // Límite derecho (sin restricciones inicialmente)
-    public float lookAheadFactor = 2f; // Cuánto mira hacia adelante
-    public float lookAheadSpeed = 0.1f; // Velocidad de ajuste del look-ahead
+    public float minX = float.MinValue;
+    public float maxX = float.MaxValue;
+    public float lookAheadFactor = 2f;
+    public float lookAheadSpeed = 0.1f;
 
-    // Límites iniciales (para restaurar si es necesario)
     private float initialMinX;
     private float initialMaxX;
-
-    private float lookAheadOffset = 0f; // Offset dinámico del look-ahead
-    private PlayerMovement playerMovement; // Referencia al script del jugador
-    private PlayerDeath playerDeath; // Referencia al script de muerte
+    private float lookAheadOffset = 0f;
+    private PlayerMovement playerMovement;
+    private PlayerDeath playerDeath;
+    private Zone currentZone;
 
     void Start()
     {
@@ -42,7 +41,6 @@ public class CameraController : MonoBehaviour
 
         offset = transform.position - target.position;
 
-        // Almacenar los límites iniciales
         initialMinX = minX;
         initialMaxX = maxX;
     }
@@ -51,11 +49,35 @@ public class CameraController : MonoBehaviour
     {
         if (target == null || (playerDeath != null && playerDeath.IsDead())) return;
 
+        // Buscar la zona actual del jugador
+        Vector2 targetPosition = target.position;
+        Zone newZone = FindZoneAtPosition(targetPosition);
+
+        // Actualizar los límites de la cámara si la zona ha cambiado
+        if (newZone != currentZone)
+        {
+            currentZone = newZone;
+            if (currentZone != null)
+            {
+                float newMinX, newMaxX;
+                currentZone.GetCameraLimits(out newMinX, out newMaxX);
+                minX = newMinX;
+                maxX = newMaxX;
+                Debug.Log($"Límites de la cámara actualizados según la zona ({currentZone.gameObject.name}): minX = {minX}, maxX = {maxX}");
+            }
+            else
+            {
+                minX = initialMinX;
+                maxX = initialMaxX;
+                Debug.Log($"No se encontró una zona en la posición {targetPosition}. Restaurando límites iniciales: minX = {minX}, maxX = {maxX}");
+            }
+        }
+
         // Determinar qué seguir: jugador o cabeza
         Transform currentTarget = target;
         if (playerMovement != null && playerMovement.isDismembered && headTarget != null)
         {
-            currentTarget = headTarget; // Cambiar al "PlayerHead" si está desmiembrado
+            currentTarget = headTarget;
         }
 
         // Calcular el desplazamiento dinámico (look-ahead) basado en la dirección del movimiento
@@ -65,9 +87,9 @@ public class CameraController : MonoBehaviour
 
         // Calcular la posición deseada de la cámara
         Vector3 desiredPosition = new Vector3(
-            currentTarget.position.x + offset.x + lookAheadOffset, // Incluye look-ahead
-            transform.position.y, // Mantiene la altura original
-            transform.position.z  // Mantiene la profundidad original
+            currentTarget.position.x + offset.x + lookAheadOffset,
+            transform.position.y,
+            transform.position.z
         );
 
         // Aplicar límites horizontales
@@ -82,20 +104,36 @@ public class CameraController : MonoBehaviour
             habSelector.position = new Vector3(
                 transform.position.x,
                 transform.position.y,
-                habSelector.position.z // Mantener la Z original del Hab-Selector
+                habSelector.position.z
             );
         }
     }
 
-    // Método para teletransportar la cámara a una posición específica
     public void TeleportCamera(Vector2 newPosition)
     {
         Vector3 cameraPosition = new Vector3(newPosition.x, transform.position.y, transform.position.z);
         transform.position = cameraPosition;
         Debug.Log($"Cámara teletransportada a: {cameraPosition}");
+
+        // Actualizar los límites de la cámara según la zona en la nueva posición
+        Zone newZone = FindZoneAtPosition(newPosition);
+        if (newZone != null)
+        {
+            currentZone = newZone;
+            float newMinX, newMaxX;
+            newZone.GetCameraLimits(out newMinX, out newMaxX);
+            minX = newMinX;
+            maxX = newMaxX;
+            Debug.Log($"Límites de la cámara actualizados después de teletransportar según la zona ({currentZone.gameObject.name}): minX = {minX}, maxX = {maxX}");
+        }
+        else
+        {
+            minX = initialMinX;
+            maxX = initialMaxX;
+            Debug.Log($"No se encontró una zona en la posición {newPosition}. Restaurando límites iniciales: minX = {minX}, maxX = {maxX}");
+        }
     }
 
-    // Método para actualizar los límites de la cámara
     public void UpdateCameraLimits(float newMinX, float newMaxX)
     {
         minX = newMinX;
@@ -103,17 +141,28 @@ public class CameraController : MonoBehaviour
         Debug.Log($"Nuevos límites de la cámara: minX = {minX}, maxX = {maxX}");
     }
 
-    // Método para verificar si una posición está dentro de los límites actuales
     public bool IsPositionWithinLimits(Vector2 position)
     {
         return position.x >= minX && position.x <= maxX;
     }
 
-    // Método para restaurar los límites iniciales
     public void RestoreInitialLimits()
     {
         minX = initialMinX;
         maxX = initialMaxX;
         Debug.Log($"Límites de la cámara restaurados a los iniciales: minX = {minX}, maxX = {maxX}");
+    }
+
+    private Zone FindZoneAtPosition(Vector2 position)
+    {
+        Zone[] zones = FindObjectsOfType<Zone>();
+        foreach (Zone zone in zones)
+        {
+            if (zone.ContainsPosition(position))
+            {
+                return zone;
+            }
+        }
+        return null;
     }
 }

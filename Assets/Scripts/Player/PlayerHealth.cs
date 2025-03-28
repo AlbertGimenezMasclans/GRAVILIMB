@@ -16,7 +16,7 @@ public class PlayerHealth : MonoBehaviour
 
     [Header("Position Offset")]
     [Tooltip("Offset from the player's position where the objects should be positioned when gravity is normal")]
-    public Vector2 positionOffsetNormal = new Vector2(0f, 2f); // Offset cuando la gravedad es normal (arriba del jugador)
+    public Vector2 positionOffsetNormal = new Vector2(0f, 2f); // Offset cuando la gravedad.ConcurrentModificationException normal (arriba del jugador)
     [Tooltip("Offset from the player's position where the objects should be positioned when gravity is inverted")]
     public Vector2 positionOffsetInverted = new Vector2(0f, -2f); // Offset cuando la gravedad está invertida (abajo del jugador)
 
@@ -66,7 +66,7 @@ public class PlayerHealth : MonoBehaviour
         playerTransform = transform;
         if (playerTransform == null)
         {
-            UnityEngine.Debug.LogError("playerTransform es null. Asegúrate de que el script esté adjunto a un GameObject.", this);
+            Debug.LogError("playerTransform es null. Asegúrate de que el script esté adjunto a un GameObject.", this);
             return;
         }
 
@@ -74,14 +74,14 @@ public class PlayerHealth : MonoBehaviour
         playerRigidbody = GetComponent<Rigidbody2D>();
         if (playerRigidbody == null)
         {
-            UnityEngine.Debug.LogError("Rigidbody2D no encontrado en el jugador. Asegúrate de que el jugador tenga un Rigidbody2D.", this);
+            Debug.LogError("Rigidbody2D no encontrado en el jugador. Asegúrate de que el jugador tenga un Rigidbody2D.", this);
         }
 
         // Obtener el script PlayerMovement para detectar la gravedad
         playerMovement = GetComponent<PlayerMovement>();
         if (playerMovement == null)
         {
-            UnityEngine.Debug.LogError("PlayerMovement no encontrado en el jugador. Asegúrate de que el jugador tenga el script PlayerMovement.", this);
+            Debug.LogError("PlayerMovement no encontrado en el jugador. Asegúrate de que el jugador tenga el script PlayerMovement.", this);
         }
 
         // Inicializar los arrays para SpriteRenderers, TMP_Text y Transforms
@@ -114,15 +114,15 @@ public class PlayerHealth : MonoBehaviour
                     healthCounterCanvas = objectsToHide[i].GetComponent<Canvas>(); // Obtener el Canvas del HealthCounter
                     if (healthCounterText == null)
                     {
-                        UnityEngine.Debug.LogError($"TMP_Text no encontrado en {objectsToHide[i].name}.", this);
+                        Debug.LogError($"TMP_Text no encontrado en {objectsToHide[i].name}.", this);
                     }
                     if (healthCounterTransform == null)
                     {
-                        UnityEngine.Debug.LogError($"Transform no encontrado en {objectsToHide[i].name}.", this);
+                        Debug.LogError($"Transform no encontrado en {objectsToHide[i].name}.", this);
                     }
                     if (healthCounterCanvas == null)
                     {
-                        UnityEngine.Debug.LogError($"Canvas no encontrado en {objectsToHide[i].name}. Asegúrate de que el HealthCounter sea un objeto TextMeshPro en el espacio del mundo.", this);
+                        Debug.LogError($"Canvas no encontrado en {objectsToHide[i].name}. Asegúrate de que el HealthCounter sea un objeto TextMeshPro en el espacio del mundo.", this);
                     }
                     else
                     {
@@ -133,7 +133,7 @@ public class PlayerHealth : MonoBehaviour
                         // Ajustar la posición Z para que esté más cerca de la cámara
                         Vector3 currentPosition = healthCounterTransform.position;
                         healthCounterTransform.position = new Vector3(currentPosition.x, currentPosition.y, healthCounterZPosition);
-                        UnityEngine.Debug.Log($"HealthCounter detectado: {healthCounterTransform.name}, Sorting Layer: {healthCounterCanvas.sortingLayerName}, Sorting Order: {healthCounterCanvas.sortingOrder}, Z Position: {healthCounterTransform.position.z}");
+                        Debug.Log($"HealthCounter detectado: {healthCounterTransform.name}, Sorting Layer: {healthCounterCanvas.sortingLayerName}, Sorting Order: {healthCounterCanvas.sortingOrder}, Z Position: {healthCounterTransform.position.z}");
                         // Asegurarse de que la escala del HealthCounter sea la especificada
                         healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
                     }
@@ -145,7 +145,7 @@ public class PlayerHealth : MonoBehaviour
         playerSpriteRenderers = GetComponentsInChildren<SpriteRenderer>();
         if (playerSpriteRenderers.Length == 0)
         {
-            UnityEngine.Debug.LogError("No se encontraron SpriteRenderers en el jugador o sus hijos. No se podrá cambiar el color al recibir daño.", this);
+            Debug.LogError("No se encontraron SpriteRenderers en el jugador o sus hijos. No se podrá cambiar el color al recibir daño.", this);
         }
         else
         {
@@ -161,7 +161,7 @@ public class PlayerHealth : MonoBehaviour
         healthBar = FindObjectOfType<HealthBar>();
         if (healthBar == null)
         {
-            UnityEngine.Debug.LogError("HealthBar no encontrado en la escena.", this);
+            Debug.LogError("HealthBar no encontrado en la escena.", this);
         }
         else
         {
@@ -178,7 +178,7 @@ public class PlayerHealth : MonoBehaviour
         playerDeath = GetComponent<PlayerDeath>();
         if (playerDeath == null)
         {
-            UnityEngine.Debug.LogError("PlayerDeath no encontrado en el jugador.", this);
+            Debug.LogError("PlayerDeath no encontrado en el jugador.", this);
         }
     }
 
@@ -193,7 +193,7 @@ public class PlayerHealth : MonoBehaviour
         // Asegurarse de que playerTransform no sea null
         if (playerTransform == null)
         {
-            UnityEngine.Debug.LogError("playerTransform es null en Update().", this);
+            Debug.LogError("playerTransform es null en Update().", this);
             return;
         }
 
@@ -239,7 +239,7 @@ public class PlayerHealth : MonoBehaviour
                     }
                     else
                     {
-                        UnityEngine.Debug.LogWarning("healthCounterTransform es null. Asegúrate de que HealthCounter esté en objectsToHide y que su nombre sea exactamente 'HealthCounter'.");
+                        Debug.LogWarning("healthCounterTransform es null. Asegúrate de que HealthCounter esté en objectsToHide y que su nombre sea exactamente 'HealthCounter'.");
                     }
                     continue;
                 }
@@ -263,38 +263,55 @@ public class PlayerHealth : MonoBehaviour
         // Si colisiona con una DeathZone, reducir la vida a 0
         if (collision.CompareTag("DeathZone"))
         {
-            currentHealth = 0f;
+            // Calcular la vida después del daño
+            float newHealth = 0f; // La DeathZone reduce la vida a 0 directamente
+
+            // Actualizar la barra de vida y hacer los objetos visibles
+            currentHealth = newHealth;
             if (healthBar != null)
             {
                 healthBar.UpdateHealth(currentHealth);
-                // Actualizar el texto del contador
                 UpdateHealthCounterText();
-                // Hacer los objetos visibles al colisionar con DeathZone
                 ShowObjects();
             }
+
+            // No aplicamos el efecto rojo porque este daño matará al jugador
+            Debug.Log("Colisión con DeathZone. No se aplica el efecto rojo.");
+
+            // Llamar a Die() directamente
             Die();
         }
     }
 
     public void TakeDamage(float damage)
     {
-        // Reducir la vida
-        currentHealth -= damage;
-        currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth); // Asegurarse de que no baje de 0 ni exceda el máximo
+        // Si el jugador ya está muerto, no aplicar daño
+        if (playerDeath != null && playerDeath.IsDead())
+        {
+            Debug.Log("El jugador ya está muerto. No se aplica daño.");
+            return;
+        }
+
+        // Calcular la vida después del daño
+        float newHealth = currentHealth - damage;
 
         // Actualizar la barra de vida y hacer los objetos visibles
+        currentHealth = Mathf.Clamp(newHealth, 0f, maxHealth); // Asegurarse de que no baje de 0 ni exceda el máximo
         if (healthBar != null)
         {
             healthBar.UpdateHealth(currentHealth);
-            // Actualizar el texto del contador
             UpdateHealthCounterText();
             ShowObjects();
         }
 
-        // Cambiar el color del jugador a rojo por 0.4 segundos
-        if (playerSpriteRenderers != null && playerSpriteRenderers.Length > 0 && !isChangingColor)
+        // Cambiar el color del jugador a rojo por 0.4 segundos solo si el daño no lo mata
+        if (newHealth > 0f && playerSpriteRenderers != null && playerSpriteRenderers.Length > 0 && !isChangingColor)
         {
             StartCoroutine(ChangeColorOnDamage());
+        }
+        else if (newHealth <= 0f)
+        {
+            Debug.Log("El daño matará al jugador. No se aplica el efecto rojo.");
         }
 
         // Comprobar si el jugador ha muerto
