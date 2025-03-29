@@ -299,11 +299,11 @@ public class PlayerMovement : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public void DismemberHead()
+    void DismemberHead()
     {
         if (!isGrounded || !canDismember) return;
 
-        headObject.tag = "Player";
+        headObject.tag = "PlayerHead"; // Cambiar de "Player" a "PlayerHead"
         if (headObject != null && bodyObject != null)
         {
             isDismembered = true;

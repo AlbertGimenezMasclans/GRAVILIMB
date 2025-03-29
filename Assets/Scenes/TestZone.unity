@@ -2578,6 +2578,8 @@ MonoBehaviour:
   entrySpeed: 5
   entryDuration: 0
   gravityAfterTeleport: 0
+  headOffsetDirection: 0
+  headOffsetDistance: 0.25
 --- !u!61 &403810185
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -4846,6 +4848,8 @@ MonoBehaviour:
   entrySpeed: 5
   entryDuration: 0
   gravityAfterTeleport: 0
+  headOffsetDirection: 1
+  headOffsetDistance: 0.25
 --- !u!61 &827372583
 BoxCollider2D:
   m_ObjectHideFlags: 0

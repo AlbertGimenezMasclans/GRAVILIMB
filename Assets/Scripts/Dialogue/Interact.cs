@@ -120,9 +120,20 @@ public class Interact : MonoBehaviour
             isDismembered = playerMovement.isDismembered;
             playerMovement.enabled = false; // Desactiva el movimiento del jugador
         }
-        else if (playerObject != null && playerObject.GetComponent<Dismember>() != null)
+        else if (playerObject != null)
         {
-            isDismembered = true;
+            // Si es la cabeza, buscar el PlayerMovement asociado
+            PlayerMovement pm = FindPlayerMovementForHead(playerObject);
+            if (pm != null)
+            {
+                playerMovement = pm;
+                isDismembered = pm.isDismembered;
+                playerMovement.enabled = false; // Desactiva el movimiento si se encuentra
+            }
+            else if (playerObject.GetComponent<Dismember>() != null)
+            {
+                isDismembered = true; // La cabeza siempre implica desmembramiento
+            }
         }
 
         if (isDismembered && headlessDialogueLines != null && headlessDialogueLines.Length > 0)
@@ -288,7 +299,7 @@ public class Interact : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("PlayerHead"))
         {
             isPlayerRange = true;
             if (dialogueMark != null) dialogueMark.SetActive(true);
@@ -299,12 +310,25 @@ public class Interact : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("PlayerHead"))
         {
             isPlayerRange = false;
             if (dialogueMark != null) dialogueMark.SetActive(false);
             playerMovement = null;
             playerObject = null;
         }
+    }
+
+    private PlayerMovement FindPlayerMovementForHead(GameObject head)
+    {
+        PlayerMovement[] players = FindObjectsOfType<PlayerMovement>();
+        foreach (PlayerMovement pm in players)
+        {
+            if (pm.isDismembered && pm.headObject == head)
+            {
+                return pm;
+            }
+        }
+        return null;
     }
 }

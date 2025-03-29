@@ -7,55 +7,38 @@ using UnityEngine.UI;
 public class DialogueSystem : MonoBehaviour
 {
     [Header("UI Elements")]
-    [Tooltip("Icon shown when player is in dialogue range")]
     [SerializeField] private GameObject dialogueMark;
-    [Tooltip("Main dialogue text box container")]
     [SerializeField] private GameObject textBox;
-    [Tooltip("Primary text field for dialogue (preferred if both are set)")]
     [SerializeField] private TMP_Text textField1;
-    [Tooltip("Secondary text field for dialogue")]
     [SerializeField] private TMP_Text textField2;
-    [Tooltip("Input indicator image")]
     [SerializeField] private Image Input_TB;
 
     [Header("Dialogue Content")]
-    [Tooltip("Lines of dialogue for normal state")]
     [SerializeField, TextArea(1, 4)] private string[] dialogueLines;
-    [Tooltip("Lines of dialogue when player is dismembered")]
     [SerializeField, TextArea(1, 4)] private string[] headlessDialogueLines;
-    [Tooltip("Is this line spoken by another character? (Normal state)")]
-    [SerializeField] private bool[] isOtherCharacterNormal; // Checkbox para diálogo normal
-    [Tooltip("Is this line spoken by another character? (Headless state)")]
-    [SerializeField] private bool[] isOtherCharacterHeadless; // Checkbox para diálogo headless
+    [SerializeField] private bool[] isOtherCharacterNormal;
+    [SerializeField] private bool[] isOtherCharacterHeadless;
 
     [Header("Portrait Settings")]
-    [Tooltip("GameObject containing the portrait image")]
     [SerializeField] private GameObject textBoxPortrait;
-    [Tooltip("Sprites for normal dialogue portraits")]
     [SerializeField] private Sprite[] portraitSprites;
-    [Tooltip("Sprites for headless dialogue portraits")]
     [SerializeField] private Sprite[] headlessPortraitSprites;
 
     [Header("Position Settings")]
-    [Tooltip("Use an alternative position for the text box?")]
     [SerializeField] private bool useAlternativePosition = false;
-    [Tooltip("Custom position for text box when using alternative position")]
     [SerializeField] private Vector2 alternativeTextBoxPosition = new Vector2(100, 100);
 
     [Header("Audio Settings")]
-    [Tooltip("Sound played during text typing")]
     [SerializeField] private AudioClip typingSound;
 
     [Header("Blink Animation")]
-    [Tooltip("Default portrait sprite when idle")]
     [SerializeField] private Sprite idleSprite;
-    [Tooltip("Portrait sprite during blink animation")]
     [SerializeField] private Sprite blinkSprite;
 
     private float typingTime = 0.05f;
     private float commaPauseTime = 0.25f;
     private float periodPauseTime = 0.48f;
-    private const float otherCharacterDelay = 0.25f; // Retraso de 0.25 segundos para "otro personaje"
+    private const float otherCharacterDelay = 0.25f;
     private bool isPlayerRange;
     private bool didDialogueStart;
     private int lineIndex;
@@ -68,7 +51,7 @@ public class DialogueSystem : MonoBehaviour
     private List<AnimatorUpdateMode> originalUpdateModes;
     private string[] activeDialogueLines;
     private Sprite[] activePortraitSprites;
-    private bool[] activeIsOtherCharacter; // Array activo para el checkbox
+    private bool[] activeIsOtherCharacter;
     private TMP_Text dialogueText;
 
     public bool IsDialogueActive => didDialogueStart;
@@ -109,7 +92,6 @@ public class DialogueSystem : MonoBehaviour
         sceneAnimators = new List<Animator>();
         originalUpdateModes = new List<AnimatorUpdateMode>();
 
-        // Validar que los arrays de "isOtherCharacter" tengan la longitud correcta
         if (isOtherCharacterNormal == null || isOtherCharacterNormal.Length != dialogueLines.Length)
         {
             Debug.LogWarning($"isOtherCharacterNormal length does not match dialogueLines length. Adjusting...");
@@ -162,19 +144,27 @@ public class DialogueSystem : MonoBehaviour
         {
             isDismembered = playerMovement.isDismembered;
         }
-        else if (playerObject != null && playerObject.GetComponent<Dismember>() != null)
+        else if (playerObject != null)
         {
-            isDismembered = true;
+            // Si es la cabeza, buscar el PlayerMovement asociado
+            PlayerMovement pm = FindPlayerMovementForHead(playerObject);
+            if (pm != null)
+            {
+                playerMovement = pm;
+                isDismembered = pm.isDismembered;
+            }
+            else if (playerObject.GetComponent<Dismember>() != null)
+            {
+                isDismembered = true; // La cabeza siempre implica desmembramiento
+            }
         }
 
         if (isDismembered && headlessDialogueLines != null && headlessDialogueLines.Length > 0)
         {
-            // Combinar los diálogos normales y headless
             activeDialogueLines = new string[dialogueLines.Length + headlessDialogueLines.Length];
             dialogueLines.CopyTo(activeDialogueLines, 0);
             headlessDialogueLines.CopyTo(activeDialogueLines, dialogueLines.Length);
 
-            // Combinar los retrasos de "otro personaje"
             activeIsOtherCharacter = new bool[dialogueLines.Length + headlessDialogueLines.Length];
             isOtherCharacterNormal.CopyTo(activeIsOtherCharacter, 0);
             isOtherCharacterHeadless.CopyTo(activeIsOtherCharacter, dialogueLines.Length);
@@ -256,18 +246,15 @@ public class DialogueSystem : MonoBehaviour
     {
         if (dialogueText == null) yield break;
 
-        // Desactivar inicialmente el texto y el retrato
         dialogueText.gameObject.SetActive(false);
         if (textBoxPortrait != null) textBoxPortrait.SetActive(false);
 
-        // Comprobar si esta línea tiene el retraso de "otro personaje"
         bool applyDelay = activeIsOtherCharacter[lineIndex];
         if (applyDelay)
         {
-            yield return new WaitForSecondsRealtime(otherCharacterDelay); // Retraso de 0.70 segundos
+            yield return new WaitForSecondsRealtime(otherCharacterDelay);
         }
 
-        // Activar el texto y el retrato después del retraso (si aplica)
         dialogueText.gameObject.SetActive(true);
         if (textBoxPortrait != null) textBoxPortrait.SetActive(true);
 
@@ -342,7 +329,6 @@ public class DialogueSystem : MonoBehaviour
     {
         if (textBoxPortrait != null)
         {
-            // No activamos aquí, ya que ShowLine se encarga de activar/desactivar
             if (portraitImage != null && activePortraitSprites != null && lineIndex < activePortraitSprites.Length)
                 portraitImage.sprite = activePortraitSprites[lineIndex];
             else if (portraitImage != null)
@@ -426,7 +412,7 @@ public class DialogueSystem : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("PlayerHead"))
         {
             isPlayerRange = true;
             if (dialogueMark != null) dialogueMark.SetActive(true);
@@ -437,12 +423,25 @@ public class DialogueSystem : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("PlayerHead"))
         {
             isPlayerRange = false;
             if (dialogueMark != null) dialogueMark.SetActive(false);
             playerMovement = null;
             playerObject = null;
         }
+    }
+
+    private PlayerMovement FindPlayerMovementForHead(GameObject head)
+    {
+        PlayerMovement[] players = FindObjectsOfType<PlayerMovement>();
+        foreach (PlayerMovement pm in players)
+        {
+            if (pm.isDismembered && pm.headObject == head)
+            {
+                return pm;
+            }
+        }
+        return null;
     }
 }
