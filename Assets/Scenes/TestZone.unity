@@ -1703,8 +1703,8 @@ GameObject:
   m_Component:
   - component: {fileID: 289948581}
   - component: {fileID: 289948580}
-  - component: {fileID: 289948579}
   - component: {fileID: 289948578}
+  - component: {fileID: 289948579}
   m_Layer: 0
   m_Name: Door1-Destination
   m_TagString: Untagged
@@ -1733,6 +1733,7 @@ MonoBehaviour:
   fadeInTime: 0.45
   blackScreenDuration: 0.2
   fadeOutTime: 0.45
+  gravityOnTP: 1
 --- !u!61 &289948579
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1839,7 +1840,7 @@ Transform:
   m_GameObject: {fileID: 289948577}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 20.962627, y: 0.9871862, z: -0.22259595}
+  m_LocalPosition: {x: 20.962627, y: 1.06, z: -0.22259595}
   m_LocalScale: {x: 1.2326, y: 2.3060799, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -12409,6 +12410,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 885540606}
     - target: {fileID: 1686504560533851083, guid: a4631375ba1f6294cadfe04a90d30dc6, type: 3}
+      propertyPath: gravityOnTP
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1686504560533851083, guid: a4631375ba1f6294cadfe04a90d30dc6, type: 3}
       propertyPath: zoneToActivate
       value: 
       objectReference: {fileID: 909134503}
@@ -12430,7 +12435,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3579174901179314776, guid: a4631375ba1f6294cadfe04a90d30dc6, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 7.017
+      value: 1.06
       objectReference: {fileID: 0}
     - target: {fileID: 3579174901179314776, guid: a4631375ba1f6294cadfe04a90d30dc6, type: 3}
       propertyPath: m_LocalPosition.z

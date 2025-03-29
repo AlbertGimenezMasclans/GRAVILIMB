@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3579174901179314776}
   - component: {fileID: 2387304246858296234}
-  - component: {fileID: 812293600072708155}
   - component: {fileID: 1686504560533851083}
+  - component: {fileID: 812293600072708155}
   m_Layer: 0
   m_Name: Door
   m_TagString: Untagged
@@ -87,6 +87,28 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1686504560533851083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 665039334601274984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dd97474cef14d64e899167c6fb73d73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destinationDoor: {fileID: 0}
+  originDoor: {fileID: 665039334601274984}
+  zoneToActivate: {fileID: 0}
+  zoneToDeactivate: {fileID: 0}
+  indicatorObject: {fileID: 9158017291248606725}
+  fadePanel: {fileID: 0}
+  fadeInTime: 0.45
+  blackScreenDuration: 1.1
+  fadeOutTime: 0.45
+  gravityOnTP: 0
 --- !u!61 &812293600072708155
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -132,25 +154,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1.1110781}
   m_EdgeRadius: 0
---- !u!114 &1686504560533851083
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 665039334601274984}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8dd97474cef14d64e899167c6fb73d73, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  destinationDoor: {fileID: 0}
-  originDoor: {fileID: 665039334601274984}
-  indicatorObject: {fileID: 9158017291248606725}
-  fadePanel: {fileID: 0}
-  fadeInTime: 0.45
-  blackScreenDuration: 1.1
-  fadeOutTime: 0.45
 --- !u!1 &9158017291248606725
 GameObject:
   m_ObjectHideFlags: 0
