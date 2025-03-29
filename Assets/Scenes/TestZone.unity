@@ -1840,7 +1840,7 @@ Transform:
   m_GameObject: {fileID: 289948577}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 20.962627, y: 1.06, z: -0.22259595}
+  m_LocalPosition: {x: 22.65, y: 1.06, z: -0.22259595}
   m_LocalScale: {x: 1.2326, y: 2.3060799, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2146,7 +2146,9 @@ Transform:
   - {fileID: 827372584}
   - {fileID: 403810186}
   - {fileID: 297341229}
+  - {fileID: 567975766}
   - {fileID: 606615175}
+  - {fileID: 755451067}
   m_Father: {fileID: 1549176963}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &359409443
@@ -2565,7 +2567,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a7837c6f78dde44888ae0ad6bcee54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destinationPosition: {fileID: 606615174}
+  normalGravityDestination: {fileID: 606615174}
+  invertedGravityDestination: {fileID: 755451066}
   zoneToActivate: {fileID: 530915999}
   zoneToDeactivate: {fileID: 909134503}
   fadePanel: {fileID: 885540606}
@@ -2574,6 +2577,7 @@ MonoBehaviour:
   entryDirection: 0
   entrySpeed: 5
   entryDuration: 0
+  gravityAfterTeleport: 0
 --- !u!61 &403810185
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2753,8 +2757,8 @@ Transform:
   m_GameObject: {fileID: 427602695}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.82250786, y: 4.0145, z: -0.47352654}
-  m_LocalScale: {x: 1.0829856, y: 5.8327417, z: 1}
+  m_LocalPosition: {x: -0.6382, y: 4.0145, z: -0.47352654}
+  m_LocalScale: {x: 2.7096407, y: 5.8327417, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 909134504}
@@ -3716,6 +3720,37 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &567975765
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 567975766}
+  m_Layer: 0
+  m_Name: ZoneDestination_1 INV
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &567975766
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 567975765}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 18.752626, y: 2.65, z: -0.27650306}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 341641095}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &582467977
 GameObject:
   m_ObjectHideFlags: 0
@@ -4439,6 +4474,37 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &755451066
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 755451067}
+  m_Layer: 0
+  m_Name: ZoneDestination_2 INV
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &755451067
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 755451066}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 8.752626, y: 2.65, z: -0.27650306}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 341641095}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &766078621
 GameObject:
   m_ObjectHideFlags: 0
@@ -4769,7 +4835,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a7837c6f78dde44888ae0ad6bcee54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destinationPosition: {fileID: 297341228}
+  normalGravityDestination: {fileID: 297341228}
+  invertedGravityDestination: {fileID: 567975765}
   zoneToActivate: {fileID: 909134503}
   zoneToDeactivate: {fileID: 530915999}
   fadePanel: {fileID: 885540606}
@@ -4778,6 +4845,7 @@ MonoBehaviour:
   entryDirection: 1
   entrySpeed: 5
   entryDuration: 0
+  gravityAfterTeleport: 0
 --- !u!61 &827372583
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -9280,8 +9348,8 @@ Transform:
   m_GameObject: {fileID: 1457095849}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 21.31, y: 1.7811, z: -0.052131016}
-  m_LocalScale: {x: 1.0829856, y: 5.938339, z: 1}
+  m_LocalPosition: {x: 21.5325, y: 1.8349, z: -0.052131016}
+  m_LocalScale: {x: 3.1631856, y: 5.8309035, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 530916000}
