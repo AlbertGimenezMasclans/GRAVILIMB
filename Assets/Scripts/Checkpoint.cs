@@ -9,7 +9,7 @@ public class Checkpoint : MonoBehaviour
 
     [Header("Zone Management")]
     [Tooltip("The visual zone (GameObject) associated with this checkpoint")]
-    public GameObject visualZone; // La zona visual asociada a este checkpoint
+    public GameObject visualZone;
 
     private Animator animator;
     private bool isActivated = false;
@@ -27,7 +27,6 @@ public class Checkpoint : MonoBehaviour
             Debug.Log("Checkpoint inicializado: en estado 'Checkpoint_Idle'.");
         }
 
-        // Verificar que el checkpoint esté dentro de una zona de cámara
         Vector2 checkpointPosition = transform.position;
         Zone zone = FindZoneAtPosition(checkpointPosition);
         if (zone == null)
@@ -39,7 +38,6 @@ public class Checkpoint : MonoBehaviour
             Debug.Log($"El checkpoint {gameObject.name} está dentro de la zona de cámara {zone.gameObject.name}.");
         }
 
-        // Verificar que la zona visual esté asignada
         if (visualZone == null)
         {
             Debug.LogWarning($"VisualZone no asignado en el checkpoint {gameObject.name}. No se activará ninguna zona visual al reaparecer en este checkpoint.");
@@ -48,44 +46,65 @@ public class Checkpoint : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        // --- AÑADIDO: Detección mejorada para cabeza desmembrada ---
+        GameObject playerObject = null;
+        bool isHead = collision.CompareTag("PlayerHead");
+        bool isPlayer = collision.CompareTag("Player");
+
+        if (isHead)
         {
-            Debug.Log("Colisión detectada con el jugador.");
-
-            if (!isActivated)
+            PlayerMovement playerMovement = collision.GetComponentInParent<PlayerMovement>();
+            if (playerMovement != null && playerMovement.isDismembered)
             {
-                if (animator != null)
-                {
-                    animator.SetBool("Active", true);
-                    Debug.Log("Bool 'Active' establecido a true para reproducir 'Checkpoint-Active'.");
-                    StartCoroutine(TransitionToCheckpointC());
-                }
-                else
-                {
-                    Debug.LogError("Animator es null. No se puede establecer el bool.");
-                }
+                playerObject = playerMovement.gameObject;
+                Debug.Log("Checkpoint activado por cabeza desmembrada");
+            }
+        }
+        else if (isPlayer)
+        {
+            playerObject = collision.gameObject;
+        }
 
-                isActivated = true;
+        if (playerObject == null) return;
 
-                PlayerDeath playerDeath = collision.GetComponent<PlayerDeath>();
-                if (playerDeath != null)
-                {
-                    Vector3 checkpointPosition = transform.position;
-                    Vector3 newSpawnPosition = new Vector3(checkpointPosition.x, checkpointPosition.y + 0.50f, checkpointPosition.z);
-                    playerDeath.SetNewSpawnPositionAndCamera(newSpawnPosition, checkpointPosition.x, this);
-                    Debug.Log($"Nueva posición inicial del jugador: {newSpawnPosition}");
-                }
-                else
-                {
-                    Debug.LogError("PlayerDeath no encontrado en el jugador.");
-                }
+        // --- COMPORTAMIENTO ORIGINAL (SIN MODIFICAR) ---
+        if (!isActivated)
+        {
+            if (animator != null)
+            {
+                animator.SetBool("Active", true);
+                Debug.Log("Bool 'Active' establecido a true para reproducir 'Checkpoint-Active'.");
+                StartCoroutine(TransitionToCheckpointC());
             }
             else
             {
-                Debug.Log("Checkpoint ya activado para cambio de spawn, pero se verificará si puede curar.");
+                Debug.LogError("Animator es null. No se puede establecer el bool.");
             }
 
-            PlayerHealth playerHealth = collision.GetComponent<PlayerHealth>();
+            isActivated = true;
+
+            PlayerDeath playerDeath = playerObject.GetComponent<PlayerDeath>();
+            if (playerDeath != null)
+            {
+                Vector3 checkpointPosition = transform.position;
+                Vector3 newSpawnPosition = new Vector3(checkpointPosition.x, checkpointPosition.y + 0.50f, checkpointPosition.z);
+                playerDeath.SetNewSpawnPositionAndCamera(newSpawnPosition, checkpointPosition.x, this);
+                Debug.Log($"Nueva posición inicial del jugador: {newSpawnPosition}");
+            }
+            else
+            {
+                Debug.LogError("PlayerDeath no encontrado en el jugador.");
+            }
+        }
+        else
+        {
+            Debug.Log("Checkpoint ya activado para cambio de spawn, pero se verificará si puede curar.");
+        }
+
+        // --- COMPORTAMIENTO ORIGINAL DE CURA (SIN MODIFICAR) ---
+        if (isPlayer) // Solo cura si es el Player completo
+        {
+            PlayerHealth playerHealth = playerObject.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
                 if (playerHealth.currentHealth < playerHealth.maxHealth && !isInCooldown)
@@ -107,12 +126,9 @@ public class Checkpoint : MonoBehaviour
                 Debug.LogError("PlayerHealth no encontrado en el jugador.");
             }
         }
-        else
-        {
-            Debug.Log("Colisión ignorada: no es el jugador.");
-        }
     }
 
+    // --- MÉTODOS ORIGINALES (SIN MODIFICAR) ---
     private IEnumerator TransitionToCheckpointC()
     {
         yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("Checkpoint-Active"));
@@ -178,7 +194,6 @@ public class Checkpoint : MonoBehaviour
         return null;
     }
 
-    // Método para obtener la zona visual asociada a este checkpoint
     public GameObject GetVisualZone()
     {
         return visualZone;

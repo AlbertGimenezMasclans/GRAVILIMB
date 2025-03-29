@@ -110,7 +110,7 @@ public class Interact : MonoBehaviour
         if (dialogueMark != null) dialogueMark.SetActive(false);
         dialogueText.gameObject.SetActive(true);
         lineIndex = 0;
-        // Time.timeScale = 0f; // Descomenta esta línea si quieres pausar el juego
+        Time.timeScale = 0f; // Pausa el juego durante el diálogo
 
         ConfigureAnimatorsForDialogue(true);
 
@@ -118,6 +118,7 @@ public class Interact : MonoBehaviour
         if (playerMovement != null)
         {
             isDismembered = playerMovement.isDismembered;
+            playerMovement.enabled = false; // Desactiva el movimiento del jugador
         }
         else if (playerObject != null && playerObject.GetComponent<Dismember>() != null)
         {
@@ -165,12 +166,15 @@ public class Interact : MonoBehaviour
             textBox.SetActive(false);
             if (dialogueMark != null) dialogueMark.SetActive(true);
             dialogueText.gameObject.SetActive(false);
-            // Time.timeScale = 1f; // Descomenta esta línea si usaste la pausa en StartDialogue
+            Time.timeScale = 1f; // Reanuda el juego al terminar el diálogo
 
             ConfigureAnimatorsForDialogue(false);
 
             if (playerMovement != null)
+            {
                 playerMovement.SetDialogueActive(null);
+                playerMovement.enabled = true; // Reactiva el movimiento del jugador
+            }
 
             if (coinControllerUI != null)
                 coinControllerUI.gameObject.SetActive(true);

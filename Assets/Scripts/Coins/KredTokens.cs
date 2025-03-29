@@ -7,7 +7,8 @@ public class KredToken : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        // Verifica si el objeto que colisiona es "Player" O "PlayerHead"
+        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("PlayerHead"))
         {
             if (collectionEffectPrefab != null)
             {

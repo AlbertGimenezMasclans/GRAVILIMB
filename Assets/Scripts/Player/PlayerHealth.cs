@@ -235,7 +235,6 @@ public class PlayerHealth : MonoBehaviour
                         healthCounterTransform.localScale = new Vector3(healthCounterScale, healthCounterScale, healthCounterScale);
                         // No rotar el HealthCounter, mantenerlo siempre en su rotación original
                         healthCounterTransform.rotation = Quaternion.identity;
-                        Debug.Log($"HealthCounter posición: {healthCounterTransform.position}, isGravityInverted: {isGravityInverted}");
                     }
                     else
                     {
@@ -253,7 +252,6 @@ public class PlayerHealth : MonoBehaviour
 
                 // Ajustar la rotación según la gravedad para los otros objetos (HealthBar y HealthBar_Fill)
                 objTransform.rotation = isGravityInverted ? Quaternion.Euler(0f, 0f, 180f) : Quaternion.identity;
-                Debug.Log($"{objTransform.name} rotación: {objTransform.rotation.eulerAngles.z} (isGravityInverted: {isGravityInverted})");
             }
         }
     }

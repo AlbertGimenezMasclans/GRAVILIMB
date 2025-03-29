@@ -49,8 +49,15 @@ public class CameraController : MonoBehaviour
     {
         if (target == null || (playerDeath != null && playerDeath.IsDead())) return;
 
-        // Buscar la zona actual del jugador
-        Vector2 targetPosition = target.position;
+        // Determinar qué seguir: jugador o cabeza
+        Transform currentTarget = target;
+        if (playerMovement != null && playerMovement.isDismembered && headTarget != null)
+        {
+            currentTarget = headTarget;
+        }
+
+        // Buscar la zona actual usando la posición del target actual (jugador o cabeza)
+        Vector2 targetPosition = currentTarget.position;
         Zone newZone = FindZoneAtPosition(targetPosition);
 
         // Actualizar los límites de la cámara si la zona ha cambiado
@@ -71,13 +78,6 @@ public class CameraController : MonoBehaviour
                 maxX = initialMaxX;
                 Debug.Log($"No se encontró una zona en la posición {targetPosition}. Restaurando límites iniciales: minX = {minX}, maxX = {maxX}");
             }
-        }
-
-        // Determinar qué seguir: jugador o cabeza
-        Transform currentTarget = target;
-        if (playerMovement != null && playerMovement.isDismembered && headTarget != null)
-        {
-            currentTarget = headTarget;
         }
 
         // Calcular el desplazamiento dinámico (look-ahead) basado en la dirección del movimiento
@@ -115,8 +115,16 @@ public class CameraController : MonoBehaviour
         transform.position = cameraPosition;
         Debug.Log($"Cámara teletransportada a: {cameraPosition}");
 
+        // Determinar qué posición usar para buscar la zona: jugador o cabeza
+        Vector2 targetPosition = newPosition;
+        if (playerMovement != null && playerMovement.isDismembered && headTarget != null)
+        {
+            targetPosition = headTarget.position;
+            Debug.Log($"Jugador desmembrado. Usando la posición de la cabeza ({targetPosition}) para buscar la zona.");
+        }
+
         // Actualizar los límites de la cámara según la zona en la nueva posición
-        Zone newZone = FindZoneAtPosition(newPosition);
+        Zone newZone = FindZoneAtPosition(targetPosition);
         if (newZone != null)
         {
             currentZone = newZone;
@@ -130,7 +138,7 @@ public class CameraController : MonoBehaviour
         {
             minX = initialMinX;
             maxX = initialMaxX;
-            Debug.Log($"No se encontró una zona en la posición {newPosition}. Restaurando límites iniciales: minX = {minX}, maxX = {maxX}");
+            Debug.Log($"No se encontró una zona en la posición {targetPosition}. Restaurando límites iniciales: minX = {minX}, maxX = {maxX}");
         }
     }
 

@@ -9718,7 +9718,7 @@ GameObject:
   - component: {fileID: 1536204009}
   m_Layer: 0
   m_Name: PlayerHead
-  m_TagString: Player
+  m_TagString: PlayerHead
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12676,6 +12676,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3582722600502385860, guid: ed071897198b3864d8a0132f8f43957c, type: 3}
       propertyPath: m_Name
+      value: Checkpoint
+      objectReference: {fileID: 0}
+    - target: {fileID: 3582722600502385860, guid: ed071897198b3864d8a0132f8f43957c, type: 3}
+      propertyPath: m_TagString
       value: Checkpoint
       objectReference: {fileID: 0}
     - target: {fileID: 6499819518300675660, guid: ed071897198b3864d8a0132f8f43957c, type: 3}
