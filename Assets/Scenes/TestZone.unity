@@ -5103,7 +5103,7 @@ GameObject:
   m_Component:
   - component: {fileID: 870874719}
   m_Layer: 0
-  m_Name: ZoneDestination_2 (1)
+  m_Name: ZoneDestination_2 INV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6849,7 +6849,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1042387266}
   m_Layer: 0
-  m_Name: ZoneDestination_1 (1)
+  m_Name: ZoneDestination_1 INV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
