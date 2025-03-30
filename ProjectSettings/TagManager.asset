@@ -5,11 +5,20 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Crate
+  - Bullet
+  - KredToken
+  - KredBag
+  - DeathZone
+  - Checkpoint
+  - Enemy
+  - FlyingEnemy
+  - PlayerHead
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - KredTokens
   - Water
   - UI
   - Ground
